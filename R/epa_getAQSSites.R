@@ -1,41 +1,19 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download Hourly EPA Air Quality Data
+#' @title Download and Parse EPA AQS Sites Metadata
 #'
 #' @description
-#' Download hourly air quality data from the US EPA and save it to a directory.
+#' Download site metadata from the US EPA and save it to a directory. Then
+#' uncompress and parse the data into a tibble.
 #'
-#' EPA parameter codes and (start year) include:
-#'
-#' \enumerate{
-#' \item{44201}{ -- Ozone (1980)}
-#' \item{42401}{ -- SO2 (1980)}
-#' \item{42101}{ -- CO (1980)}
-#' \item{42602}{ -- NO2 (1980)}
-#' \item{88101}{ -- PM2.5 FRM/FEM (2008)}
-#' \item{88502}{ -- PM2.5 non FRM/FEM (1998)}
-#' \item{81102}{ -- PM10 (1988)}
-#' \item{SPEC}{ -- PM2.5 Speciation(2001)}
-#' \item{PM10SPEC}{ -- PM10 Speciation (1988)}
-#' \item{WIND}{ -- Winds (1980)}
-#' \item{TEMP}{ -- Temperature (1980)}
-#' \item{PRESS}{ -- Barometric Pressure (1980)}
-#' \item{RH_DP}{ -- RH and Dewpoint (1980)}
-#' \item{HAPS}{ -- HAPs (1993)}
-#' \item{VOCS}{ -- VOCs (1980)}
-#' \item{NONOxNOy (1980)}
-#' }
-#'
-#' @note Unzipped CSV files are almost 100X larger than the compressed .zip files.
-#'
-#' @param downloadDir Directory where monitoring data .zip file will be saved.
-#' @param baseUrl Character base URL for EPA AQS archive.
+#' @param downloadDir Directory where .zip file will be saved.
+#' @param baseUrl Character base URL for the EPA AQS archive.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
-#' @return Filepath of the downloaded zip file.
+#' @return Tibble of EPA site metadata.
 #'
-#' @references \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html#Raw}{EPA AirData Pre-Generated Data Files}
+#' @references \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html#Meta}{Site and Monitor Descriptions}
 #'
 #' @examples
 #' \dontrun{
@@ -49,17 +27,17 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Download and parse site metadata
-#' AQS_sites <- epa_downloadParseAQSSites(downloadDir = "~/Data/EPA", quiet = FALSE)
+#' AQS_sites <- epa_getAQSSites(downloadDir = "~/Data/EPA", quiet = FALSE)
 #' }
 
-epa_downloadParseAQSSites <- function(
+epa_getAQSSites <- function(
   downloadDir = tempdir(),
   baseUrl = 'https://aqs.epa.gov/aqsweb/airdata/',
   quiet = TRUE
 ) {
 
   if ( logger.isInitialized() )
-    logger.debug(" ----- epa_downloadParseAQSSites() ----- ")
+    logger.debug(" ----- epa_getAQSSites() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 

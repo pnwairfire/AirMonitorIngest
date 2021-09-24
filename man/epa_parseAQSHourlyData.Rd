@@ -12,10 +12,10 @@ epa_parseAQSHourlyData(zipFile = NULL, quiet = TRUE)
 \item{quiet}{Logical passed on to \code{readr::read_csv(progress = !quiet)}.}
 }
 \value{
-Tibble of EPA data.
+Tibble of EPA air quality data.
 }
 \description{
-Uncompresses previously downloaded, hourly air quality .zip files from the
+Uncompress previously downloaded, hourly air quality .zip files from the
 US EPA and parse the data into a tibble.
 
 EPA parameter codes and (start year) include:

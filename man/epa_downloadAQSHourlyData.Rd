@@ -17,9 +17,9 @@ epa_downloadAQSHourlyData(
 
 \item{parameterCode}{Character pollutant code.}
 
-\item{downloadDir}{Directory where monitoring data .zip file will be saved.}
+\item{downloadDir}{Directory where .zip file will be saved.}
 
-\item{baseUrl}{Character base URL for EPA AQS archive.}
+\item{baseUrl}{Character base URL for the EPA AQS archive.}
 
 \item{quiet}{Logical passed on to \code{utils::download.file()}.}
 }

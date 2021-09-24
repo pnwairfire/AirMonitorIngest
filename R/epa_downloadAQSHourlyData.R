@@ -31,8 +31,8 @@
 #'
 #' @param year Ingeter year.
 #' @param parameterCode Character pollutant code.
-#' @param downloadDir Directory where monitoring data .zip file will be saved.
-#' @param baseUrl Character base URL for EPA AQS archive.
+#' @param downloadDir Directory where .zip file will be saved.
+#' @param baseUrl Character base URL for the EPA AQS archive.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
 #' @return Filepath of the downloaded zip file.

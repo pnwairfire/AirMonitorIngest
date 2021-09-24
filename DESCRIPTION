@@ -15,6 +15,7 @@ BugReports: https://github.com/pnwairfire/AirMonitorIngest/issues
 Depends:
     R (>= 3.5.0)
 Imports:
+    dplyr,
     MazamaCoreUtils,
     readr,
     stringr

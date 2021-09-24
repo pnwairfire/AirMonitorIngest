@@ -4,7 +4,7 @@
 #' @title Parse Hourly EPA Air Quality Data
 #'
 #' @description
-#' Uncompresses previously downloaded, hourly air quality .zip files from the
+#' Uncompress previously downloaded, hourly air quality .zip files from the
 #' US EPA and parse the data into a tibble.
 #'
 #' EPA parameter codes and (start year) include:
@@ -34,7 +34,7 @@
 #' @param zipFile Absolute path to monitoring data .zip file
 #' @param quiet Logical passed on to \code{readr::read_csv(progress = !quiet)}.
 #'
-#' @return Tibble of EPA data.
+#' @return Tibble of EPA air quality data.
 #'
 #' @references \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html#Raw}{EPA AirData Pre-Generated Data Files}
 #' @references \href{https://aqs.epa.gov/aqsweb/airdata/FileFormats.html#_hourly_data_files}{file format description}
