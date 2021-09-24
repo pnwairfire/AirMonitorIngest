@@ -1,10 +1,10 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download EPA Air Quality Data
+#' @title Download Hourly EPA Air Quality Data
 #'
-#' @description This function downloads air quality data from the EPA and saves
-#' it to a directory.
+#' @description
+#' Download hourly air quality data from the US EPA and save it to a directory.
 #'
 #' EPA parameter codes and (start year) include:
 #'
@@ -32,7 +32,7 @@
 #' @param year Ingeter year.
 #' @param parameterCode Character pollutant code.
 #' @param downloadDir Directory where monitoring data .zip file will be saved.
-#' @param baseUrl Character base URL EPA AQS archive.
+#' @param baseUrl Character base URL for EPA AQS archive.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
 #' @return Filepath of the downloaded zip file.
@@ -41,11 +41,23 @@
 #'
 #' @examples
 #' \dontrun{
-#' zipFile <- epa_downloadAQSData(2016, "88101", '~/Data/EPA')
-#' tbl <- epa_parseAQSData(zipFile, "PM2.5")
+#' library(AirMonitorIngest)
+#'
+#' # Create a directory specifically for EPA data
+#' dir.create("~/Data/EPA", recursive = TRUE)
+#'
+#' # Set logging level so messages and errors will appear in the console
+#' MazamaCoreUtils::initializeLogging(logDir = "~/Data/EPA/")
+#' logger.setLevel(TRACE)
+#'
+#' # Save the download in ~/Data/EPA
+#' zipFile <- epa_downloadAQSHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
+#'
+#' # Uncompress and parse into a tibble
+#' tbl <- epa_parseAQSHourlyData(zipFile)
 #' }
 
-epa_downloadAQSData <- function(
+epa_downloadAQSHourlyData <- function(
   year = NULL,
   parameterCode = "88101",
   downloadDir = tempdir(),
@@ -53,7 +65,8 @@ epa_downloadAQSData <- function(
   quiet = TRUE
 ) {
 
-  logger.debug(" ----- epa_downloadAQSData() ----- ")
+  if ( logger.isInitialized() )
+    logger.debug(" ----- epa_downloadAQSHourlyData() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 
@@ -74,8 +87,7 @@ epa_downloadAQSData <- function(
       "parameterCode '%s' is not in: %s",
       parameterCode, paste0(validParameterCodes, collapse = ", ")
     )
-    if ( logger.isInitialized() )
-      logger.error(err_msg)
+    if ( logger.isInitialized() ) logger.error(err_msg)
     stop(err_msg)
   }
 
@@ -100,10 +112,10 @@ epa_downloadAQSData <- function(
   # Set up file names and paths
   fileBase <- paste("hourly", parameterCode, year, sep = "_")
   url <- paste0(baseUrl, fileBase, ".zip")
-  zipFile <- path.expand( paste0(downloadDir, '/', fileBase, ".zip") )
+  zipFile <- path.expand( paste0(file.path(downloadDir, fileBase), ".zip") )
 
   if ( logger.isInitialized() )
-    logger.trace('Downloading %s.zip', fileBase)
+    logger.trace('Downloading %s.zip ...', fileBase)
 
   result <- try({
     utils::download.file(url, zipFile, quiet = quiet)
