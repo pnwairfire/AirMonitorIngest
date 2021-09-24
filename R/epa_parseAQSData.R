@@ -1,12 +1,13 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Parse EPA data
+#' @title Parse EPA Air Quality Data
 #'
-#' @description This function uncompress previously downloaded air quality .zip
-#' files from the EPA and reads it into a tibble.
+#' @description This function uncompresses previously downloaded air quality .zip
+#' files from the EPA and parses that d into a tibble.
 #'
 #' Available parameters include:
+#'
 #' \enumerate{
 #' \item{Ozone}
 #' \item{SO2}
@@ -23,29 +24,31 @@
 #' \item{NONOxNOy}
 #' }
 #'
-#' Associated parameter codes include:
+#' EPA parameter codes and (start year) include:
+#'
 #' \enumerate{
-#' \item{44201}{ -- Ozone}
-#' \item{42401}{ -- SO2}
-#' \item{42101}{ -- CO}
-#' \item{42602}{ -- NO2}
-#' \item{88101}{ -- PM2.5}
-#' \item{88502}{ -- PM2.5}
-#' \item{81102}{ -- PM10}
-#' \item{SPEC}{ -- PM2.5}
-#' \item{WIND}{ -- Wind}
-#' \item{TEMP}{ -- Temperature}
-#' \item{PRESS}{ -- Barometric Pressure}
-#' \item{RH_DP}{ -- RH and dewpoint}
-#' \item{HAPS}{ -- HAPs}
-#' \item{VOCS}{ -- VOCs}
-#' \item{NONOxNOy}
+#' \item{44201}{ -- Ozone (1980)}
+#' \item{42401}{ -- SO2 (1980)}
+#' \item{42101}{ -- CO (1980)}
+#' \item{42602}{ -- NO2 (1980)}
+#' \item{88101}{ -- PM2.5 FRM/FEM (2008)}
+#' \item{88502}{ -- PM2.5 non FRM/FEM (1998)}
+#' \item{81102}{ -- PM10 (1988)}
+#' \item{SPEC}{ -- PM2.5 Speciation(2001)}
+#' \item{PM10SPEC}{ -- PM10 Speciation (1988)}
+#' \item{WIND}{ -- Winds (1980)}
+#' \item{TEMP}{ -- Temperature (1980)}
+#' \item{PRESS}{ -- Barometric Pressure (1980)}
+#' \item{RH_DP}{ -- RH and Dewpoint (1980)}
+#' \item{HAPS}{ -- HAPs (1993)}
+#' \item{VOCS}{ -- VOCs (1980)}
+#' \item{NONOxNOy (1980)}
 #' }
 #'
 #' @note Unzipped CSV files are almost 100X larger than the compressed .zip files.
-#' CSV files are removed after data are read into a dataframe.
+#' CSV files are removed after data are read into a tibble.
 #'
-#' @param zipFile absolute path to monitoring data .zip file
+#' @param zipFile Absolute path to monitoring data .zip file
 #'
 #' @return Tibble of EPA data.
 #'
@@ -54,21 +57,16 @@
 #'
 #' @examples
 #' \dontrun{
-#' zipFile <- epa_downloadData(2016, "88101", '~/Data/EPA')
-#' tbl <- epa_parseData(zipFile, "PM2.5")
+#' zipFile <- epa_downloadAQSData(2016, "88101", '~/Data/EPA')
+#' tbl <- epa_parseAQSData(zipFile, "PM2.5")
 #' }
 
+epa_parseData <- function(
+  zipFile = NULL
+) {
 
-# if (false){
-#   parameterName="PM2.5"
-#   parameterCode=88101
-#   year=2016
-#   baseUrl='http://aqs.epa.gov/aqsweb/airdata/'
-# }
-
-epa_parseData <- function(zipFile = NULL) {
-
-  logger.debug(" ----- epa_parseData() ----- ")
+  if ( logging.isInitialized() )
+    logger.debug(" ----- epa_parseAQSData() ----- ")
 
   # Sanity checks
   if ( is.null(zipFile) ) {
@@ -79,9 +77,11 @@ epa_parseData <- function(zipFile = NULL) {
   csvFile <- stringr::str_replace(zipFile,"\\.zip","\\.csv")
 
   # Uncompress
-  logger.trace(paste0('Uncompressing ',zipFile,' ...'))
+  if ( logging.isInitialized() )
+    logger.trace(paste0('Uncompressing ',zipFile,' ...'))
   utils::unzip(zipFile, exdir=dirname(zipFile))
-  logger.trace(paste0('Finished uncompressing'))
+  if ( logging.isInitialized() )
+    logger.trace(paste0('Finished uncompressing'))
 
 
   # Here are the column names from an EPA hourly dataset:
@@ -96,14 +96,17 @@ epa_parseData <- function(zipFile = NULL) {
   col_types <- paste0("ccccc","ddccc","cccdc","ddccc","cccc")
 
   # Read in the data
-  logger.trace(paste0('Reading in ',csvFile,' ...'))
+  if ( logging.isInitialized() )
+    logger.trace(paste0('Reading in ',csvFile,' ...'))
   tbl <- readr::read_csv(csvFile, col_types=col_types)
-  logger.trace(paste0('Finished reading in ',csvFile))
+  if ( logging.isInitialized() )
+    logger.trace(paste0('Finished reading in ',csvFile))
 
   # Cleanup
   file.remove(csvFile)
 
-  logger.trace('Downloaded and parsed %d rows of EPA data', nrow(tbl))
+  if ( logging.isInitialized() )
+    logger.trace('Downloaded and parsed %d rows of EPA data', nrow(tbl))
 
   return(tbl)
 }
