@@ -12,7 +12,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction
+# Introduction
 
 The USFS [AirFire](https://www.airfire.org) group is focused on air quality 
 associated with wildfire smoke and maintains both historical and 
@@ -44,7 +44,7 @@ each "known location" will be understood to represent a circle with a radius of
 250m of an existing location wll assigned to that "known location". New "known locations"
 will be added as needed.
 
-## Setup
+# Setup
 
 ```{r mazama_setup, message = FALSE}
 library(MazamaCoreUtils)
@@ -316,7 +316,7 @@ table(known_locations_0$countryCode)
 # Are all locations unique?
 any(duplicated(known_locations_0$locationID))
 ```
-## Impose 500 Meter Separation
+### Impose 500 Meter Separation
 
 As described in the Introduction, we want the AirFire "known locations" table to
 have a measurement scale >= 500 meters. We will use functions from
@@ -343,8 +343,9 @@ make executive decisions based on other metadata as to which one we will use for
 representing that area.
 
 ```{r leaflet}
-# Wich sites are too close
-rows <- c(tbl$row1, tbl$row2) %>% sort()
+source("table_leaflet.R")
+# Which sites are too close
+rows <- c(distance_table$row1, distance_table$row2) %>% sort()
 too_close <- known_locations_0[rows,]
 
 table_leaflet(too_close)
@@ -352,202 +353,279 @@ table_leaflet(too_close)
 
 ### Manual Editing
 
-Starting in Alaska, we will work our way through all "too close" sites and 
+We will work our way through all "too close" sites and 
 decide which locations should be elided from our location table. We hide the
 details but show the results:
 
 ```{r manual_inspection, echo = FALSE}
-bad_IDs <- c()
+IDs_for_removal <- c()
 
 # ----- Alaska  -----
 
 # AQSID 020900040 or 020900029 ?
 # ==> 020900029 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "020900029")
+IDs_for_removal <- append(IDs_for_removal, "020900029")
 
 # ----- Washington -----
 
 # AQSID 530330037 or 530330004 ?
 # ==> 530330004 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "530330004")
+IDs_for_removal <- append(IDs_for_removal, "530330004")
 
 # ----- Idaho -----
 
 # AQSID 160170005 or 160170004 ?
 # ==> xxx because it was deployed earlier
-bad_IDs <- append(bad_IDs, "160170004")
+IDs_for_removal <- append(IDs_for_removal, "160170004")
 
 # AQSID 160270004 or 160270005 ?
 # ==> 160270005 because location and site name do not match
-bad_IDs <- append(bad_IDs, "160270005")
+IDs_for_removal <- append(IDs_for_removal, "160270005")
 
 # ----- Oregon -----
 
 # AQSID 410250003 or 410250002 ?
 # ==> 410250002 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "410250002")
+IDs_for_removal <- append(IDs_for_removal, "410250002")
 
 # AQSID 410390059 or 410390058 ?
 # ==> 410390058 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "410390058")
+IDs_for_removal <- append(IDs_for_removal, "410390058")
 
 # AQSID 410330107 or 410330114 ?
 # ==> 410330114 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "410330114")
+IDs_for_removal <- append(IDs_for_removal, "410330114")
 
 # ----- California -----
 
 # AQSID 060190011 or 060190008 ?
 # ==> 060190008 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "060190008")
+IDs_for_removal <- append(IDs_for_removal, "060190008")
 
 # AQSID 060731022 or 060730003 ?
 # ==> 060730003 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "060730003")
+IDs_for_removal <- append(IDs_for_removal, "060730003")
 
 # AQSID 060250007 or 060250003 ?
 # ==> 060250003 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "060250003")
+IDs_for_removal <- append(IDs_for_removal, "060250003")
 
 # ----- South Dakota -----
 
 # AQSID 461030020 or 461030019 ?
 # ==> 461030019 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "461030019")
+IDs_for_removal <- append(IDs_for_removal, "461030019")
 
 # ----- Nebraska -----
 
 # AQSID 311570006 or 311570004 ?
 # ==> 311570004 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "311570004")
+IDs_for_removal <- append(IDs_for_removal, "311570004")
 
 # ----- Colorado -----
 
 # AQSID 080010006 or 080010001 ?
 # ==> 080010001 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "080010001")
+IDs_for_removal <- append(IDs_for_removal, "080010001")
 
 # AQSID 080070001 or 080070002 ?
 # ==> 080070002 because it stopped collecting data in 2001
-bad_IDs <- append(bad_IDs, "080070002")
+IDs_for_removal <- append(IDs_for_removal, "080070002")
 
 # ----- New Mexico -----
 
 # AQSID 350439011 or 350439003 ?
 # ==> 350439003 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "350439003")
+IDs_for_removal <- append(IDs_for_removal, "350439003")
 
 # AQSID 350019013 or 350019004 ?
 # ==> 350019004 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "350019004")
+IDs_for_removal <- append(IDs_for_removal, "350019004")
 
 # ----- Texas -----
 
 # AQSID 484393010 or 484390063 ?
 # ==> 484390063 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "484390063")
+IDs_for_removal <- append(IDs_for_removal, "484390063")
 
 # ----- Florida -----
 
 # AQSID 120992005 or 120992003 ?
 # ==> 120992003 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "120992003")
+IDs_for_removal <- append(IDs_for_removal, "120992003")
 
 # ----- Puerto Rico -----
 
 # AQSID 720570012 or 720570008 ?
 # ==> 720570008 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "720570008")
+IDs_for_removal <- append(IDs_for_removal, "720570008")
 
 # ----- South Carolina -----
 
 # AQSID 450450014 or 450450008 ?
 # ==> 450450008 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "450450008")
+IDs_for_removal <- append(IDs_for_removal, "450450008")
 
 # ----- Missouri -----
 
 # AQSID 290950041 or 290470041 ?
 # ==> 290470041 because it location and county do not match
-bad_IDs <- append(bad_IDs, "290470041")
+IDs_for_removal <- append(IDs_for_removal, "290470041")
 
 # AQSID 291892003 or 291893001 ?
 # ==> 291893001 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "291893001")
+IDs_for_removal <- append(IDs_for_removal, "291893001")
 
 # ----- Illinois -----
 
 # AQSID 171132003 or 171132002 ?
 # ==> 171132002 because it stopped collecting data in 2004
-bad_IDs <- append(bad_IDs, "171132002")
+IDs_for_removal <- append(IDs_for_removal, "171132002")
 
 # AQSID 171613002 or 171610003 ?
 # ==> 171610003 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "171610003")
+IDs_for_removal <- append(IDs_for_removal, "171610003")
 
 # ----- Wisconsin -----
 
 # AQSID 550790056 or 550790058 ?
 # ==> 550790058 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "550790058")
+IDs_for_removal <- append(IDs_for_removal, "550790058")
 
 # ----- Ohio -----
 
 # AQSID 390950028 or 390950025 ?
 # ==> 390950025 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "390950025")
+IDs_for_removal <- append(IDs_for_removal, "390950025")
 
 # AQSID 391130032 or 391130014 ?
 # ==> 391130014 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "391130014")
+IDs_for_removal <- append(IDs_for_removal, "391130014")
 
 # AQSID 390490034 or 390490024 ?
 # ==> 390490024 because it stopped collecting data in 2018
-bad_IDs <- append(bad_IDs, "390490024")
+IDs_for_removal <- append(IDs_for_removal, "390490024")
 
 # AQSID 390490039 or 390490025 ?
 # ==> 390490025 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "390490025")
+IDs_for_removal <- append(IDs_for_removal, "390490025")
 
 # AQSID 391550014 or 391550005 ?
 # ==> 391550005 because it stopped collecting data in 2015
-bad_IDs <- append(bad_IDs, "391550005")
+IDs_for_removal <- append(IDs_for_removal, "391550005")
 
 # AQSID 390810017 or 390810016 ?
 # ==> 390810016 because it stopped collecting data in 2003
-bad_IDs <- append(bad_IDs, "390810016")
+IDs_for_removal <- append(IDs_for_removal, "390810016")
 
 # AQSID 390810021 or 390811001 ?
 # ==> 390811001 because it stopped collecting data in 2013
-bad_IDs <- append(bad_IDs, "390811001")
+IDs_for_removal <- append(IDs_for_removal, "390811001")
 
 # ----- West Virginia -----
 
 # AQSID 540390010 or 540390009 ?
 # ==> 540390009 because it stopped collecting data in 2000
-bad_IDs <- append(bad_IDs, "540390009")
+IDs_for_removal <- append(IDs_for_removal, "540390009")
 
 # ----- Washington DC -----
 
 # AQSID 240330025 or 240330001 ?
 # ==> 240330001 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "240330001")
+IDs_for_removal <- append(IDs_for_removal, "240330001")
 
 # ----- New Jersey -----
 
 # AQSID 340030008 or 340030007 ?
 # ==> 340030007 because the AQSID implies an earlier deployment
-bad_IDs <- append(bad_IDs, "340030007")
+IDs_for_removal <- append(IDs_for_removal, "340030007")
 
 # AQSID 340170008 or 340172002 ?
 # ==> 340172002 because it was deployed earlier and has less metadata
-bad_IDs <- append(bad_IDs, "340172002")
+IDs_for_removal <- append(IDs_for_removal, "340172002")
 
 # ----- New York -----
 
 # AQSID 360810125 or 360810124 ?
 # ==> 360810124 because it was deployed earlier
-bad_IDs <- append(bad_IDs, "360810124")
+IDs_for_removal <- append(IDs_for_removal, "360810124")
+```
+
+```{r show_IDs_for_removal}
+print(IDs_for_removal)
+```
+
+## Final "Known Locations" Table
+
+### Subset
+
+Removing these monitors will leave us with a table where every monitor is at least 500 meters away from their nearest neighbor.
+
+```{r final_known_locations}
+dim(known_locations_0)
+
+known_locations <-
+  known_locations_0 %>%
+  dplyr::filter(!AQS_AQSID %in% IDs_for_removal)
+
+dim(known_locations)
+
+```
+
+### Consistent Casing
+
+```{r consistent casing}
+known_locations$locationName <- 
+  stringr::str_to_title(known_locations$locationName)
+```
+
+### Non-US State Codes
+
+Using ISO standards requires that we re-evaluate states codes for non-US countries.
+
+```{r ISO_stateCode}
+
+# Split, fix and then recombine
+US <- dplyr::filter(known_locations, countryCode == "US")
+non_US <- dplyr::filter(known_locations, countryCode != "US")
+
+non_US$stateCode <-
+  MazamaSpatialUtils::getStateCode(
+    non_US$longitude,
+    non_US$latitude,
+    dataset = "NaturalEarthAdm1",
+    countryCodes = c("CA", "MX", "VI", "GU"),
+    useBuffering = TRUE
+  )
+
+# Combine two tables
+known_locations <-
+  dplyr::bind_rows(
+    US,
+    non_US
+  )
+```
+
+### Minor improvements
+
+```{r minor improvements}
+known_locations <-
+  known_locations %>%
+  dplyr::mutate(city = dplyr::na_if(city, "Not in a City")) %>%
+  dplyr::mutate(city = dplyr::na_if(city, "Not in a city"))
+```
+
+# Final Result
+
+```{r final_result}
+table_leaflet(known_locations)
 ```
 
 
+```{r save}
+setLocationDataDir("~/Data/Known_Locations")
+table_save(known_locations, "AirFire_monitors_500m")
+
+table_csv <- table_export(known_locations)
+readr::write_csv(known_locations, file = file.path(getLocationDataDir(), "AirFire_monitors_500m.csv"))
+```
