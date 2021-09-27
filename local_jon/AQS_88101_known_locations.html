@@ -199,7 +199,7 @@ pre code {
 </ul></li>
 <li><a href="#impose-500-meter-separation">Impose 500 Meter Separation</a>
 <ul>
-<li><a href="#finding-overlapping-locations">Finding Overlapping Locations</a></li>
+<li><a href="#find-overlapping-locations">Find Overlapping Locations</a></li>
 </ul></li>
 </ul>
 </div>
@@ -491,8 +491,8 @@ any(duplicated(known_locations_0$locationID))</code></pre>
 <div id="impose-500-meter-separation" class="section level2">
 <h2>Impose 500 Meter Separation</h2>
 <p>As described in the Introduction, we want the AirFire “known locations” table to have a measurement scale &gt;= 500 meters. We will use functions from <em>MazamaLocationUtils</em> to identify overlapping locations and deal with them on an individual basis.</p>
-<div id="finding-overlapping-locations" class="section level3">
-<h3>Finding Overlapping Locations</h3>
+<div id="find-overlapping-locations" class="section level3">
+<h3>Find Overlapping Locations</h3>
 <pre class="r"><code>tbl &lt;- 
   dplyr::select(known_locations_0, longitude, latitude) %&gt;%
   MazamaLocationUtils::table_findOverlappingLocations(radius = 250)
@@ -512,6 +512,7 @@ print(tbl)</code></pre>
 ##  9  1019  1021     80.4
 ## 10  1065  1067     88.1
 ## # … with 27 more rows</code></pre>
+<p>So we have 74 separate <em>“sites”</em> involved in overlap given our chosen 500m separation rule. Further investigation is in order.</p>
 </div>
 </div>
 
