@@ -1,4 +1,4 @@
-# Creating a "known locations" table for AQS sites
+# Creating a "known locations" table for AirFire
 
 # ----- Setup ------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ AQS_monitors <- epa_getAQSMonitors(downloadDir = "~/Data/EPA", quiet = FALSE)
 # [17] "Exclusions"                   "Monitoring Objective"
 # [19] "Last Method Code"             "Last Method"
 # [21] "Measurement Scale"            "Measurement Scale Definition"
-# [23] "NAAQS Primary Monitor"        "QA Primary Monitor"
+# [23] "NAQS Primary Monitor"        "QA Primary Monitor"
 # [25] "Local Site Name"              "Address"
 # [27] "State Name"                   "County Name"
 # [29] "City Name"                    "CBSA Name"
@@ -83,13 +83,53 @@ AQS_monitors %>%
 # [5] "REGIONAL SCALE -- 50 TO HUNDREDS KM"
 # [6] "URBAN SCALE -- 4 KM TO 50 KM"
 
-# * Parameter codes for MICROSCALE monitoring
-AQS_monitors %>%
-  dplyr::filter(`Measurement Scale` == "MICROSCALE") %>%
-  dplyr::pull(`Parameter Name`) %>%
-  unique() %>% sort()
-
 # ==> Pretty much all of them so skip any idea of subsetting by Scale
+
+# ----- Minimalist starting point ----------------------------------------------
+
+# * Subset monitors -----
+
+AQS_monitors_0 <-
+  AQS_monitors %>%
+  # Subset
+  dplyr::filter(`Measurement Scale` != "MICROSCALE") %>%
+  dplyr::filter(`Measurement Scale` != "MIDDLE SCALE") %>%
+  dplyr::filter(`Parameter Code` == "88101") %>%
+  dplyr::filter(`POC` == "1") %>%
+  # Add AQSID is a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  )
+
+# > dim(AQS_monitors_0)
+# [1] 1592   33
+
+# * Subset sites -----
+
+AQS_sites_0 <-
+  AQS_sites %>%
+  # Add AQSID is a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  ) %>%
+  # Subset
+  dplyr::filter(AQSID %in% AQS_monitors_0$AQSID)
+
+# > dim(AQS_sites_0)
+# [1] 1592   29
+
+# ==> A reasonable number to start with
+
+locationID <-
+  MazamaLocationUtils::location_createID(
+    AQS_sites_0$`Longitude`,
+    AQS_sites_0$`Latitude`
+  )
+
+# > any(duplicated(locationID))?
+# [1] FALSE
+
+# ==> There we have it! Data for our first "known locations" table.
 
 # ----- Create harmonized_AQS_sites table --------------------------------------
 
@@ -102,7 +142,7 @@ AQS_monitors %>%
 # [13] "zip"
 
 harmonized_AQS_sites <-
-  AQS_sites %>%
+  AQS_sites_0 %>%
 
   # * Rename all existing columns with "AQS_" -----
 
@@ -145,19 +185,14 @@ harmonized_AQS_sites <-
 
 # plot(harmonized_AQS_sites$longitude, harmonized_AQS_sites$latitude, pch = 15)
 
-# ==> Need to remove lon/lat == 0
+# ==> Looks like US + Puerto Rico
 
-# * Remove lon/lat == 0 -----
-
-harmonized_AQS_sites <-
-  harmonized_AQS_sites %>%
-  dplyr::filter(longitude != 0 & latitude != 0)
-
-# ----- Add countryCode --------------------------------------------------------
+# ----- Add ISO countryCode ----------------------------------------------------
 
 harmonized_AQS_sites$countryCode <-
   dplyr::case_when(
     harmonized_AQS_sites$AQS_State.Code == "66" ~ "GU",
+    harmonized_AQS_sites$AQS_State.Code == "72" ~ "PR",
     harmonized_AQS_sites$AQS_State.Code == "78" ~ "VI",
     harmonized_AQS_sites$AQS_State.Code == "80" ~ "MX",
     harmonized_AQS_sites$AQS_State.Code == "CC" ~ "CA",
@@ -168,14 +203,14 @@ harmonized_AQS_sites$countryCode <-
 # [1] FALSE
 # > table(harmonized_AQS_sites$countryCode)
 #
-# CA    GU    MX    US    VI
-# 4    25    41 20633    27
+# CA   PR   US   VI
+# 2   15 1573    2
 
 # ==> Looks good.
 
 # ----- Add locationID ---------------------------------------------------------
 
-# NOTE:  Add a unique identifier at this point so we can dplyr::join() later on.
+# Add a unique identifier
 
 harmonized_AQS_sites$locationID <-
   MazamaLocationUtils::location_createID(
@@ -186,7 +221,7 @@ harmonized_AQS_sites$locationID <-
 # ----- Add timezones ----------------------------------------------------------
 
 MazamaSpatialUtils::setSpatialDataDir("~/Data/Spatial")
-MazamaSpatialUtils::loadSpatialData("Worldimezones")
+MazamaSpatialUtils::loadSpatialData("WorldTimezones")
 
 # NOTE:  Taking some care with this as it takes a very long time
 
@@ -206,42 +241,22 @@ timezone <-
 
 # Where do we still have missing values?
 # > sum(is.na(timezone))
-# [1] 1
+# [1] 0
 
-# ==> Only one left. Figure out where it is.
+# ==> YAY!
 
 # Add timezones
 harmonized_AQS_sites$timezone <- timezone
 
-# * Fix locations with missing timezones -----
 
-# na_timezone <- dplyr::filter(harmonized_AQS_sites, is.na(timezone))
-# View(na_timezone)
+# Now check all key parameters
 
-# Alachua, Florida is in the "America/New_York" timezone.
-
-na_index <- which(is.na(harmonized_AQS_sites$timezone))
-harmonized_AQS_sites$timezone[na_index] <- "America/New_York"
-
-# > any(is.na(harmonized_AQS_sites$timezone))
-# [1] FALSE
-#
-# ==> YAY!
-
-# Now check the other key parameters
-
-# > any(is.na(harmonized_AQS_sites$timezone))
-# [1] FALSE
-# > any(is.na(harmonized_AQS_sites$longitude))
-# [1] FALSE
-# > any(is.na(harmonized_AQS_sites$latitude))
-# [1] FALSE
-# > any(is.na(harmonized_AQS_sites$timezone))
-# [1] FALSE
-# > any(is.na(harmonized_AQS_sites$countryCode))
-# [1] FALSE
-# > any(is.na(harmonized_AQS_sites$stateCode))
-# [1] TRUE
+any(is.na(harmonized_AQS_sites$timezone))
+any(is.na(harmonized_AQS_sites$longitude))
+any(is.na(harmonized_AQS_sites$latitude))
+any(is.na(harmonized_AQS_sites$timezone))
+any(is.na(harmonized_AQS_sites$countryCode))
+any(is.na(harmonized_AQS_sites$stateCode))
 
 # ----- Fix stateCodes ---------------------------------------------------------
 
@@ -276,128 +291,13 @@ harmonized_AQS_sites <-
     na_stateCode
   )
 
-# dplyr::filter(harmonized_AQS_sites, is.na(stateCode)) %>% View()
+any(is.na(harmonized_AQS_sites$stateCode))
 
-# ==> Only missing for Guam which is OK!
-
-# ----- Investigate duplicates -------------------------------------------------
-
-# > sum(duplicated(harmonized_AQS_sites$locationID))
-# [1] 368
-
-# ==> Yikes! 368 duplicate locations
-
-duplicate_indices <- which(duplicated(harmonized_AQS_sites$locationID))
-duplicate_IDs <- harmonized_AQS_sites$locationID[duplicate_indices]
-
-duplicates <-
-  harmonized_AQS_sites %>%
-  dplyr::filter(locationID %in% duplicate_IDs)
-
-# View(duplicates)
-
-# ==> Many of these have AQS_Site.Closed.Date < 1980
-
-siteClosedYear <-
-  stringr::str_sub(duplicates$AQS_Site.Closed.Date, 1, 4) %>%
-  as.numeric()
-
-# > sum(siteClosedYear >= 1980, na.rm = TRUE)
-# [1] 271
-
-fewer_duplicates <-
-  duplicates %>%
-  dplyr::filter(siteClosedYear >= 1980, na.rm = TRUE)
-
-duplicate_indices <- which(duplicated(fewer_duplicates$locationID))
-duplicate_IDs <- fewer_duplicates$locationID[duplicate_indices]
-
-duplicates <-
-  fewer_duplicates %>%
-  dplyr::filter(locationID %in% duplicate_IDs)
-
-# > dim(duplicates)
-# [1] 209  41
-# View(duplicates)
-
-# ==> Ugh, but most have AQS_Site.Closed.Date < 2000
-
-siteClosedYear <-
-  stringr::str_sub(duplicates$AQS_Site.Closed.Date, 1, 4) %>%
-  as.numeric()
-
-# > sum(siteClosedYear >= 2000, na.rm = TRUE)
-# [1] 33
-
-fewer_duplicates <-
-  duplicates %>%
-  dplyr::filter(siteClosedYear >= 2000, na.rm = TRUE)
-
-duplicate_indices <- which(duplicated(fewer_duplicates$locationID))
-duplicate_IDs <- fewer_duplicates$locationID[duplicate_indices]
-
-duplicates <-
-  fewer_duplicates %>%
-  dplyr::filter(locationID %in% duplicate_IDs)
-
-# > dim(duplicates)
-# [1] 10 41
-# > View(duplicates)
-
-# With this few, we will just remove the duplicates
-
-# ----- Remove duplicates ------------------------------------------------------
-
-# Break tbl into two parts: duplicated or not
-
-duplicate_indices <- which(duplicated(harmonized_AQS_sites$locationID))
-duplicate_IDs <- harmonized_AQS_sites$locationID[duplicate_indices]
-
-duplicates <-
-  harmonized_AQS_sites %>%
-  dplyr::filter(locationID %in% duplicate_IDs)
-
-no_duplicates <-
-  harmonized_AQS_sites %>%
-  dplyr::filter(! locationID %in% duplicate_IDs)
-
-# * Remove duplicates with Site.Closed < 2000 -----
-
-siteClosedYear <-
-  stringr::str_sub(duplicates$AQS_Site.Closed.Date, 1, 4) %>%
-  as.numeric()
-
-mask <- is.na(siteClosedYear) | siteClosedYear >= 2000
-
-duplicates <- duplicates[mask,]
-
-duplicate_indices <- which(duplicated(duplicates$locationID))
-duplicate_IDs <- duplicates$locationID[duplicate_indices]
-
-# > length(duplicate_IDs)
-# [1] 53
-
-# * Just use dplyr::distinct() on the final 53 -----
-
-duplicates <-
-  duplicates %>%
-  dplyr::distinct(locationID, .keep_all = TRUE)
-
-# Combine two tbls
-harmonized_AQS_sites <-
-  dplyr::bind_rows(
-    no_duplicates,
-    duplicates
-  )
-
-# > dim(harmonized_AQS_sites)
-# [1] 19285    41
-# > any(duplicated(harmonized_AQS_sites$locationID))
-# [1] FALSE
+# ==> All clear!
 
 # ----- Check for locations that are too close ---------------------------------
 
-radius <- 500    # meters
+diameter <- 500    # meters
 
 x <-
   harmonized_AQS_sites %>%
@@ -469,6 +369,6 @@ Please review the returned locationTbl for the identified rows.
   warning(paste(lines, collapse = "\n"))
 
 }
-
-
-
+#
+#
+#

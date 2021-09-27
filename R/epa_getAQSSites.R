@@ -50,22 +50,26 @@ epa_getAQSSites <- function(
   url <- paste0(baseUrl, "aqs_sites.zip")
   zipFile <- path.expand( file.path(downloadDir, "aqs_sites.zip") )
 
-  if ( logger.isInitialized() )
-    logger.trace('Downloading %s ...', zipFile)
+  if ( !file.exists(zipFile) ) {
 
-  result <- try({
-    utils::download.file(url, zipFile, quiet = quiet)
-  }, silent = quiet)
-
-  if ( "try-error" %in% class(result) ) {
-    err_msg <- geterrmessage()
     if ( logger.isInitialized() )
-      logger.error(err_msg)
-    stop(err_msg)
-  }
+      logger.trace('Downloading %s ...', zipFile)
 
-  if ( logger.isInitialized() )
-    logger.trace(paste0('Finished downloading.'))
+    result <- try({
+      utils::download.file(url, zipFile, quiet = quiet)
+    }, silent = quiet)
+
+    if ( "try-error" %in% class(result) ) {
+      err_msg <- geterrmessage()
+      if ( logger.isInitialized() )
+        logger.error(err_msg)
+      stop(err_msg)
+    }
+
+    if ( logger.isInitialized() )
+      logger.trace(paste0('Finished downloading.'))
+
+  }
 
   # ----- Uncompress zip file --------------------------------------------------
 
