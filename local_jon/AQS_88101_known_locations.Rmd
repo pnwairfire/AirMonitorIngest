@@ -620,6 +620,17 @@ known_locations <-
 table_leaflet(known_locations)
 ```
 
+## Compare with removed locations
+
+```{r compare_with_removed}
+removed_locations <-
+  known_locations_0 %>%
+  dplyr::filter(AQS_AQSID %in% IDs_for_removal)
+
+map <- table_leaflet(known_locations)
+
+table_leafletAdd(map, removed_locations)
+```
 
 ```{r save}
 setLocationDataDir("~/Data/Known_Locations")
@@ -628,3 +639,4 @@ table_save(known_locations, "AirFire_monitors_500m")
 table_csv <- table_export(known_locations)
 readr::write_csv(known_locations, file = file.path(getLocationDataDir(), "AirFire_monitors_500m.csv"))
 ```
+
