@@ -328,7 +328,7 @@ individual basis.
 ```{r find_overlapping}
 distance_table <- 
   dplyr::select(known_locations_0, longitude, latitude) %>%
-  MazamaLocationUtils::table_findOverlappingLocations(radius = 250)
+  MazamaLocationUtils::table_findOverlappingDistances(radius = 250)
 
 print(distance_table)
 ```
@@ -345,10 +345,9 @@ representing that area.
 ```{r leaflet}
 source("table_leaflet.R")
 # Which sites are too close
-rows <- c(distance_table$row1, distance_table$row2) %>% sort()
-too_close <- known_locations_0[rows,]
-
-table_leaflet(too_close)
+known_locations_0 %>%
+  MazamaLocationUtils::table_findOverlappingLocations(radius = 250) %>%
+  table_leaflet()
 ```
 
 ### Manual Editing
