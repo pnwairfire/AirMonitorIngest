@@ -1,0 +1,57 @@
+---
+title: "AQS 88101 3: Create 'known_locations' Table"
+author: "Jonathan Callahan"
+date: "September 29, 2021"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+
+We need to start where we left off in step 2:
+
+```{r setup_data, message = FALSE}
+library(MazamaCoreUtils)
+library(AirMonitorIngest)
+
+AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA")
+AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
+
+AQS_monitors_88101 <-
+  AQS_monitors %>%
+  # Subset
+  dplyr::filter(`Measurement Scale` != "MICROSCALE") %>%
+  dplyr::filter(`Parameter Code` == "88101") %>%
+  # Add AQSID as a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  )
+
+AQS_sites_88101 <-
+  AQS_sites %>%
+  # Add AQSID as a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  ) %>%
+  # Subset
+  dplyr::filter(AQSID %in% AQS_monitors_88101$AQSID)
+
+library(MazamaSpatialUtils)
+library(MazamaLocationUtils)
+
+# Set up spatial data
+MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
+
+# Set "known locations" directory
+MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
+
+known_sites <- table_load("AQS_88101_sites")
+```
+
+----

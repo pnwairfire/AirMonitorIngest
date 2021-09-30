@@ -1,7 +1,7 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download EPA Air Quality Format Description Tabless
+#' @title Download EPA air quality format description tables
 #'
 #' @description
 #' Download tables with descriptions of data file formats. These are needed to
@@ -18,7 +18,7 @@
 #' \item{"Blanks Data"}
 #' }
 #'
-#' For example, the `epa_parseAQSHourlyData()` function uses the information in
+#' For example, the `epa_aqs_parseHourlyData()` function uses the information in
 #' the table named "Hourly Data".
 #'
 #' @param url Character URL for EPA AQS file format descriptions.
@@ -31,11 +31,11 @@
 #' \dontrun{
 #' library(AirMonitorIngest)
 #'
-#' formatDescriptionTables <- epa_getAQSFormatDescriptionTables()
+#' formatDescriptionTables <- epa_aqs_getFormatDescriptionTables()
 #' head(formatDescriptionTables$`Hourly Data`)
 #' }
 
-epa_getAQSFormatDescriptionTables <- function(
+epa_aqs_getFormatDescriptionTables <- function(
   url = 'https://aqs.epa.gov/aqsweb/airdata/FileFormats.html'
 ) {
 

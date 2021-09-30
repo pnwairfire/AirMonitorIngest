@@ -1,0 +1,277 @@
+---
+title: "AQS 88101 2: Create 'known_sites' Table"
+author: "Jonathan Callahan"
+date: "September 29, 2021"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+
+We need to start where we left off in step 1:
+
+```{r setup_data, message = FALSE}
+library(MazamaCoreUtils)
+library(AirMonitorIngest)
+
+AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA")
+AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
+
+AQS_monitors_88101 <-
+  AQS_monitors %>%
+  # Subset
+  dplyr::filter(`Measurement Scale` != "MICROSCALE") %>%
+  dplyr::filter(`Parameter Code` == "88101") %>%
+  # Add AQSID as a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  )
+
+AQS_sites_88101 <-
+  AQS_sites %>%
+  # Add AQSID as a unique identifier
+  dplyr::mutate(
+    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
+  ) %>%
+  # Subset
+  dplyr::filter(AQSID %in% AQS_monitors_88101$AQSID)
+
+```
+
+----
+
+# Create a "Known Locations" Table
+
+We will build a standardized _"known locations"_ table using the 
+**MazamaLocationUtils** package. This will involve:
+
+* creating standardized variables
+* adding spatial metadata
+
+We begin by initializing **MazamaLocationUtils** and associated datasets and
+then display the column names we need to create.
+
+```{r known_location_columns, results = "hold"}
+library(MazamaSpatialUtils)
+library(MazamaLocationUtils)
+
+# Set up spatial data
+MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
+
+# Print out names for an empty "known locations" table
+known_location_columns <-
+  MazamaLocationUtils::table_initialize() %>% 
+  names()
+```
+
+## Known Site Locations
+
+We will create a "known locations" table from `AQS_sites_88101` in several 
+stages.
+
+### Create required variables
+
+```{r harmonizing_variables, results = "hold"}
+known_sites <-
+  
+  # Start with AQS_sites_0
+  AQS_sites_88101 %>%
+
+  # Rename all existing columns with "AQS_"
+  dplyr::rename_all(make.names) %>%
+  dplyr::rename_all(~ gsub("^", "AQS_", .x)) %>%
+
+  # Add "known location" columns derived from AQS columns where possible
+  dplyr::mutate(
+    locationID = as.character(NA),
+    locationName = AQS_Local.Site.Name,
+    longitude = AQS_Longitude,
+    latitude = AQS_Latitude,
+    elevation = AQS_Elevation,
+    countryCode = as.character(NA),
+    stateCode = MazamaSpatialUtils::US_stateFIPSToCode(AQS_State.Code),
+    county = AQS_County.Name,
+    timezone = as.character(NA),
+    houseNumber = as.character(NA),
+    street = as.character(NA),
+    city = AQS_City.Name,
+    zip = AQS_Zip.Code
+  )
+```
+
+### Reorganize columns
+
+```{r reorganize_columns, results = "hold"}
+# Get "AQS_" columns
+AQS_columns <-
+  names(known_sites) %>%
+  stringr::str_subset("AQS_.*")
+
+# Reorder column names
+known_sites <-
+  known_sites %>%
+  dplyr::select(dplyr::all_of(c(known_location_columns, AQS_columns)))
+```
+
+### Add/fix required columns
+
+Several columns of data were set to `NA` when we created `known_sites`.
+These columns require a bit more work and are dealt with here:
+
+```{r fix_columns, results = "markdown"}
+# ----- Add unique identifiers -------------------------------------------------
+
+known_sites$locationID <-
+  MazamaLocationUtils::location_createID(
+    known_sites$longitude,
+    known_sites$latitude
+  )
+
+# ----- Add ISO countryCodes ---------------------------------------------------
+
+known_sites$countryCode <-
+  dplyr::case_when(
+    known_sites$AQS_State.Code == "66" ~ "GU",
+    known_sites$AQS_State.Code == "72" ~ "PR",
+    known_sites$AQS_State.Code == "78" ~ "VI",
+    known_sites$AQS_State.Code == "80" ~ "MX",
+    known_sites$AQS_State.Code == "CC" ~ "CA",
+    TRUE ~ "US" # default
+  )
+
+# ----- Add timezones ----------------------------------------------------------
+
+known_sites$timezone <-
+  MazamaSpatialUtils::getTimezone(
+    known_sites$longitude,
+    known_sites$latitude,
+    # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
+    countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
+    useBuffering = TRUE
+)
+
+# ----- Fix stateCodes ---------------------------------------------------------
+
+# Split, fix and then recombine
+US <- dplyr::filter(known_sites, countryCode == "US")
+non_US <- dplyr::filter(known_sites, countryCode != "US")
+
+non_US$stateCode <-
+  MazamaSpatialUtils::getStateCode(
+    non_US$longitude,
+    non_US$latitude,
+    dataset = "NaturalEarthAdm1",
+    countryCodes = c("CA", "MX", "VI", "GU"),
+    useBuffering = TRUE
+  )
+
+# Combine two tables
+known_sites <-
+  dplyr::bind_rows(
+    US,
+    non_US
+  )
+
+```
+
+### Review
+
+It's now time to review our first pass table, `known_sites`:
+
+```{r first_pass_review}
+# What country codes to we have?
+table(known_sites$countryCode)
+
+# Are all locations unique?
+any(duplicated(known_sites$locationID))
+```
+
+## Further Improvements
+
+A review of the contents of the `AQS_~` parameters shows that some are of little
+value. Will will remove these as well as other columns of data that have been 
+copied to standardized names or are potentially outdated.
+
+```{r review_AQS_, results = "hold"}
+# Review "AQS_" parameters for removal
+lapply(known_sites, function(x) { sum(is.na(x)) }) %>% str()
+```
+
+```{r remove_non_spatial, results = "hold"}
+# Remove unwanted columns
+unwanted_columns <- c(
+  # Renamed or redundant
+  "AQS_Latitude",
+  "AQS_Longitude",
+  "AQS_Elevation",
+  "AQS_Zip.Code",
+  "AQS_State.Name",
+  "AQS_County.Name",
+  "AQS_City.Name",
+  # Not useful or potentially no longer accurate
+  "AQS_Datum",
+  "AQS_Land.Use",
+  "AQS_Location.Setting",
+  # Very little data found
+  "AQS_Met.Site.State.Code",
+  "AQS_Met.Site.County.Code",
+  "AQS_Met.Site.Site.Number",
+  "AQS_Met.Site.Type",
+  "AQS_Met.Site.Distance",
+  "AQS_Met.Site.Direction"
+)
+
+known_sites <- 
+  known_sites %>%
+  dplyr::select(- dplyr::all_of(unwanted_columns))
+```
+
+### Finishing touches
+
+After a quick review with `View(known_sites)`, a few more _data janitor_ tasks
+can dealt with here:
+
+```{r Finishing touches}
+# Uniform casing of locationName
+known_sites$locationName <- 
+  stringr::str_to_title(known_sites$locationName)
+
+# USse'NA' where appropriate
+known_sites <-
+  known_sites %>%
+  dplyr::mutate(city = dplyr::na_if(city, "Not in a City")) %>%
+  dplyr::mutate(city = dplyr::na_if(city, "Not in a city"))
+```
+
+# Final Result
+
+
+## Visual Spot Check
+
+We can visually spot check the result with leaflet. Clicking on a location will
+display core metadata.
+
+```{r final_result}
+table_leaflet(
+  known_sites,
+  extraVars = c("AQS_AQSID", "AQS_Site.Established.Date", "AQS_Site.Closed.Date"),
+  weight = 1
+)
+```
+
+## Save Our Work
+
+```{r save}
+setLocationDataDir("~/Data/Known_Locations")
+table_save(known_sites, "AQS_88101_sites")
+
+table_csv <- table_export(known_sites)
+readr::write_csv(known_sites, file = file.path(getLocationDataDir(), "AQS_88101_sites.csv"))
+```
+

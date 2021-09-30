@@ -20,7 +20,7 @@ dir.create("~/Data/EPA", showWarnings = FALSE, recursive = TRUE)
 # ----- Download data ----------------------------------------------------------
 
 # Get site metadata
-AQS_sites <- epa_getAQSSites(downloadDir = "~/Data/EPA", quiet = FALSE)
+AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA", quiet = FALSE)
 
 # > dim(AQS_sites)
 # [1] 20730    28
@@ -37,7 +37,7 @@ AQS_sites <- epa_getAQSSites(downloadDir = "~/Data/EPA", quiet = FALSE)
 # [28] "Extraction Date"
 
 # Get monitor metadata
-AQS_monitors <- epa_getAQSMonitors(downloadDir = "~/Data/EPA", quiet = FALSE)
+AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA", quiet = FALSE)
 
 # > dim(AQS_monitors)
 # [1] 356777     32
@@ -60,7 +60,7 @@ AQS_monitors <- epa_getAQSMonitors(downloadDir = "~/Data/EPA", quiet = FALSE)
 # [31] "Tribe Name"                   "Extraction Date"
 
 # Get parameter codes
-AQS_parameterCodes <- epa_getAQSCodes(tableName = "parameters", quiet = FALSE)
+AQS_parameterCodes <- epa_aqs_getCodes(tableName = "parameters", quiet = FALSE)
 
 # > dim(AQS_parameterCodes)
 # [1] 1477    8

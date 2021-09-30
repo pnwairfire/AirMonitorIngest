@@ -1,7 +1,7 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download Hourly EPA Air Quality Data
+#' @title Download hourly EPA air quality data
 #'
 #' @description
 #' Download hourly air quality data from the US EPA and save it to a directory.
@@ -51,13 +51,13 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Save the download in ~/Data/EPA
-#' zipFile <- epa_downloadAQSHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
+#' zipFile <- epa_aqs_downloadHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
 #'
 #' # Uncompress and parse into a tibble
-#' tbl <- epa_parseAQSHourlyData(zipFile)
+#' tbl <- epa_aqs_parseHourlyData(zipFile)
 #' }
 
-epa_downloadAQSHourlyData <- function(
+epa_aqs_downloadHourlyData <- function(
   year = NULL,
   parameterCode = "88101",
   downloadDir = tempdir(),
@@ -66,7 +66,7 @@ epa_downloadAQSHourlyData <- function(
 ) {
 
   if ( logger.isInitialized() )
-    logger.debug(" ----- epa_downloadAQSHourlyData() ----- ")
+    logger.debug(" ----- epa_aqs_downloadHourlyData() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 

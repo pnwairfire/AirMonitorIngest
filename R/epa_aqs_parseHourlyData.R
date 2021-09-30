@@ -1,7 +1,7 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Parse Hourly EPA Air Quality Data
+#' @title Parse hourly EPA air quality data
 #'
 #' @description
 #' Uncompress previously downloaded, hourly air quality .zip files from the
@@ -51,19 +51,19 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Save the download in ~/Data/EPA
-#' zipFile <- epa_downloadAQSHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
+#' zipFile <- epa_aqs_downloadHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
 #'
 #' # Uncompress and parse into a tibble
-#' tbl <- epa_parseAQSHourlyData(zipFile)
+#' tbl <- epa_aqs_parseHourlyData(zipFile)
 #' }
 
-epa_parseAQSHourlyData <- function(
+epa_aqs_parseHourlyData <- function(
   zipFile = NULL,
   quiet = TRUE
 ) {
 
   if ( logger.isInitialized() )
-    logger.debug(" ----- epa_parseAQSHourlyData() ----- ")
+    logger.debug(" ----- epa_aqs_parseHourlyData() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 
@@ -90,7 +90,7 @@ epa_parseAQSHourlyData <- function(
 
   # ----- Parse csv file -------------------------------------------------------
 
-  # Here are the column names from epa_downloadAQSData(1980, "88101"):
+  # Here are the column names from epa_aqs_downloadData(1980, "88101"):
 
   #   > dplyr::glimpse(tbl, width = 75)
   #   Rows: 70,043

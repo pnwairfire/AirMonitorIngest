@@ -1,7 +1,7 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download and Parse EPA AQS Sites Metadata
+#' @title Download and parse EPA AQS sites metadata
 #'
 #' @description
 #' Download site metadata from the US EPA and save it to a directory. Then
@@ -27,17 +27,17 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Download and parse site metadata
-#' AQS_sites <- epa_getAQSSites(downloadDir = "~/Data/EPA", quiet = FALSE)
+#' AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA", quiet = FALSE)
 #' }
 
-epa_getAQSSites <- function(
+epa_aqs_getSites <- function(
   downloadDir = tempdir(),
   baseUrl = 'https://aqs.epa.gov/aqsweb/airdata/',
   quiet = TRUE
 ) {
 
   if ( logger.isInitialized() )
-    logger.debug(" ----- epa_getAQSSites() ----- ")
+    logger.debug(" ----- epa_aqs_getSites() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 

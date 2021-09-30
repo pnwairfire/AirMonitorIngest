@@ -1,7 +1,7 @@
 #' @export
 #' @import MazamaCoreUtils
 #'
-#' @title Download and Parse Tables of EPA AQS Codes
+#' @title Download and parse tables of EPA AQS codes
 #'
 #' @description
 #' Download and parse code tables from the US EPA.
@@ -36,17 +36,17 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Get a table of parameter codes
-#' parameter_codes <- epa_getAQSCodes(tableName = "parameters", quiet = FALSE)
+#' parameter_codes <- epa_aqs_getCodes(tableName = "parameters", quiet = FALSE)
 #' }
 
-epa_getAQSCodes <- function(
+epa_aqs_getCodes <- function(
   tableName = NULL,
   baseUrl = 'https://aqs.epa.gov/aqsweb/documents/codetables/',
   quiet = TRUE
 ) {
 
   if ( logger.isInitialized() )
-    logger.debug(" ----- epa_getAQSCodes() ----- ")
+    logger.debug(" ----- epa_aqs_getCodes() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 
