@@ -1,5 +1,5 @@
 ---
-title: "AQS 88101 3: Create 'known_locations' Table"
+title: "AQS 88101 Tutorial 3: Create Monitor 'meta' Table"
 author: "Jonathan Callahan"
 date: "September 29, 2021"
 output:
@@ -12,35 +12,40 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Introduction
+
+This tutorial demonstrates how to use the **MazamaLocationUtils** and
+**AirMonitorIngest** R packages to work with EPA AQS PM2.5 data. Target
+audiences include grad students, researchers and any member of the public
+interested in air quality and comfortable working with R and RStudio.
+
+Tutorials in this series include:
+
+* AQS 88101 Tutorial 1: Explore AQS Data
+* AQS 88101 Tutorial 2: Create 'known locations' Table
+* AQS 88101 Tutorial 3: Create Monitor 'meta' Table
+
 # Setup
 
-We need to start where we left off in step 2:
+In the second tutorial we created a vetted "known locations" table for sites 
+associated with parameter 88101.
+
+We need to pick up where we left off in step 2:
 
 ```{r setup_data, message = FALSE}
 library(MazamaCoreUtils)
 library(AirMonitorIngest)
 
-AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA")
 AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
 
 AQS_monitors_88101 <-
   AQS_monitors %>%
   # Subset
-  dplyr::filter(`Measurement Scale` != "MICROSCALE") %>%
   dplyr::filter(`Parameter Code` == "88101") %>%
   # Add AQSID as a unique identifier
   dplyr::mutate(
     AQSID = paste0(`State Code`, `County Code`, `Site Number`)
   )
-
-AQS_sites_88101 <-
-  AQS_sites %>%
-  # Add AQSID as a unique identifier
-  dplyr::mutate(
-    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
-  ) %>%
-  # Subset
-  dplyr::filter(AQSID %in% AQS_monitors_88101$AQSID)
 
 library(MazamaSpatialUtils)
 library(MazamaLocationUtils)
@@ -51,7 +56,203 @@ MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
 # Set "known locations" directory
 MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
-known_sites <- table_load("AQS_88101_sites")
+sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88101_sites")
 ```
 
-----
+# Validate Tables
+
+Before we begin creating a 'meta' table for 88101 monitors, we need to validate
+that the information we begin with is consistent. The following interactive
+session shows that things are in order.
+
+```{r validate_tablesl}
+# Any AQSIDs in sites that are unknown in monitors?
+setdiff(sites_locationTbl$AQS_AQSID, AQS_monitors_88101$AQSID)
+
+# Any AQSIDs in monitors that are unknown in sites?
+setdiff(AQS_monitors_88101$AQSID, sites_locationTbl$AQS_AQSID)
+
+# NOTE:  This is the Wash. U. site we dealt with in Tutorial 2. This is why we
+# NOTE:  cannot use 'AQSID' as an identifier for unique locations.
+
+# Now create and compare locationIDs
+
+AQS_monitors_88101$locationID <- 
+  MazamaLocationUtils::location_createID(
+    AQS_monitors_88101$Longitude, 
+    AQS_monitors_88101$Latitude
+  )
+
+# Any locationIDs in sites that are unknown in monitors?
+setdiff(sites_locationTbl$locationID, AQS_monitors_88101$locationID)
+
+# Any AQSIDs in monitors that are unknown in sites?
+setdiff(AQS_monitors_88101$locationID, sites_locationTbl$locationID)
+
+# NOTE:  No differences means that 'locationID' is a unique identifier for
+# NOTE:  unique locations.
+
+# How many duplicate locations are found in monitors?
+indices <- which(duplicated(AQS_monitors_88101$locationID))
+length(indices)
+
+# What 'POC's are they associated with.
+AQS_monitors_88101 %>% 
+  dplyr::slice(indices) %>% 
+  dplyr::pull(POC) %>% 
+  unique() %>% as.numeric() %>% sort()
+
+# What 'POC's are found among monitors that have no co-habitants at their location
+inverse_indices <- which(!duplicated(AQS_monitors_88101$locationID))
+AQS_monitors_88101 %>% 
+  dplyr::slice(inverse_indices) %>% 
+  dplyr::pull(POC) %>% 
+  unique() %>% as.numeric() %>% sort()
+```
+
+Everything looks in order. The `duplicated()` function only finds _subsequent_
+instances and the `AQS_monitors_88101` appears to be organized so that `POC` of
+"1" always comes before other `POC` values at a particular site.
+
+As a reminder, 'POC' is described as:
+
+> This is the “Parameter Occurrence Code” used to distinguish different 
+> instruments that measure the same parameter at the same site.
+
+# Merge Sites and Monitors
+
+In creating a `meta` table for Monitor metadata, we wish to merge location-specific
+information from `sites_locationTbl` with additional monitor-specific information
+from `AQS_monitors_88101`.
+
+Required columns include:
+
+* deviceDeploymentID -- unique identifier (see MazmaLocationUtils)
+* deviceID -- device identifier
+* locationID -- location identifier (see MazmaLocationUtils)
+* siteName -- English language name
+* longitude -- decimal degrees E
+* latitude -- decimal degrees N
+* elevation -- elevation of station in m
+* countryCode -- ISO 3166-1 alpha-2
+* stateCode -- ISO 3166-2 alpha-2
+* timezone -- Olson time zone
+
+Additional columns may include anything relevant to the monitors or questions
+being asked of the data.
+
+## Create Tables to Join
+
+Our goal is to join information from `sites_locationTbl` onto information from
+`AQS_monitors_88101`. 
+
+We begin by preparing `monitors_meta` to exclude any _site_ information found in
+`AQS_monitors_88101` and to include the `locationID`:
+
+```{r prepare_monitors_meta}
+# Create core monitors_meta table
+
+monitors_meta <-
+  AQS_monitors_88101 %>%
+  
+  # Rename all existing columns with "AQS_"
+  dplyr::rename_all(make.names) %>%
+  dplyr::rename_all(~ gsub("^", "AQS_", .x))
+
+# Keep the following columns
+keep_columns <- c(
+  # "AQS_State.Code",
+  # "AQS_County.Code",
+  # "AQS_Site.Number",
+  "AQS_Parameter.Code",
+  "AQS_Parameter.Name",
+  "AQS_POC",
+  # "AQS_Latitude",
+  # "AQS_Longitude",
+  # "AQS_Datum",
+  "AQS_First.Year.of.Data",
+  "AQS_Last.Sample.Date",
+  "AQS_Monitor.Type",
+  "AQS_Networks",
+  "AQS_Reporting.Agency",
+  "AQS_PQAO",
+  "AQS_Collecting.Agency",
+  "AQS_Exclusions",
+  "AQS_Monitoring.Objective",
+  "AQS_Last.Method.Code",
+  "AQS_Last.Method",
+  "AQS_Measurement.Scale",
+  "AQS_Measurement.Scale.Definition",
+  "AQS_NAAQS.Primary.Monitor",
+  "AQS_QA.Primary.Monitor",
+  # "AQS_Local.Site.Name",
+  # "AQS_Address",
+  # "AQS_State.Name",
+  # "AQS_County.Name",
+  # "AQS_City.Name",
+  # "AQS_CBSA.Name",
+  # "AQS_Tribe.Name",
+  # "AQS_Extraction.Date",
+  "AQS_AQSID",
+  "AQS_locationID"
+)
+
+monitors_meta <- 
+  monitors_meta %>%
+  dplyr::select(dplyr::all_of(keep_columns))
+
+# Check which columns are still found in both
+intersect(names(monitors_meta), names(sites_locationTbl))
+
+# Add additional variables
+
+monitors_meta <-
+  monitors_meta %>%
+  # Include 'locationID' so we have something to join on
+  dplyr::rename(
+    locationID = AQS_locationID,
+  ) %>%
+  # Unique instrument ID
+  dplyr::mutate(
+    deviceID = sprintf("%s_%02d", AQS_AQSID, as.numeric(AQS_POC))
+  ) %>%
+  # Unique "device deployment" ID
+  dplyr::mutate(
+    deviceDeploymentID = paste(locationID, deviceID, sep = "_")
+  ) %>%
+  # Now remove AQS_AQSID
+  dplyr::select(- AQS_AQSID)
+
+# Check which columns are still found in both
+intersect(names(monitors_meta), names(sites_locationTbl))
+```
+
+Now we can left join "known location" information to create a `meta` tibble:
+
+```{r left_join_sites}
+meta <-
+  dplyr::left_join(monitors_meta, sites_locationTbl, by = "locationID")
+
+# Reorder columns
+coreNames <- c(
+  "deviceDeploymentID", "deviceID",
+  MazamaLocationUtils::coreMetadataNames
+)
+aqsNames <- setdiff(names(meta), coreNames)
+
+meta <- 
+  meta %>%
+  dplyr::select(dplyr::all_of(c(coreNames, aqsNames)))
+```
+
+## Save our work
+
+We will save our newly vetted "meta" table in a dedicated directory.
+
+```{r save}
+save(meta, file = ("~/Data/EPA/AQS_88101_meta.rda"))
+
+readr::write_csv(meta, file = file.path("~/Data/EPA", "AQS_88101_monitors.csv"))
+```
+
+

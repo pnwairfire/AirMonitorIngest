@@ -1,5 +1,5 @@
 ---
-title: "AQS 88101 1: Explore AQS Data"
+title: "AQS 88101 Tutorial 1: Explore AQS Data"
 author: "Jonathan Callahan"
 date: "September 29, 2021"
 output:
@@ -14,6 +14,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
+This tutorial demonstrates how to use the **MazamaLocationUtils** and
+**AirMonitorIngest** R packages to work with EPA AQS PM2.5 data. Target
+audiences include grad students, researchers and any member of the public
+interested in air quality and comfortable working with R and RStudio.
+
+Tutorials in this series include:
+
+* AQS 88101 Tutorial 1: Explore AQS Data
+* AQS 88101 Tutorial 2: Create 'known locations' Table
+
+# Background
+
 The USFS [AirFire](https://www.airfire.org) group is focused on air quality 
 measurements associated with wildfire smoke and maintains both historical and 
 real-time databases of PM2.5 monitoring data obtained from stationary monitors. 
@@ -22,11 +34,10 @@ ingest and management of air quality "stationary time series" are both important
 ongoing activities.
 
 Challenges include:
- * Location stability -- jitter in reported longitude and latitude coming from 
- real-time GPS.
- * Data duplication -- data from an individual monitor arriving through mutiple 
- data streams.
- * CPU-intensive spatial searches for data such as time zone.
+
+* Location stability -- jitter in reported longitude and latitude coming from real-time GPS.
+* Data duplication -- data from an individual monitor arriving through mutiple data streams.
+* CPU-intensive spatial searches for data such as time zone.
  
 To address these and other issues, we are creating "known locations" tables -- 
 a set of locations which have been vetted for reuse and for which all 
@@ -88,7 +99,7 @@ names(AQS_sites)
 ## AQS Monitors
 
 The `AQS_monitors` table mixes monitor-specific information like `Parameter Code`
-and `Last Sample Data` with location-specific information like `State Code` or
+and `Last Sample Date` with location-specific information like `State Code` or
 `CBSA Name`.
 
 ```{r AQS_monitors, message = FALSE, results = "hold"}
@@ -120,11 +131,6 @@ pieces of metadata:
 ```{r names_AQS_parameterCodes, display = FALSE}
 names(AQS_parameterCodes)
 ```
-----
-
-# Explore
-
-## Parameter Code 88101
 
 Parameter code 88101 is associated with regulatory PM2.5 measurements.
 
@@ -134,20 +140,6 @@ _**NOTE:** Measured PM2.5 values are truncated. This will be relevant when stori
 AQS_parameterCodes %>%
   dplyr::filter(`Parameter Code` == "88101") %>% 
   dplyr::glimpse()
-```
-
-## Measurement Scale
-
-As seen in the output below, `Measurement Scale` provides important 
-information on the appropriate use of data from a particular monitor. The 
-AirFire _"known locations"_ table will be used in the context of wildfire smoke. 
-For this use case, we will ignore measurement scales < 100m.
-
-```{r measurement_scale, results = "hold"}
-AQS_monitors %>%
-  dplyr::mutate(scale_definition = paste(`Measurement Scale`, `Measurement Scale Definition`, sep = ' -- ')) %>%
-  dplyr::pull(scale_definition) %>%
-  unique() %>% sort()
 ```
 
 ----
@@ -166,9 +158,8 @@ with a monitor-site. The `AQSID can be created for both `AQS_monitors` and
 AQS_monitors_88101 <-
   AQS_monitors %>%
   # Subset
-  dplyr::filter(`Measurement Scale` != "MICROSCALE") %>%
   dplyr::filter(`Parameter Code` == "88101") %>%
-  # Add AQSID as a unique identifier
+  # Add AQSID as a useful unique identifier
   dplyr::mutate(
     AQSID = paste0(`State Code`, `County Code`, `Site Number`)
   )
@@ -181,7 +172,7 @@ dim(AQS_monitors_88101)
 ```{r AQS_sites_88101, results = "hold"}
 AQS_sites_88101 <-
   AQS_sites %>%
-  # Add AQSID as a unique identifier
+  # Add AQSID as a useful unique identifier
   dplyr::mutate(
     AQSID = paste0(`State Code`, `County Code`, `Site Number`)
   ) %>%
@@ -191,12 +182,25 @@ AQS_sites_88101 <-
 dim(AQS_sites_88101)
 ```
 
+There are `r nrow(AQS_monitors_88101)` monitors but only `r nrow(AQS_sites_88101)`
+sites. This is as it should be as monitors with different `POC` values may 
+appear at the same site:
+
+> This is the “Parameter Occurrence Code” used to distinguish different 
+> instruments that measure the same parameter at the same site.
+
 # Review Sites and Monitors
 
 ## Visual Inspection
 
-We can create an interactive map showing the locations of the monitors (red) and 
-sites (black ring) we have identified.
+We can create an interactive map showing the locations of the monitors and 
+sites we have identified with monitors shown as red circles and sites shown as 
+black rings. As shown below, we can visually review that every monitor is
+associated with a site and _vise versa_ -- all circles have black rings around 
+them and all black rings are filled with red.
+
+Locations that appear darker red are evidence of multiple monitors (associated
+with different `POC` values) at a single site.
 
 ```{r sites_monitors_leaflet}
 monitor_locations <-
@@ -204,6 +208,9 @@ monitor_locations <-
   dplyr::mutate(
     longitude = Longitude,
     latitude = Latitude
+  ) %>%
+  dplyr::mutate(
+    locationID = MazamaLocationUtils::location_createID(longitude, latitude)
   )
 
 site_locations <-
@@ -211,6 +218,9 @@ site_locations <-
   dplyr::mutate(
     longitude = Longitude,
     latitude = Latitude
+  ) %>%
+  dplyr::mutate(
+    locationID = MazamaLocationUtils::location_createID(longitude, latitude)
   )
 
 monitor_locations %>%
@@ -228,15 +238,9 @@ monitor_locations %>%
   )
 ```
 
-All red circles associated with `AQS_monitors` appear to be surrounded by black
-rings associated with `AQS_sites`. This is as it should be as monitors with
-different `POC` values may appear at the same site:
-
-> This is the “Parameter Occurrence Code” used to distinguish different 
-> instruments that measure the same parameter at the same site.
-
 ----
 
-This ends the exploration of available data. See step 2 for the creation of a
-"known locations" table for these locations.
+This ends the exploration of available data. 
+
+See step 2 for the creation of a "known sites" table for these locations.
 

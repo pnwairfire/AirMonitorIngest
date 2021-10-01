@@ -17,7 +17,10 @@ Depends:
 Imports:
     dplyr,
     MazamaCoreUtils,
+    MazamaLocationUtils,
     readr,
+    reshape2,
+    rlang,
     stringr
 Suggests:
     knitr,
