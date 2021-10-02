@@ -149,7 +149,7 @@ epa_aqs_getMonitors <- function(
   }
 
   if ( logger.isInitialized() )
-    logger.trace('Parsing %s', csvFile)
+    logger.trace('Finished parsing.')
 
   # Cleanup
   file.remove(csvFile)

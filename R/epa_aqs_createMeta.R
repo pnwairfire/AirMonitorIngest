@@ -12,16 +12,16 @@
 #' with a \code{deviceDeploymentID} unique identifier that is matched by column
 #' names in an associated \code{data} file.
 #'
-#' @param sites_locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param AQS_monitors Table of monitor data obtained with \code{epa_aqs_getMonitors()}.
+#' @param sites_locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param parameterCode EPA "Parameter Code".
 #'
 #' @return Restructured tibble  with data organized as timeseries columns.
 #'
 
 epa_aqs_createMeta <- function(
-  sites_locationTbl = NULL,
   AQS_monitors = NULL,
+  sites_locationTbl = NULL,
   parameterCode = NULL
 ) {
 
@@ -30,8 +30,8 @@ epa_aqs_createMeta <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  MazamaCoreUtils::stopIfNull(sites_locationTbl)
   MazamaCoreUtils::stopIfNull(AQS_monitors)
+  MazamaCoreUtils::stopIfNull(sites_locationTbl)
   MazamaCoreUtils::stopIfNull(parameterCode)
 
   # ----- Prepare data ---------------------------------------------------------

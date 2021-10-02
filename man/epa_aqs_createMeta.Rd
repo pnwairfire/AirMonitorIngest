@@ -5,15 +5,15 @@
 \title{Create a 'meta' dataframe with required monitor metadata}
 \usage{
 epa_aqs_createMeta(
-  sites_locationTbl = NULL,
   AQS_monitors = NULL,
+  sites_locationTbl = NULL,
   parameterCode = NULL
 )
 }
 \arguments{
-\item{sites_locationTbl}{Table of "known locations" produced with \pkg{MazamaLocationUtils}.}
-
 \item{AQS_monitors}{Table of monitor data obtained with \code{epa_aqs_getMonitors()}.}
+
+\item{sites_locationTbl}{Table of "known locations" produced with \pkg{MazamaLocationUtils}.}
 
 \item{parameterCode}{EPA "Parameter Code".}
 }

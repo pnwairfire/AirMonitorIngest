@@ -67,6 +67,8 @@ epa_aqs_createData <- function(
   #   $ `County Name`         <chr> "Fresno", "Fresno", "Fresno", "Fresno", "Fr
   #   $ `Date of Last Change` <chr> "2010-09-16", "2010-09-16", "2010-09-16", "
 
+  if ( logger.isInitialized() ) logger.trace("Adding standard data ...")
+
   # * datetime -----
 
   # Create a column with the datetime
@@ -113,7 +115,11 @@ epa_aqs_createData <- function(
 
   # ----- Reshape data ---------------------------------------------------------
 
+  if ( logger.isInitialized() ) logger.trace("Reshape data ...")
+
   # * melt ----
+
+  if ( logger.isInitialized() ) logger.trace(" * melt")
 
   # "melt" the data frame into long-format data containing a single measurement
   melted <-
@@ -124,6 +130,8 @@ epa_aqs_createData <- function(
     )
 
   # * validate -----
+
+  if ( logger.isInitialized() ) logger.trace(" * validate")
 
   # Should only have one pm25DF measure per hour
   valueCountPerCell <-
@@ -137,10 +145,14 @@ epa_aqs_createData <- function(
 
   # * reshape -----
 
+  if ( logger.isInitialized() ) logger.trace(" * reshape")
+
   # Create a tibble for data values
   parameterDF <- reshape2::dcast(melted, datetime ~ deviceDeploymentID, stats::median)
 
   # * regular time axis -----
+
+  if ( logger.isInitialized() ) logger.trace(" * regular time axis")
 
   # NOTE:  We want to guarantee that there is a record for every single hour
   # NOTE:  even if no data are available in that hour.

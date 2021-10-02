@@ -25,7 +25,7 @@ data_ORIG <- epa_aqs_createData(AQS_data, meta_ORIG, parameterCode)
 
 # Modify meta to match prototype 'air_monitor' sensibilities
 
-deviceDeploymentIDs <- names(data)[2:ncol(data)]
+deviceDeploymentIDs <- names(data)[2:ncol(data_ORIG)]
 
 meta <-
   meta_ORIG %>%
@@ -64,7 +64,6 @@ data <-
   dplyr::select(dplyr::all_of(preferredColumns))
 
 # Remove 'tibble-ness'
-
 class(meta) <- "data.frame"
 class(data) <- "data.frame"
 rownames(meta) <- meta$monitorID
@@ -73,12 +72,10 @@ rownames(meta) <- meta$monitorID
 ws_monitor <- list(meta = meta, data = data)
 ws_monitor <- structure(ws_monitor, class = c("ws_monitor", "list"))
 
-PWFSLSmoke::monitor_timeseriesPlot(
-  ws_monitor, pch = 15,
-  col = adjustcolor('black', 0.1)
-)
-
 library(PWFSLSmoke)
+
+ws_monitor %>%
+  monitor_timeseriesPlot(pch = 15, cex = 0.5, col = adjustcolor('black', 0.1))
 
 ws_monitor %>%
   monitor_subset(stateCodes = "HI", tlim = c(20080901, 20081001)) %>%

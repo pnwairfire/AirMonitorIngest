@@ -8,18 +8,18 @@
 #' to open them quickly.
 #'
 #' \itemize{
-#' \item{\url{https://aqs.epa.gov/aqsweb/airdata/download_files.html}}
-#' \item{\url{https://aqs.epa.gov/aqsweb/airdata/FileFormats.html}}
-#' \item{\url{https://www.epa.gov/criteria-air-pollutants/naaqs-table}}
 #' \item{\url{https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors}}
+#' \item{\url{https://www.epa.gov/criteria-air-pollutants/naaqs-table}}
+#' \item{\url{https://aqs.epa.gov/aqsweb/airdata/FileFormats.html}}
+#' \item{\url{https://aqs.epa.gov/aqsweb/airdata/download_files.html}}
 #' }
 #'
 
-epa_aqs_browse <- function() {
+epa_aqs_openWebPages <- function() {
 
-  utils::browseURL("https://aqs.epa.gov/aqsweb/airdata/download_files.html")
-  utils::browseURL("https://aqs.epa.gov/aqsweb/airdata/FileFormats.html")
-  utils::browseURL("https://www.epa.gov/criteria-air-pollutants/naaqs-table")
   utils::browseURL("https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors")
+  utils::browseURL("https://www.epa.gov/criteria-air-pollutants/naaqs-table")
+  utils::browseURL("https://aqs.epa.gov/aqsweb/airdata/FileFormats.html")
+  utils::browseURL("https://aqs.epa.gov/aqsweb/airdata/download_files.html")
 
 }

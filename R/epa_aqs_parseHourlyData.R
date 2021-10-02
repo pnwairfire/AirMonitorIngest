@@ -143,10 +143,10 @@ epa_aqs_parseHourlyData <- function(
   }
 
   if ( logger.isInitialized() )
-    logger.trace('Parsing %s', csvFile)
+    logger.trace('Finished parsing.')
 
-  # Cleanup
-  file.remove(csvFile)
+  # Cleanup (ignoring any return)
+  ignored_value <- file.remove(csvFile)
 
   return(tbl)
 
