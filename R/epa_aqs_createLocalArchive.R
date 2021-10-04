@@ -212,17 +212,17 @@ if ( FALSE ) {
 
   library(MazamaCoreUtils)
 
-  MazamaCoreUtils::initializeLogging("~/Data/monitoring/epa_aqs/88101")
+  MazamaCoreUtils::initializeLogging("~/Data/monitoring/epa_aqs/88502")
   MazamaCoreUtils::logger.setLevel(DEBUG)
 
   library(MazamaLocationUtils)
   MazamaLocationUtils::mazama_initialize()
   MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
 
-  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88101_sites")
+  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88502_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "88101"
+  parameterCode <- "88502"
   year <- 2016
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE

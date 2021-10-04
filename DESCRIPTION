@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.0.1
+Version: 0.1.0
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
@@ -8,7 +8,9 @@ Authors@R: c(
 Author: Jonathan Callahan [aut, cre]
 Maintainer: Jonathan Callahan <jonathan.s.callahan@gmail.com>
 Description: A suite of utility functions for ingesting hourly air quality 
-    monitoring data.
+    monitoring data. Data from various sources are harmonized to use standardized
+    variable names and a compact data model with spatial metadata stored in a 
+    'meta' dataframe while hourly data are stored in a 'data' dataframe.
 License: GPL-3
 URL: https://github.com/pnwairfire/AirMonitorIngest
 BugReports: https://github.com/pnwairfire/AirMonitorIngest/issues

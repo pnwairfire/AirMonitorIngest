@@ -23,6 +23,7 @@ Tutorials in this series include:
 
 * AQS 88101 Tutorial 1: Explore AQS Data
 * AQS 88101 Tutorial 2: Create 'known locations' Table
+* AQS 88101 Tutorial 3: Create Monitor 'meta' Table
 
 # Background
 
