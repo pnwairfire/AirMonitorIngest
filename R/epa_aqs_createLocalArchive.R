@@ -1,5 +1,6 @@
 #' @export
 #' @import MazamaCoreUtils
+#' @importFrom rlang .data
 #'
 #' @title Create a 'data' dataframe with required data
 #'
@@ -128,6 +129,26 @@ epa_aqs_createLocalArchive <- function(
           parameterCode = parameterCode
         )
 
+      # * then subset 'meta' -----
+
+      # Limit 'meta' to only those monitors found in 'data'
+
+      data_IDs <- names(data)[2:ncol(data)]
+
+      meta <- dplyr::filter(meta, .data$deviceDeploymentID %in% data_IDs)
+
+      # * finally, reorder 'data' -----
+
+      data <- dplyr::select(data, c('datetime', meta$deviceDeploymentID))
+
+      if ( !all(c('datetime', meta$deviceDeploymentID) == names(data)) ) {
+        err_msg <- sprintf("Skipping %d because meta$deviceDeploymentID does not match names(data)", year)
+        logger.warn(err_msg)
+        next
+      }
+
+      # ----- Save files -------------------------------------------------------
+
       basePath <- file.path(path.expand(archiveBaseDir), "epa_aqs", parameterCode, year)
 
       dir.create(basePath, showWarnings = FALSE, recursive = TRUE)
@@ -135,8 +156,6 @@ epa_aqs_createLocalArchive <- function(
       fileBase <- sprintf("epa_aqs_%s_%s_", parameterCode, year)
 
       base <- file.path(basePath, fileBase)
-
-      # ----- Save files -------------------------------------------------------
 
       # * meta -----
 
@@ -212,7 +231,9 @@ if ( FALSE ) {
 
   library(MazamaCoreUtils)
 
-  MazamaCoreUtils::initializeLogging("~/Data/monitoring/epa_aqs/88502")
+  logDir <- "~/Data/monitoring/epa_aqs/88502"
+  dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
+  MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
 
   library(MazamaLocationUtils)
@@ -222,7 +243,7 @@ if ( FALSE ) {
   sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88502_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "88502"
+  parameterCode <- "88101"
   year <- 2016
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE
