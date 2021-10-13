@@ -1,7 +1,7 @@
 ---
-title: "AQS 88502 Tutorial 2: Create 'known locations' Table"
+title: "AQS 42101 Tutorial 2: Create 'known locations' Table"
 author: "Jonathan Callahan"
-date: "October 04, 2021"
+date: "October 13, 2021"
 output:
   html_document:
     toc: TRUE
@@ -26,12 +26,12 @@ Tutorials in this series include:
 * AQS 88101 Tutorial 3: Create Monitor 'meta' Table
 
 This tutorial is a duplicate of AQS 88101 Tutorial 2 but using parameterCode
-88502 instead. The result will be a "known locations" table for parameterCode 88502.
+42101 instead. The result will be a "known locations" table for parameterCode 42101.
 
 # Setup
 
 In the first tutorial we explored AQS data and determined that there was 
-agreement between the monitor and sites data associated with parameter 88502.
+agreement between the monitor and sites data associated with parameter 42101.
 
 We need to pick up where we left off in step 1:
 
@@ -42,23 +42,23 @@ library(AirMonitorIngest)
 AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA")
 AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
 
-AQS_monitors_88502 <-
+AQS_monitors_42101 <-
   AQS_monitors %>%
   # Subset
-  dplyr::filter(`Parameter Code` == "88502") %>%
+  dplyr::filter(`Parameter Code` == "42101") %>%
   # Add AQSID as a useful unique identifier
   dplyr::mutate(
     AQSID = paste0(`State Code`, `County Code`, `Site Number`)
   )
 
-AQS_sites_88502 <-
+AQS_sites_42101 <-
   AQS_sites %>%
   # Add AQSID as a useful unique identifier
   dplyr::mutate(
     AQSID = paste0(`State Code`, `County Code`, `Site Number`)
   ) %>%
   # Subset
-  dplyr::filter(AQSID %in% AQS_monitors_88502$AQSID)
+  dplyr::filter(AQSID %in% AQS_monitors_42101$AQSID)
 
 ```
 
@@ -66,7 +66,7 @@ AQS_sites_88502 <-
 
 # Standardize the Sites Table
 
-We will modify the `AQS_sites_88502` table using the 
+We will modify the `AQS_sites_42101` table using the 
 **MazamaLocationUtils** package. This will involve:
 
 * creating standardized variables
@@ -88,7 +88,7 @@ known_location_columns <-
   names()
 ```
 
-Standardization of `AQS_sites_88502` will take place in several 
+Standardization of `AQS_sites_42101` will take place in several 
 stages.
 
 ## Create required variables
@@ -116,8 +116,8 @@ columns. Some are filled in here. Others will be handled below.
 ```{r harmonizing_variables, results = "hold"}
 sites_locationTbl <-
   
-  # Start with AQS_sites_0
-  AQS_sites_88502 %>%
+  # Start with AQS_sites_42101
+  AQS_sites_42101 %>%
 
   # Rename all existing columns with "AQS_"
   dplyr::rename_all(make.names) %>%
@@ -138,6 +138,14 @@ sites_locationTbl <-
     street = as.character(NA),
     city = AQS_City.Name,
     zip = AQS_Zip.Code
+  ) %>%
+  
+  # Remove records with missing lons or lats
+  dplyr::filter(
+    is.finite(.data$longitude),
+    is.finite(.data$latitude),
+    .data$longitude != 0,
+    .data$latitude != 0
   )
 ```
 
@@ -243,19 +251,20 @@ this involves only a single site which we can review with the following code:
 mask <- duplicated(sites_locationTbl$locationID)
 duplicate_locationIDs <- sites_locationTbl$locationID[mask]
 
-# # Review duplicates visually
-# sites_locationTbl %>%
-#   dplyr::filter(locationID %in% duplicate_locationIDs) %>%
-#   View()
-
-# Show the important fields
+# Review duplicates visually
 sites_locationTbl %>%
   dplyr::filter(locationID %in% duplicate_locationIDs) %>%
-  dplyr::select(AQS_Local.Site.Name, AQS_Owning.Agency, AQS_Site.Number)
+  View()
+
+# Show the differentiating fields
+sites_locationTbl %>%
+  dplyr::filter(locationID %in% duplicate_locationIDs) %>%
+  dplyr::select(AQS_Address, AQS_Owning.Agency, AQS_Site.Number)
 ```
 
-The National Park Service has several sites with `AQS_Site.Number` of `900#` but
-other purely spatial data are identical. We can safely remove the duplicated sites
+The duplicates appear to be renamed or nearby addresses. We choose to remove the 
+duplicated sites on the assumption they represent repositioning at a "location"
+that is identical from an atmospheric processes perspective.
 
 ```{r remove_duplicated_sites}
 non_duplicated_indices <- which(!mask)
@@ -357,23 +366,23 @@ We will save our newly vetted "known locations" table in a dedicated directory.
 
 ```{r save}
 setLocationDataDir("~/Data/Known_Locations")
-table_save(sites_locationTbl, "AQS_88502_sites")
+table_save(sites_locationTbl, "AQS_42101_sites")
 
 table_csv <- table_export(sites_locationTbl)
-readr::write_csv(sites_locationTbl, file = file.path(getLocationDataDir(), "AQS_88502_sites.csv"))
+readr::write_csv(sites_locationTbl, file = file.path(getLocationDataDir(), "AQS_42101_sites.csv"))
 ```
 
 # Compare with 88101
 
-Both parameterCode 88101 (PM2.5 FRM/FEM) and parameterCode 88502 (PM2.5 non-FRM/FEM)
+Both parameterCode 88101 (PM2.5 FRM/FEM) and parameterCode 42101 (PM2.5 non-FRM/FEM)
 measure pm2.5. Let's take at the known locations table for each.:
 
-```{r compare_88101_88502}
+```{r compare_88101_42101}
 # Set "known locations" directory
 MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
 kl_88101 <- MazamaLocationUtils::table_load("AQS_88101_sites")
-kl_88502 <- MazamaLocationUtils::table_load("AQS_88502_sites")
+kl_42101 <- MazamaLocationUtils::table_load("AQS_42101_sites")
 
 kl_88101 %>% 
   MazamaLocationUtils::table_leaflet(
@@ -381,20 +390,12 @@ kl_88101 %>%
     fillColor = "red"
   ) %>% 
   MazamaLocationUtils::table_leafletAdd(
-    kl_88502, 
+    kl_42101, 
     weight = 2, 
     color = "black", 
     fillOpacity = 0
   )
 ```
 
-Lots of overlap including some where the spatial metadata is identical. The
-following `locationID` for "Twisp - Glover St" is found in both known locations
-tables.
-
-```{r twisp_glover_st}
-a <- dplyr::filter(kl_88101, locationID == "99a6ee8e126ff8cf")
-b <- dplyr::filter(kl_88502, locationID == "99a6ee8e126ff8cf")
-
-dplyr::bind_rows(a, b) %>% dplyr::glimpse()
-```
+Compared with 88101 (PM2.5), 42101 (Ozone) monitors are more concentrated in
+urban areas.
