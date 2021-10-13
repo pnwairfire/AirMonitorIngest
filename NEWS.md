@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.1.1
+
+* Importing **AirMonitor**.
+* Updates to support `AirMonitor::coreMetadataNames`.
+
 # AirMonitorIngest 0.1.0
 
 Version 0.1 focuses on data ingest functions for EPA AQS data. Functions fall
