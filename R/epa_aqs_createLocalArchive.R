@@ -222,7 +222,7 @@ epa_aqs_createLocalArchive <- function(
     dummy <- gc(verbose = !quiet)
 
     if ( MazamaCoreUtils::logger.isInitialized() )
-      logger.trace("finished creating %s", fileBase)
+      logger.trace("Finished creating %s\n", fileBase)
 
   }
 
@@ -241,7 +241,7 @@ if ( FALSE ) {
 
   library(MazamaCoreUtils)
 
-  logDir <- "~/Data/monitoring/epa_aqs/42101"
+  logDir <- "~/Data/monitoring/epa_aqs/88502"
   dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
   MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
@@ -250,10 +250,10 @@ if ( FALSE ) {
   MazamaLocationUtils::mazama_initialize()
   MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
 
-  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_42101_sites")
+  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88502_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "42101"
+  parameterCode <- "88502"
   year <- 2010
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE
@@ -261,11 +261,15 @@ if ( FALSE ) {
 
   library(AirMonitorIngest)
 
+  # 42101 starts in 1980
+  # 88101 starts in 2008
+  # 88502 starts in 1998
+
   epa_aqs_createLocalArchive(
     sites_locationTbl = sites_locationTbl,
     downloadDir = "~/Data/EPA",
-    parameterCode = "42101",
-    years = 2010:2011,
+    parameterCode = "88502",
+    years = 2008,
     archiveBaseDir = "~/Data/monitoring",
     quiet = FALSE
   )
