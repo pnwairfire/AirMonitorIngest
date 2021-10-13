@@ -216,7 +216,7 @@ epa_aqs_createMeta <- function(
     meta$units <- as.character(NA)
   } else if ( parameterCode == "42101" ) {
     meta$pollutant <- "CO"
-    meta$units <- as.character(NA)
+    meta$units <- "ppm"
   } else if ( parameterCode == "42602" ) {
     meta$pollutant <- "NO2"
     meta$units <- as.character(NA)

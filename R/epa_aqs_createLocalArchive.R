@@ -84,6 +84,16 @@ epa_aqs_createLocalArchive <- function(
           quiet = quiet
         )
 
+      # Remove records with missing lon/lat
+      AQS_monitors <-
+        AQS_monitors %>%
+        dplyr::filter(
+          is.finite(.data$Longitude),
+          is.finite(.data$Latitude),
+          .data$Longitude != 0,
+          .data$Latitude != 0
+        )
+
       # Convert into 'meta'
       meta <-
         epa_aqs_createMeta(
@@ -231,7 +241,7 @@ if ( FALSE ) {
 
   library(MazamaCoreUtils)
 
-  logDir <- "~/Data/monitoring/epa_aqs/88101"
+  logDir <- "~/Data/monitoring/epa_aqs/42101"
   dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
   MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
@@ -240,11 +250,11 @@ if ( FALSE ) {
   MazamaLocationUtils::mazama_initialize()
   MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
 
-  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88101_sites")
+  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_42101_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "88101"
-  year <- 2016
+  parameterCode <- "42101"
+  year <- 2010
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE
 
@@ -254,7 +264,7 @@ if ( FALSE ) {
   epa_aqs_createLocalArchive(
     sites_locationTbl = sites_locationTbl,
     downloadDir = "~/Data/EPA",
-    parameterCode = "88101",
+    parameterCode = "42101",
     years = 2010:2011,
     archiveBaseDir = "~/Data/monitoring",
     quiet = FALSE
