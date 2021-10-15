@@ -29,6 +29,12 @@
 #'
 #' @note Unzipped CSV files are almost 100X larger than the compressed .zip files.
 #'
+#' @note
+#' Depending on your internet connection speeds, downloading files from the EPA
+#' site can take several minutes per file. If you see warning messages that you have
+#' timed out, please download files manually. Functions that process these files
+#' will then discover the downloaded files in the \code{downloadDir}.
+
 #' @param year Ingeter year.
 #' @param parameterCode Character pollutant code.
 #' @param downloadDir Directory where .zip file will be saved.
@@ -124,6 +130,7 @@ epa_aqs_downloadHourlyData <- function(
     }, silent = quiet)
 
     if ( "try-error" %in% class(result) ) {
+      base::unlink(zipFile) # cleanup
       err_msg <- geterrmessage()
       if ( logger.isInitialized() )
         logger.error(err_msg)

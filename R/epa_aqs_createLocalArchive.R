@@ -28,6 +28,12 @@
 #' epa_aqs_<parameterCode>_<year>_data.[rda|csv|csv.gz]
 #' }
 #'
+#' @note
+#' Depending on your internet connection speeds, downloading files from the EPA
+#' site can take several minutes per file. If you see warning messages that you have
+#' timed out, please download files manually before running this function. This
+#' function will then discover the downloaded files in the \code{downloadDir}.
+#'
 #' @param sites_locationTbl EPA AQS "known locations" table for \code{parameterCode} monitors.
 #' @param downloadDir Directory in which to save downloaded EPA .zip files. If \code{NULL}, a temp directory is used.
 #' @param parameterCode EPA "Parameter Code".
@@ -240,8 +246,7 @@ epa_aqs_createLocalArchive <- function(
 if ( FALSE ) {
 
   library(MazamaCoreUtils)
-
-  logDir <- "~/Data/monitoring/epa_aqs/42101"
+  logDir <- "~/Data/monitoring/epa_aqs/44201"
   dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
   MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
@@ -250,10 +255,10 @@ if ( FALSE ) {
   MazamaLocationUtils::mazama_initialize()
   MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
 
-  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_42101_sites")
+  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_44201_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "42101"
+  parameterCode <- "44201"
   year <- 2010
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE
@@ -262,13 +267,14 @@ if ( FALSE ) {
   library(AirMonitorIngest)
 
   # 42101 starts in 1980
+  # 44201 starts in 1980
   # 88101 starts in 2008
   # 88502 starts in 1998
 
   epa_aqs_createLocalArchive(
     sites_locationTbl = sites_locationTbl,
     downloadDir = "~/Data/EPA",
-    parameterCode = "42101",
+    parameterCode = "44201",
     years = 2008:2020,
     archiveBaseDir = "~/Data/monitoring",
     quiet = FALSE
