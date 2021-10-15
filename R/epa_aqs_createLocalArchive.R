@@ -241,7 +241,7 @@ if ( FALSE ) {
 
   library(MazamaCoreUtils)
 
-  logDir <- "~/Data/monitoring/epa_aqs/88502"
+  logDir <- "~/Data/monitoring/epa_aqs/42101"
   dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
   MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
@@ -250,10 +250,10 @@ if ( FALSE ) {
   MazamaLocationUtils::mazama_initialize()
   MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
 
-  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88502_sites")
+  sites_locationTbl <- MazamaLocationUtils::table_load("AQS_42101_sites")
 
   downloadDir <- "~/Data/EPA"
-  parameterCode <- "88502"
+  parameterCode <- "42101"
   year <- 2010
   archiveBaseDir <- "~/Data/monitoring"
   quiet <- FALSE
@@ -268,8 +268,8 @@ if ( FALSE ) {
   epa_aqs_createLocalArchive(
     sites_locationTbl = sites_locationTbl,
     downloadDir = "~/Data/EPA",
-    parameterCode = "88502",
-    years = 2008,
+    parameterCode = "42101",
+    years = 2008:2020,
     archiveBaseDir = "~/Data/monitoring",
     quiet = FALSE
   )

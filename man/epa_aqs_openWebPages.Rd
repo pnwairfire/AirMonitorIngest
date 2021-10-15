@@ -14,6 +14,7 @@ to open them quickly.
 \itemize{
 \item{\url{https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors}}
 \item{\url{https://www.epa.gov/criteria-air-pollutants/naaqs-table}}
+\item{\url{https://www.epa.gov/aqs/aqs-code-list}}
 \item{\url{https://aqs.epa.gov/aqsweb/airdata/FileFormats.html}}
 \item{\url{https://aqs.epa.gov/aqsweb/airdata/download_files.html}}
 }
