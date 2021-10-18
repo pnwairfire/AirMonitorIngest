@@ -210,7 +210,7 @@ epa_aqs_createMeta <- function(
   # pollutant
   if ( parameterCode == "44201" ) {
     meta$pollutant <- "OZONE"
-    meta$units <- as.character(NA)
+    meta$units <- "PPM"
   } else if ( parameterCode == "42401" ) {
     meta$pollutant <- "SO2"
     meta$units <- as.character(NA)

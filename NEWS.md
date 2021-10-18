@@ -1,7 +1,15 @@
+# AirMonitorIngest 0.1.2
+
+* Support for EPA AQS 81102 -- PM10.
+
 # AirMonitorIngest 0.1.1
 
 * Importing **AirMonitor**.
 * Updates to support `AirMonitor::coreMetadataNames`.
+* Support for EPA AQS 88101 -- PM2.5 FRM/FEM.
+* Support for EPA AQS 88402 -- PM2.5 non-FRM/FEM.
+* Support for EPA AQS 42101 -- CO.
+* Support for EPA AQS 44201 -- OZONE.
 
 # AirMonitorIngest 0.1.0
 
