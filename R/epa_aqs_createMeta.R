@@ -163,7 +163,7 @@ epa_aqs_createMeta <- function(
   #   $ elevation                        <dbl> 37.19, 344.42, 122.00, 122.00, 5
   #   $ countryCode                      <chr> "US", "US", "US", "US", "US", "U
   #   $ stateCode                        <chr> "AL", "AL", "AL", "AL", "AL", "A
-  #   $ county                           <chr> "Baldwin", "Clay", "Colbert", "C
+  #   $ countyName                       <chr> "Baldwin", "Clay", "Colbert", "C
   #   $ timezone                         <chr> "America/Chicago", "America/Chic
   #   $ houseNumber                      <chr> NA, NA, NA, NA, NA, NA, NA, NA,
   #   $ street                           <chr> NA, NA, NA, NA, NA, NA, NA, NA,
@@ -213,22 +213,22 @@ epa_aqs_createMeta <- function(
     meta$units <- "PPM"
   } else if ( parameterCode == "42401" ) {
     meta$pollutant <- "SO2"
-    meta$units <- as.character(NA)
+    meta$units <- "PPB"
   } else if ( parameterCode == "42101" ) {
     meta$pollutant <- "CO"
     meta$units <- "PPM"
   } else if ( parameterCode == "42602" ) {
     meta$pollutant <- "NO2"
-    meta$units <- as.character(NA)
+    meta$units <- "PPB"
   } else if ( parameterCode == "88101" ) {
     meta$pollutant <- "PM2.5"
-    meta$units <- "MICROGRAMS"
+    meta$units <- "UG/M3"
   } else if ( parameterCode == "88502" ) {
     meta$pollutant <- "PM2.5"
-    meta$units <- "MICROGRAMS"
+    meta$units <- "UG/M3"
   } else if ( parameterCode == "81102" ) {
     meta$pollutant <- "PM10"
-    meta$units <- "MICROGRAMS"
+    meta$units <- "UG/M3"
   } else {
     meta$pollutant <- parameterCode
     meta$units <- as.character(NA)

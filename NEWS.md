@@ -1,4 +1,4 @@
-# AirMonitorIngest 0.1.2
+# AirMonitorIngest 0.1.3
 
 * Support for EPA AQS 81102 -- PM10.
 

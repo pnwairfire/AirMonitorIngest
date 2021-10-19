@@ -144,7 +144,7 @@ epa_aqs_getSites <- function(
   }
 
   if ( logger.isInitialized() )
-    logger.trace('Parsing %s', csvFile)
+    logger.trace('Finished parsing %s', csvFile)
 
   # Cleanup
   file.remove(csvFile)

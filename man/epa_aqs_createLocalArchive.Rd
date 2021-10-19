@@ -53,3 +53,9 @@ epa_aqs_<parameterCode>_<year>_meta.[rda|csv|csv.gz]
 epa_aqs_<parameterCode>_<year>_data.[rda|csv|csv.gz]
 }
 }
+\note{
+Depending on your internet connection speeds, downloading files from the EPA
+site can take several minutes per file. If you see warning messages that you have
+timed out, please download files manually before running this function. This
+function will then discover the downloaded files in the \code{downloadDir}.
+}

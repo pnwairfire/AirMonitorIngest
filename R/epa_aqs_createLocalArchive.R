@@ -76,6 +76,9 @@ epa_aqs_createLocalArchive <- function(
 
   for ( year in years ) {
 
+    if ( MazamaCoreUtils::logger.isInitialized() )
+      logger.debug("===== Working on parmeterCode %s for %d ...", parameterCode, year)
+
     result <- try({
 
       # NOTE:  We choose not to pipe these one to the next so that we can see

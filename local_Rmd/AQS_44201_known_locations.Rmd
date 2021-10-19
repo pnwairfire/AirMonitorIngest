@@ -103,7 +103,7 @@ set of standardized columns being present in a `locationTbl`.
 * elevation
 * countryCode
 * stateCode
-* county
+* countyName
 * timezone
 * houseNumber
 * street
@@ -132,7 +132,7 @@ sites_locationTbl <-
     elevation = AQS_Elevation,
     countryCode = as.character(NA),
     stateCode = MazamaSpatialUtils::US_stateFIPSToCode(AQS_State.Code),
-    county = AQS_County.Name,
+    countyName = AQS_County.Name,
     timezone = as.character(NA),
     houseNumber = as.character(NA),
     street = as.character(NA),

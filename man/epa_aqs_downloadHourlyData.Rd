@@ -52,6 +52,11 @@ EPA parameter codes and (start year) include:
 }
 \note{
 Unzipped CSV files are almost 100X larger than the compressed .zip files.
+
+Depending on your internet connection speeds, downloading files from the EPA
+site can take several minutes per file. If you see warning messages that you have
+timed out, please download files manually. Functions that process these files
+will then discover the downloaded files in the \code{downloadDir}.
 }
 \examples{
 \dontrun{
