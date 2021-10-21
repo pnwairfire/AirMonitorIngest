@@ -244,7 +244,7 @@ Check out North American sites:
 ```{r leaflet_North_America}
 airnow_sites %>%
   dplyr::filter(countryCode %in% c("CA", "US", "MX")) %>%
-  MazamaLocationUtils::table_leaflet(locationOnly = TRUE)
+  MazamaLocationUtils::table_leaflet()
 ```
 
 Looks good so far. Did we miss anything?
@@ -252,7 +252,7 @@ Looks good so far. Did we miss anything?
 ```{r leaflet_other}
 airnow_sites %>%
   dplyr::filter(!countryCode %in% c("CA", "US", "MX")) %>%
-  MazamaLocationUtils::table_leaflet(locationOnly = TRUE)
+  MazamaLocationUtils::table_leaflet()
 ```
 
 Perfect!

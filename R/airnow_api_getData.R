@@ -158,7 +158,7 @@ if ( FALSE ) {
   library(AirMonitorIngest)
 
   starttime <- 2021101802
-  endtime <- 2021102001
+  endtime <- 2021101802
   timezone <- "America/Los_Angeles"
   pollutant <- "PM2.5"
   monitorType <- "permanent"
@@ -183,7 +183,6 @@ if ( FALSE ) {
     tbl,
     maptype = "terrain",
     extraVars = c("siteName", "agencyName", "AQSID"),
-    locationOnly = TRUE,
     weight = 1
   )
 

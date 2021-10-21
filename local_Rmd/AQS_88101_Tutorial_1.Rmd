@@ -226,13 +226,11 @@ site_locations <-
 
 monitor_locations %>%
   MazamaLocationUtils::table_leaflet(
-    locationOnly = TRUE,
     opacity = 0.0,
     fillColor = "red"
   ) %>%
   MazamaLocationUtils::table_leafletAdd(
     site_locations, 
-    locationOnly = TRUE, 
     weight = 2,
     color = "black",
     fillOpacity = 0.0

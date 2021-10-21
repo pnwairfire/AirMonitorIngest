@@ -67,6 +67,13 @@ airnow_api_getDataSubset <- function(
   if ( !timezone %in% base::OlsonNames() )
     stop(sprintf("'timezone = %s' is not found in OlsonNames()", timezone))
 
+  airnow_API_KEY <- getAPIKey("airnow")
+  if ( is.null(airnow_API_KEY) )
+    stop(paste0(
+      "The AirNow API_KEY is not set. Please set it with:\n\n",
+      "  setAPIKey(\"airnow\", <your-api-key>)"
+    ))
+
   # ----- Prepare request ------------------------------------------------------
 
   # bbox (w,s,e,n)
@@ -304,7 +311,6 @@ if ( FALSE ) {
     tbl,
     maptype = "terrain",
     extraVars = c("siteName", "agencyName", "AQSID"),
-    locationOnly = TRUE,
     weight = 1
   )
 

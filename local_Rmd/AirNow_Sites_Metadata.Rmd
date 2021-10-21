@@ -154,8 +154,8 @@ sites <-
 
 MazamaLocationUtils::table_leaflet(
   sites,
-  locationOnly = TRUE,
-  weight = 1
+  weight = 1,
+  extraVars = c("elevation", "status")
 )
 ```
 
