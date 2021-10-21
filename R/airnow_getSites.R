@@ -47,7 +47,7 @@ airnow_getSites <- function(
   quiet = TRUE
 ) {
 
-  if ( logger.isInitialized() )
+  if ( MazamaCoreUtils::logger.isInitialized() )
     logger.debug(" ----- airnow_getSites() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
@@ -67,12 +67,23 @@ airnow_getSites <- function(
   # NOTE:
   # NOTE:  The column names below are correct.
 
+  # AQSID|parameter name|site code|site name|status|
+  # agency id|agency name|EPA region|latitude|longitude|
+  # elevation|GMT offset|country code|MSA code|MSA name|
+  # state code|state name|county code|county name
+  #
+  # 060410001|O3|0001|San Rafael|Active|
+  # CA2|San Francisco Bay Area AQMD|R9|37.972200|-122.518900|
+  # 0.900|- 8.00|US|||
+  # 41860| San Francisco-Oakland-Fremont, CA |06|CA|06041|
+  # MARIN||
+
   col_names <- c(
     "AQSID", "parameterName", "siteCode", "siteName", "status",
     "agencyID", "agencyName", "EPARegion", "latitude", "longitude",
-    "elevation", "GMTOffsetHours", "countryCode", "FIPSCMSACode", "CMSAName",
+    "elevation", "GMTOffsetHours", "countryCode", "empty1", "empty2",
     "FIPSMSACode", "MSAName", "FIPSStateCode", "stateCode", "GNISCountyCode",
-    "countyName", "GNISCityCode", "cityName"
+    "countyName", "empty3", "empty4"
     )
 
   col_types <- paste0("ccccc", "cccdd", "ddccc", "ccccc", "ccc")

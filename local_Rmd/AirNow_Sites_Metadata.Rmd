@@ -1,0 +1,252 @@
+---
+title: "AirNow Sites Metadata Issues"
+author: "Jonathan Callahan"
+date: "October 20, 2021"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This report looks at the Sites Metadata document produced by AirNow and available
+at https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat.
+
+A [Factsheet](https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf) 
+describes the file format.
+
+This report is written as an Rmarkdown document and can be reproduced in its 
+entirety by anyone comfortable using R and RStudio as well as "tidyverse"
+packages like **readr**, **stringr**, and **dplyr**.
+
+The latest development verions of the following R packages are also required:
+
+* [MazamaSpatialUtils](https://mazamascience.github.io/MazamaSpatialUtils/)
+* [MazamaLocationUtils](https://mazamascience.github.io/MazamaLocationUtils/)
+
+These can be installed with:
+
+```
+devtools::install_github("MazamaScience/MazamaSpatialUtils")
+devtools::install_github("MazamaScience/MazamaLocationUtils")
+```
+
+# Reading in the Data
+
+## Issue 1 -- Missing Fields in Format Description
+
+The Factsheet description of the format does not match the example records in 
+a way that is helpful for people trying to write code to ingest the data. 
+Writing out 5 fields per line immediately shows the problem and a simple solution:
+
+**Factsheet format description:**
+
+AQSID|parameter name|site code|site name|status|
+agency id|agency name|EPA region|latitude|longitude|
+elevation|GMT offset|country code|MSA code|MSA name|
+state code|state name|county code|county name
+
+**Factsheet first example:**
+
+060410001|O3|0001|San Rafael|Active|
+CA2|San Francisco Bay Area AQMD|R9|37.972200|-122.518900|
+0.900|- 8.00|US|||
+41860| San Francisco-Oakland-Fremont, CA |06|CA|06041|
+MARIN||
+
+**Corrected format description:**
+
+AQSID|parameter name|site code|site name|status|
+agency id|agency name|EPA region|latitude|longitude|
+elevation|GMT offset|country code|**empty1**|**empty2**|
+MSA code|MSA name|state code|state name|county code|
+county name|**empty3**|**empty4**
+
+
+The **empty#** fields need to be defined in order to automate data ingest.
+
+With these fields defined, the format can be read in:
+
+```{r parse_1, message = FALSE, results = "hold"}
+library(dplyr)
+
+col_names <- c(
+  "AQSID", "parameterName", "siteCode", "siteName", "status",
+  "agencyID", "agencyName", "EPARegion", "latitude", "longitude",
+  "elevation", "GMTOffsetHours", "countryCode", "empty1", "empty2",
+  "MSACode", "MSAName", "stateCode", "stateName", "countyCode",
+  "countyName", "empty3", "empty4"
+)
+
+col_types <- paste0("ccccc", "cccdd", "ddccc", "ccccc", "ccc")
+
+url <- "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat"
+
+# Read in .dat file as a tibble
+full_sites <- 
+  readr::read_delim(
+    url,
+    delim = "|",
+    col_names = col_names,
+    col_types = col_types
+  )
+
+# Take a quick look at the table
+dplyr::glimpse(full_sites)
+```
+
+## Issue 2 -- CP437 encoding
+
+A careful peruse through the data shows some encoding issues:
+
+```{r encoding, message = FALSE, results = "hold"}
+full_sites %>%
+  dplyr::filter(AQSID == "800150581", parameterName == "PM2.5") %>%
+  dplyr::pull(siteName)
+```
+
+Some experimentation reveals that this file is encoded with 
+[CP437](https://en.wikipedia.org/wiki/Code_page_437), typically associated with
+older IBM PCs. The `readr::read_delim()` default encoding is "UTF-8".
+
+To correct this, we can download and parse the file again, this time using the
+"CP437" encoding":
+
+```{r parse_2, message = FALSE, results = "hold"}
+# Read in .dat file as a tibble
+full_sites <- 
+  readr::read_delim(
+    url,
+    delim = "|",
+    col_names = col_names,
+    col_types = col_types,
+    locale = readr::locale(encoding = "CP437")
+  )
+
+# Did we correct the special characters?
+full_sites %>%
+  dplyr::filter(AQSID == "800150581", parameterName == "PM2.5") %>%
+  dplyr::pull(siteName)
+```
+
+# Validating Fields
+
+## Longitude and latitude
+
+We will limit our focus to PM2.5 in North America and will generate a quick map
+for visual inspection. This is the fastest way to validate location information.
+
+```{r map_1, results = "hold"}
+# Reduce the size of the sites
+sites <-
+  full_sites %>%
+  # drop the "empty" fields
+  dplyr::select(-dplyr::starts_with("empty")) %>%
+  # filter based on various fields
+  dplyr::filter(parameterName == "PM2.5") %>%
+  dplyr::filter(GMTOffsetHours < 0) %>%
+  dplyr::filter(latitude > 15.0)
+
+MazamaLocationUtils::table_leaflet(
+  sites,
+  locationOnly = TRUE,
+  weight = 1
+)
+```
+
+So far so good. Now lets begin validating the contents of other fields.
+
+```{r names}
+names(sites)
+```
+
+## Status and countryCode
+
+These fields have only a few possible values. We can inspect them directly:
+
+```{r table_1}
+table(sites$status) %>% sort(decreasing = TRUE)
+table(sites$countryCode) %>% sort(decreasing = TRUE)
+```
+
+These look good.
+
+## EPA Region
+
+```{r table_2}
+table(sites$EPARegion) %>% sort(decreasing = TRUE)
+```
+
+The `EPARegion` field has values of `R1` - `R10` as well as `CA`, `DSMX`, `MX`
+and `USEPA`. It makes sense that sites in Canada and Mexico do not fit in an 
+EPA Region, but what about `USEPA`?
+
+```{r EPARegion_USEPA}
+sites %>% 
+  dplyr::filter(EPARegion == "USEPA") %>% 
+  # Sample to reduce the size
+  dplyr::slice_sample(n = 20) %>%
+  dplyr::select(AQSID, agencyName, countryCode, stateCode, countyCode)
+```
+
+## Issue 3 -- Non-standard AQSIDs generate bogus state and county codes
+
+Some of the sites with `EPARegion == "USEPA"` have AQSIDs that do not match the
+description in the Factsheet: "Nine-digit EPA AQS identifier". 
+
+The canonical 
+9-digit AQSID consists of a 2-digit FIPS state code followed by a 3-digit FIPS 
+county-within-state code followed by a 4-digit site identifier within that county.
+
+It appears that the `stateCode` and `countyCode` fields are being generated from
+the first 2 and 5 characters of AQSID _even for non-standard AQSIDs_. This generates
+bogus results for `stateCode` and `countyCode`.
+
+Let's check standard and non-standard AQSIDs:
+
+```{r AQSID_standard}
+# Standard AQSIDs
+sites %>%
+  # Filter for 9-digit AQSIDs
+  dplyr::filter(stringr::str_detect(AQSID, "^[:digit:]{9}$")) %>%
+  # Sample to reduce the size
+  dplyr::slice_sample(n = 20) %>%
+  dplyr::select(AQSID, countryCode, stateCode, countyCode)
+```
+
+For standard AQSIDS, both `stateCode` and `countyCode` look as expected.
+
+```{r AQSID_non_standard}
+# Non-standard AQSIDs
+sites %>%
+  # Filter for NOT 9-digit AQSIDs
+  dplyr::filter(stringr::str_detect(AQSID, "^[:digit:]{9}$", negate = TRUE)) %>%
+  # Sample to reduce the size
+  dplyr::slice_sample(n = 20) %>%
+  dplyr::select(AQSID, countryCode, stateCode, countyCode)
+```
+
+**For non-standard AQSIDs, `stateCode` and `countyCode` are incorrect.**
+
+----
+
+```
+# Learn about non US state codes
+setdiff(unique(sites$stateCode), MazamaSpatialUtils::US_stateCodes$stateFIPS)
+
+# Investigate 12-character AQSIDs
+table(stringr::str_length(sites$AQSID))
+
+sites$AQSID %>% stringr::str_subset("^[:alnum:]{12}$") %>% stringr::str_sub(1,3) %>% table()
+
+# Investigate alpha AQSIDs
+sites$AQSID %>% stringr::str_subset("^[:alnum:]{9}$") %>% stringr::str_subset("[:alpha:]") %>% stringr::str_sub(1,2) %>% table()
+
+
+```
+
