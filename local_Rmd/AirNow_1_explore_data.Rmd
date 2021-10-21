@@ -1,0 +1,265 @@
+---
+title: "AirNow 1: Explore Data"
+author: "Jonathan Callahan"
+date: "September 29, 2021"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This tutorial demonstrates how to use the **MazamaLocationUtils** and
+**AirMonitorIngest** R packages to work with AirNow PM2.5 data. Target
+audiences include grad students, researchers and any member of the public
+interested in air quality and comfortable working with R and RStudio.
+
+Tutorials in this series include:
+
+* AirNow 1: Explore Data
+
+# Background
+
+The USFS [AirFire](https://www.airfire.org) group is focused on air quality 
+measurements associated with wildfire smoke and maintains both historical and 
+real-time databases of PM2.5 monitoring data obtained from stationary monitors. 
+This data is used in operational displays and for retrospective analysis. Data 
+ingest and management of air quality "stationary time series" are both important 
+ongoing activities.
+
+Challenges include:
+
+* Location stability -- jitter in reported longitude and latitude coming from real-time GPS.
+* Data duplication -- data from an individual monitor arriving through mutiple data streams.
+* CPU-intensive spatial searches for data such as time zone.
+ 
+To address these and other issues, we are creating "known locations" tables -- 
+a set of locations which have been vetted for reuse and for which all 
+CPU-intensive spatial queries have already been performed.
+
+Separating purely spatial information from other monitor-related metadata will 
+allow us to quickly assign incoming data to a "known location" and immediately 
+retrieve associated spatial data that would otherwise require expensive spatial 
+calculations.
+
+The basic concept for creating a _"known locations"_ table is described in the 
+introduction to the 
+[MazamaLocationUtils](https://mazamascience.github.io/MazamaLocationUtils/)
+R package.
+
+For our initial "known locations" table, we will focus on AirNow sites reporting
+"PM2.5" data.  An initial set of "known locations" will be created from AirNow 
+"sites" hen standardized and augmented with additional spatial data.
+
+# Setup
+
+```{r mazama_setup, message = FALSE}
+library(MazamaCoreUtils)
+
+library(AirMonitorIngest)
+
+# Create a directory specifically for EPA data
+dir.create("~/Data/AirNow", showWarnings = FALSE, recursive = TRUE)
+```
+
+We will begin with a current table of AirNow site and a recent table of hourly
+data. The site table is assumed to be reasonably well vetted and contain most of 
+the relevant spatial information we will need for further data processing and 
+visualization.
+
+# Download Data
+
+## AirNow Sites
+
+The `airnow_sites` table contains primarily spatial location information with additional
+_"site"_ information that is specific to an individual monitor, _e.g._
+`Owning Agency`. As we will see, it is possible to have multiple _"sites"_ at a 
+single _"known location"_.
+
+```{r airnow_sites, message = FALSE, results = "hold"}
+# Get site metadata
+airnow_sites <- airnow_getSites()
+```
+
+The `airnow_sites` table contains `r nrow(airnow_sites)` records, each with `r ncol(airnow_sites)`
+pieces of metadata:
+
+```{r names_airnow_sites, display = FALSE}
+names(airnow_sites)
+```
+
+## AirNow Data
+
+The `airnow_data` table is a synoptic file with a 1-hr snapshot of data from
+all monitors being tracked by AirNow.
+
+```{r airnow_data, message = FALSE, results = "hold"}
+# Get monitor metadata
+datestamp <- 
+  MazamaCoreUtils::timeStamp(
+    lubridate::now() - 3600, 
+    timezone = "UTC", 
+    unit = "hour"
+  )
+airnow_data <- airnow_getHourlyData(datestamp)
+```
+
+The `airnow_data` table is a "long form" data table containing 
+`r nrow(airnow_data)` records, each with `r ncol(airnow_data)` fields:
+
+```{r names_airnow_data, display = FALSE}
+names(airnow_data)
+```
+
+## AQSID
+
+The unique key combining the two is `AQSID`. Theoretically, we might have sites
+that are not found in the data but not the other way around.
+
+```{r aqsid_overlap, results = "hold"}
+sites_only_AQSID <- setdiff(airnow_sites$AQSID, airnow_data$AQSID)
+data_only_AQSID <- setdiff(airnow_data$AQSID, airnow_sites$AQSID)
+length(sites_only_AQSID)
+data_only_AQSID
+
+# Print the siteID for each data_only_AQSID
+stringr::str_sub(data_only_AQSID, 5)
+```
+
+On 2021-10-19 20:00 UTC, the only offending site has a siteID of `99991`. Looks like folks
+somewhere up the pipeline decided to use `9999` as special case sites that don't
+need to appear in `aqs_sites`. Let's have a look at these records:
+
+```{r data_only_AQSID, results = "hold"}
+airnow_data %>% dplyr::filter(AQSID %in% data_only_AQSID)
+```
+
+It's probably safe to ignore any AQSIDs found in data but not in sites.
+
+### Non-standard AQSID codes
+
+The typical AQSID is contructed from a 2-digit FIPS sate code followed by a
+3-digit FIPS county sub-code followed by a 4-digit siteID. Let's see what other
+AQSIDs exist:
+
+```{r non_us_AQSID, results = "hold"}
+US_stateFIPS <- MazamaSpatialUtils::US_stateCodes$stateFIPS
+AQSID_statePart <- stringr::str_sub(airnow_sites$AQSID, 1, 2)
+non_us_statePart <- sort(setdiff(AQSID_statePart, US_stateFIPS))
+print(non_us_statePart)
+```
+
+An interesting collection worth investigating with `View()`. Try out this:
+
+```
+airnow_sites %>%
+  dplyr::mutate(
+    statePart = stringr::str_sub(airnow_sites$AQSID, 1, 2)
+  ) %>%
+  dplyr::filter(statePart %in% non_us_statePart) %>%
+  dplyr::arrange(AQSID) %>%
+  View()
+```
+
+### AQSIDs with characters
+
+Let's first focus on AQSIDS with characters:
+
+```
+airnow_sites %>%
+  dplyr::filter(stringr::str_detect(AQSID, "[:alpha:]")) %>%
+  dplyr::arrange(AQSID) %>%
+  View()
+```
+
+A few things appear to be consistent with the initial characters of the AQSID,
+given that our focus is on creating a "known locations" table for North America:
+
+* `124CC` -- stands for _Canada_
+* `80` -- stands for _Mexico_
+* `840CK` -- stands for _Eastern Band Chrokee_
+* `840CC` -- stands for _Canada_
+* `840MM` -- stands for US _Mobile Monitor_
+* `840TT` -- stands for US _Tribal Territory_
+* `CC` -- stands for _Canada_
+* `MM` -- stands for US _Mobile Monitor_
+* `TT` -- stands for US _Tribal Territory_
+
+All other records appear to be associated with locations outside of North America.
+
+Note that several fields associated with these records have mostly bogus data.
+Corrupted fields include: `countryCode`, `FIPSStateCode`, `stateCode`, 
+`GNISCountyCode`, `countyName`.
+
+### AQSIDs with > 10 digits
+
+Many of the AQSIDs with characters have a length great that the standard 9.
+Let's see if there are any other, all-numeric AQSIDs with more than 9 digits:
+
+```
+airnow_sites %>%
+  dplyr::filter(stringr::str_detect(AQSID, "^[:digit:]+$")) %>%
+  dplyr::filter(stringr::str_length(AQSID) > 9) %>%
+  dplyr::arrange(AQSID) %>%
+  View()
+```
+
+There appear to be only a few 3-digit prefixes:
+
+```{r 3_digit_prefix}
+airnow_sites %>%
+  dplyr::filter(stringr::str_detect(AQSID, "^[:digit:]+$")) %>%
+  dplyr::filter(stringr::str_length(AQSID) > 9) %>%
+  dplyr::pull(AQSID) %>%
+  stringr::str_sub(1,3) %>%
+  sort() %>% unique()
+```
+
+Not sure what the significance of these 3-digit prefixes is but all of these
+sites appear to be in North America.
+
+These records also have a lot of similarly bogus data. 
+Corrupted fields include: `countryCode`, `FIPSStateCode`, `stateCode`, 
+`GNISCountyCode`, `countyName`.
+
+## Assign countryCode
+
+It looks like the only reasonable way to subset this dataset for North America
+is to assign a correct `countryCode` first.
+
+```{r three_digit_prefix}
+library(MazamaSpatialUtils)
+
+airnow_sites$countryCode <-
+  MazamaSpatialUtils::getCountryCode(airnow_sites$longitude, airnow_sites$latitude)
+```
+
+Check out North American sites:
+
+```{r leaflet_North_America}
+airnow_sites %>%
+  dplyr::filter(countryCode %in% c("CA", "US", "MX")) %>%
+  MazamaLocationUtils::table_leaflet(locationOnly = TRUE)
+```
+
+Looks good so far. Did we miss anything?
+
+```{r leaflet_other}
+airnow_sites %>%
+  dplyr::filter(!countryCode %in% c("CA", "US", "MX")) %>%
+  MazamaLocationUtils::table_leaflet(locationOnly = TRUE)
+```
+
+Perfect!
+
+----
+
+This ends the exploration of available data. 
+
+See step 2 for the creation of a "known sites" table for these locations.
+

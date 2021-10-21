@@ -41,7 +41,7 @@
 #' airnow_sites <- airnow_getSites()
 #' }
 
-airnow_downloadSites <- function(
+airnow_getSites <- function(
   baseUrl = "https://files.airnowtech.org/airnow/today/",
   sitesFile = "monitoring_site_locations.dat",
   quiet = TRUE
@@ -77,9 +77,17 @@ airnow_downloadSites <- function(
 
   col_types <- paste0("ccccc", "cccdd", "ddccc", "ccccc", "ccc")
 
+  # NOTE:  This file is not properly encoded.
+  # NOTE:  Using the default encoding, we see this:
 
-  # NOTE:  This plain text file is not properly encoded:
-  # NOTE:    800090033         PM2.5     0033                             Coyoac\xa0n
+  # > dplyr::filter(tbl, AQSID == "800150581", parameterName == "PM2.5") %>%
+  #   + dplyr::pull(siteName)
+  # [1] "Nezahualc\xa2yotl"
+
+  # NOTE:  Using encoding = "CP437" we see this:
+  # > dplyr::filter(tbl, AQSID == "800150581", parameterName == "PM2.5") %>%
+  #   + dplyr::pull(siteName)
+  # [1] "Nezahualcóyotl"
 
   # Fix the encoding
   locale <- readr::locale(encoding = "CP437")

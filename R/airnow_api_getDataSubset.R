@@ -1,0 +1,311 @@
+#' @export
+#' @importFrom utils read.table
+#' @importFrom rlang .data
+#'
+#' @title Download and parse hourly data from the AirNow data API
+#'
+#' @param starttime Desired start datetime (ISO 8601).
+#' @param endtime Desired end datetime (ISO 8601).
+#' @param timezone Olson timezone used to interpret dates (required).
+#' @param pollutant One or more EPA AQS criteria pollutants.
+#' @param monitorType Subset of all monitors to select.
+#' @param includeSiteMeta Logical specifying whether to request site metadata.
+#' @param baseUrl Base URL for archived hourly data.
+#'
+#' @return Tibble of AirNow hourly data.
+#'
+#' @description This function uses the AirNow data webservice to retrieve
+#' subsets of data that do not exceed a maximum data size which causes
+#' errors.
+#'
+#' Datetimes can be anything that is understood by
+#' \code{MazamaCoreUtils::parseDatetime()}. For non-POSIXct values, the
+#' recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".
+#'
+#'
+#' @examples
+#' \dontrun{
+#' library(AirMonitorIngest)
+#'
+#' tbl <-
+#'   airnow_api_getData(
+#'     starttime = 2021101200,
+#'     endtime = 2021101300,
+#'     timezone = "America/Los_Angeles",
+#'     pollutant = "PM2.5",
+#'     monitorType = "permanent",
+#'     includeSiteMeta = TRUE
+#'    )
+#'
+#' }
+
+airnow_api_getDataSubset <- function(
+  starttime = NULL,
+  endtime = NULL,
+  timezone = "UTC",
+  pollutant = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
+  monitorType = c("permanent", "mobile", "both"),
+  includeSiteMeta = TRUE,
+  baseUrl = "https://www.airnowapi.org/aq/data/"
+) {
+
+  if ( MazamaCoreUtils::logger.isInitialized() )
+    logger.debug(" ----- airnow_api_getData() ----- ")
+
+  # ----- Validate parameters --------------------------------------------------
+
+  MazamaCoreUtils::stopIfNull(starttime)
+  MazamaCoreUtils::stopIfNull(endtime)
+  MazamaCoreUtils::stopIfNull(timezone)
+
+  pollutant <- match.arg(pollutant, several.ok = TRUE)
+  monitorType <- match.arg(monitorType, several.ok = FALSE)
+
+  MazamaCoreUtils::setIfNull(includeSiteMeta, TRUE)
+  MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
+
+  if ( !timezone %in% base::OlsonNames() )
+    stop(sprintf("'timezone = %s' is not found in OlsonNames()", timezone))
+
+  # ----- Prepare request ------------------------------------------------------
+
+  # bbox (w,s,e,n)
+
+  # > library(MazamaSpatialUtils)
+  # > setSpatialDataDir("~/Data/Spatial")
+  # > loadSpatialDdata("TMWorldBorders_02)
+  # > subset(TMWorldBorders_02, countryCode %in% c("US", "CA", "MX", "PR", "VI")) %>% bbox()
+  # min       max
+  # x -167.86331 -52.61445
+  # y   14.55055  83.10942
+
+  # TODO:  support bbox as a function parameter
+
+  bbox <- "-170.0,15.0,-50.0,85.0"
+
+
+  # Let's be hyper-explicit about the times we are talking about
+  timeRange <-
+    MazamaCoreUtils::timeRange(
+      starttime = starttime,
+      endtime = endtime,
+      timezone = timezone,
+      unit = "hour",
+      ceilingStart = FALSE,
+      ceilingEnd = FALSE
+    )
+
+  # Timestamps
+  timeStamp <-
+    MazamaCoreUtils::timeStamp(
+      timeRange,
+      timezone = "UTC",
+      unit = "hour",
+      style = "clock"
+    )
+
+  # Comma-separated "parameters"
+  parameters <-
+    pollutant %>%
+    stringr::str_replace("CO", "o3") %>%
+    stringr::str_replace("NO2", "no2") %>%
+    stringr::str_replace("OZONE", "o3") %>%
+    stringr::str_replace("PM2.5", "pm25") %>%
+    stringr::str_replace("PM10", "pm10") %>%
+    stringr::str_replace("SO2", "so2") %>%
+    paste0(collapse = ",")
+
+
+  # monitortype
+
+  monitortype <-
+    switch(
+      monitorType,
+      permanent = 0,
+      mobile = 1,
+      both = 2
+    )
+
+  # verbose
+
+  if ( includeSiteMeta ) {
+    verbose <- 1
+  } else {
+    verbose <- 0
+  }
+
+  # ----- Guess at max size ----------------------------------------------------
+
+  # NOTE:  It appears I can get 12 hours of permament monitoring data for PM2.5.
+
+  hourCount <-
+    difftime(timeRange[2], timeRange[1], units = "hours") %>%
+    as.numeric()
+
+  if ( (hourCount * length(pollutant)) > 12 )
+    stop(paste0(
+      "too much data requested.\n",
+      "Please reduce the time range or the number of pollutants."
+    ))
+
+  # ----- Request parameters ---------------------------------------------------
+
+  # NOTE:  See the document describing the REST API:
+  # NOTE:    https://docs.airnowapi.org/Data/docs
+
+  # https://www.airnowapi.org/aq/data/?\
+  #   startdate=2014-09-23t22&\
+  #   enddate=2014-09-23t23&\
+  #   parameters=o3,pm25&\
+  #   bbox=-90.806632,24.634217,-71.119132,45.910790&\
+  #   datatype=a&\
+  #   format=application/vnd.google-earth.kml&\
+  #   api_key=8B9D8258-1A36-463F-A447-ACB284AD6CDC
+
+  # NOTE:  We hardcode certain options:
+  # NOTE:  datatype = "B"      -- always get both concentration and AQI values
+  # NOTE:  format = "text/csv" -- always get the most compact format
+  # NOTE:  includeraw... = "0" -- never request raw concentrations
+
+  # Create URL parameters
+  .params <- list(
+    bbox = bbox,
+    startdate = timeStamp[1],
+    enddate = timeStamp[2],
+    parameters = parameters,
+    monitortype = monitortype,
+    datatype = "B",
+    format = "text/csv",
+    api_key = getAPIKey("airnow"),
+    verbose = verbose,
+    includerawconcentrations = "0"
+  )
+
+  # ----- Download data --------------------------------------------------------
+
+  if ( MazamaCoreUtils::logger.isInitialized() )
+    logger.trace("Downloading AirNow data ...")
+
+  suppressWarnings({
+    r <- httr::GET(baseUrl, query = .params)
+  })
+
+  # NOTE:  Log the error but just return an empty string (aka "No data")
+  # NOTE:  for downstream processing.
+  if ( httr::http_error(r) ) {
+    if ( MazamaCoreUtils::logger.isInitialized() ) {
+      logger.error("AirNow API data service failed with: %s", httr::content(r))
+    }
+    return("") # Return a blank fileString
+  }
+
+  # No error so return the content (which might be an HTML formatted error message)
+  fileString <- httr::content(r, 'text', encoding = 'UTF-8')
+
+  if ( stringr::str_detect(fileString, "AirNow ERROR MESSAGE TO DETECT") ) {
+    stop(paste0(
+      "ERROR MESSAGE GOES HERE???"
+    ))
+  }
+
+  if ( MazamaCoreUtils::logger.isInitialized() )
+    logger.trace("Finished downloading AirNow data.")
+
+  # ----- Parse data -----------------------------------------------------------
+
+  ### NOTE:  Opportunity to filter out bad lines
+  ###
+  ### lines <- readr::read_lines(fileString)
+  ### # Figure out goodLines mask
+  ### fakeFile <- paste0(lines[goodLines], collapse = "\n")
+
+  fakeFile <- fileString
+
+  if ( !includeSiteMeta ) {
+
+    columnNames <- c(
+      "latitude",
+      "longitude",
+      "utcTime",
+      "parameterName",
+      "parameterValue",
+      "parameterUnits",
+      "parameterAQI",
+      "parameterAQC"
+    )
+
+    columnTypes <- "ddTcdcdd"
+
+  } else {
+
+    columnNames <- c(
+      "latitude",
+      "longitude",
+      "utcTime",
+      "parameterName",
+      "parameterValue",
+      "parameterUnits",
+      "parameterAQI",
+      "parameterAQC",
+      "siteName",
+      "agencyName",
+      "AQSID",
+      "fullAQSID"
+    )
+
+    columnTypes <- "ddTcdcddcccc"
+
+  }
+
+  tbl <-
+    readr::read_csv(
+      fakeFile,
+      col_names = columnNames,
+      col_types = columnTypes
+    )
+
+  # ----- Return ---------------------------------------------------------------
+
+  return(tbl)
+
+}
+
+# ===== DEBUGGING ==============================================================
+
+if ( FALSE ) {
+
+
+  library(MazamaCoreUtils)
+  logger.setLevel(TRACE)
+
+  library(AirMonitorIngest)
+
+  starttime <- 2021101914
+  endtime <- 2021102002
+  timezone <- "America/Los_Angeles"
+  pollutant <- "PM2.5"
+  monitorType <- "permanent"
+  includeSiteMeta <- TRUE
+
+  tbl <-
+    airnow_api_getDataSubset(
+      starttime = starttime,
+      endtime = endtime,
+      timezone = timezone,
+      pollutant = pollutant,
+      monitorType = monitorType,
+      includeSiteMeta = includeSiteMeta
+    )
+
+
+
+
+  MazamaLocationUtils::table_leaflet(
+    tbl,
+    maptype = "terrain",
+    extraVars = c("siteName", "agencyName", "AQSID"),
+    locationOnly = TRUE,
+    weight = 1
+  )
+
+}

@@ -1,3 +1,14 @@
+# AirMonitorIngest 0.2.0
+
+Version 0.2 focuses on data ingest from AirNow using the AirNow API.
+
+Initial functions include:
+
+* `airnow_getSites()`
+* `airnow_api_getData()`
+* `airnow_openWebPages()`
+* `get/setAPIKey()`
+
 # AirMonitorIngest 0.1.3
 
 * Support for EPA AQS 81102 -- PM10.
