@@ -50,7 +50,7 @@ airnow_api_getDataSubset <- function(
 ) {
 
   if ( MazamaCoreUtils::logger.isInitialized() )
-    logger.debug(" ----- airnow_api_getData() ----- ")
+    logger.debug(" ----- airnow_api_getDataSubset() ----- ")
 
   # ----- Validate parameters --------------------------------------------------
 
@@ -147,7 +147,7 @@ airnow_api_getDataSubset <- function(
 
   hourCount <-
     difftime(timeRange[2], timeRange[1], units = "hours") %>%
-    as.numeric()
+    as.numeric() + 1
 
   if ( (hourCount * length(pollutant)) > 12 )
     stop(paste0(
@@ -183,7 +183,7 @@ airnow_api_getDataSubset <- function(
     monitortype = monitortype,
     datatype = "B",
     format = "text/csv",
-    api_key = getAPIKey("airnow"),
+    api_key = airnow_API_KEY,
     verbose = verbose,
     includerawconcentrations = "0"
   )

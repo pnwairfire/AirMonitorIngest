@@ -1,7 +1,10 @@
 ---
-title: "AirNow Sites Metadata Issues"
-author: "Jonathan Callahan"
-date: "October 20, 2021"
+title: AirNow Sites Metadata Review
+author: 
+- name: Jonathan Callahan
+  email: jonathan.callahan@dri.edu
+  affiliation: Desert Research Institute
+date: October 21, 2021
 output:
   html_document:
     toc: TRUE
@@ -14,17 +17,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-This report looks at the Sites Metadata document produced by AirNow and available
+This review looks at the Sites Metadata document produced by AirNow and available
 at https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat.
 
 A [Factsheet](https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf) 
 describes the file format.
 
-This report is written as an Rmarkdown document and can be reproduced in its 
-entirety by anyone comfortable using R and RStudio as well as "tidyverse"
-packages like **readr**, **stringr**, and **dplyr**.
+This review is written as an Rmarkdown document and can be reproduced in its 
+entirety by anyone comfortable using R and RStudio. For further analysis, users
+should be familiar with "tidyverse" packages like **readr**, **stringr**, and 
+**dplyr**.
 
-The latest development verions of the following R packages are also required:
+The latest development versions of the following MazamaScience R packages are 
+also required:
 
 * [MazamaSpatialUtils](https://mazamascience.github.io/MazamaSpatialUtils/)
 * [MazamaLocationUtils](https://mazamascience.github.io/MazamaLocationUtils/)
@@ -36,13 +41,40 @@ devtools::install_github("MazamaScience/MazamaSpatialUtils")
 devtools::install_github("MazamaScience/MazamaLocationUtils")
 ```
 
+# Summary Recommendations
+
+For those in a hurry, the recommendations resulting from this review
+are summarized below. These recommendations focus on a few simple fixes 
+that would have the greatest impact.
+
+1. Update the [Factsheet](https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf)
+with correct information about:
+   - all fields including empty ones
+   - text encoding
+   - _caveat_ about elevations marked as `0.0`
+2. Do not modify `monitoring_site_locations.dat`. (An unknown number of clients
+already work with this format.)
+3. For improvements, create a new `monitor_site_locations_2.dat`.
+4. Extract correct "State Code" from 12-digit AQSIDs
+5. Extract correct "County Code" from 12-digit AQSIDs
+6. Repair "State Name" based on the correct "State Code"
+7. Mark as missing any "State Name", "State Code" or "County Code" generated
+from AQSIDs with characters.
+ 
+Just fixing these few items will greatly improve the utility of the sites 
+metadata file.
+
+Correct spatial information for all records can be assigned based purely on 
+longitudes and latitudes using **MazamaSpatialUtils** and **MazamaLocationUtils** 
+but that is beyond the scope of this review.
+
 # Reading in the Data
 
 ## Issue 1 -- Missing Fields in Format Description
 
 The Factsheet description of the format does not match the example records in 
-a way that is helpful for people trying to write code to ingest the data. 
-Writing out 5 fields per line immediately shows the problem and a simple solution:
+a way that is helpful to people writing data ingest code. the "corrected"
+description below highlights the issue.
 
 **Factsheet format description:**
 
@@ -68,9 +100,9 @@ MSA code|MSA name|state code|state name|county code|
 county name|**empty3**|**empty4**
 
 
-The **empty#** fields need to be defined in order to automate data ingest.
+**The _empty#_ fields need to be defined in order to automate data ingest.**
 
-With these fields defined, the format can be read in:
+With these fields defined, the file can be read in:
 
 ```{r parse_1, message = FALSE, results = "hold"}
 library(dplyr)
@@ -115,7 +147,7 @@ Some experimentation reveals that this file is encoded with
 older IBM PCs. The `readr::read_delim()` default encoding is "UTF-8".
 
 To correct this, we can download and parse the file again, this time using the
-"CP437" encoding":
+"CP437" encoding:
 
 ```{r parse_2, message = FALSE, results = "hold"}
 # Read in .dat file as a tibble
@@ -133,6 +165,8 @@ full_sites %>%
   dplyr::filter(AQSID == "800150581", parameterName == "PM2.5") %>%
   dplyr::pull(siteName)
 ```
+
+Excellent!
 
 # Validating Fields
 
@@ -152,17 +186,30 @@ sites <-
   dplyr::filter(GMTOffsetHours < 0) %>%
   dplyr::filter(latitude > 15.0)
 
+# Display in an interactive map
 MazamaLocationUtils::table_leaflet(
   sites,
-  weight = 1,
   extraVars = c("elevation", "status")
 )
 ```
 
-So far so good. Now lets begin validating the contents of other fields.
+When you click on a site, additional site metadata will be
+displayed.
+
+**_NOTE:_ Many of the elevations are incorrectly set to 0.0.**
+
+Other than the elevation data, things look reasonable. Now lets begin validating 
+the contents of other fields.
 
 ```{r names}
 names(sites)
+```
+
+At this point, an interactive session using `View()` is very helpful for 
+a detailed examination of the dataset:
+
+```
+View(sites)
 ```
 
 ## Status and countryCode
@@ -193,6 +240,9 @@ sites %>%
   dplyr::slice_sample(n = 20) %>%
   dplyr::select(AQSID, agencyName, countryCode, stateCode, countyCode)
 ```
+
+This is a mixed bag but, except for "State of Alaska DEC", sites appear to be 
+associated with federal rather than state agencies.
 
 ## Issue 3 -- Non-standard AQSIDs generate bogus state and county codes
 
@@ -228,25 +278,123 @@ sites %>%
   dplyr::filter(stringr::str_detect(AQSID, "^[:digit:]{9}$", negate = TRUE)) %>%
   # Sample to reduce the size
   dplyr::slice_sample(n = 20) %>%
-  dplyr::select(AQSID, countryCode, stateCode, countyCode)
+  dplyr::select(AQSID, stateName, stateCode, countyCode)
 ```
 
 **For non-standard AQSIDs, `stateCode` and `countyCode` are incorrect.**
 
+The `stateName` field has many correct USPS state codes but also includes 
+`CC`, `MM`, `MX` and `TT` which are not valid USPS state codes.
+
+See [ANSI Codes for States](https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html).
+
+## Interrogate non-standard AQSIDs
+
+The non-standard AQSIDs all appear to have an extra 3 digits prepended which
+matches the "full AQSID" found in data requested from the AirNow API data webservice.
+
+```{r AQSID_length}
+# How long are strings in the AQSID field?
+table(stringr::str_length(sites$AQSID))
+```
+
+The good news is that AQSID has only one non-standard length.
+
+What 3-character prefixes are being used?
+
+```{r AQSID_prefixes}
+# What prefixes are found in non-standard AQSIDs?
+sites$AQSID %>% 
+  stringr::str_subset("^[:alnum:]{12}$") %>% 
+  stringr::str_sub(1,3) %>% 
+  table() %>% 
+  sort(decreasing = TRUE)
+```
+
+The "840" prefix is by far the most common.
+
+What about standard-length AQSIDs with characters? It appears that the first
+two characters have a different meaning than "state code":
+
+```{r character_AQSID_state_code}
+# "state code" for AQSIDs with characters?
+sites$AQSID %>% 
+  stringr::str_subset("^[:alnum:]{9}$") %>% 
+  stringr::str_subset("[:alpha:]") %>% 
+  stringr::str_sub(1,2) %>% 
+  table() %>% 
+  sort(decreasing = TRUE)
+```
+
+We can review these records with `View()`:
+
+```
+sites %>%
+  dplyr::filter(stringr::str_detect(AQSID, "^[:alnum:]{9}$")) %>% 
+  dplyr::filter(stringr::str_detect(AQSID, "[:alpha:]")) %>% 
+  View()
+```
+
+It appears that:
+
+* `MM` is used for _Mobile_ monitors
+* `80` is used for monitors in _Mexico_
+* `CC` is used for monitors in _Canada_
+* `TT` is used for monitors on _Tribal_ lands
+* `15` is a "one off" exception in Hawaii
+
+# Correcting State and County Codes and Names
+
+It appears that we can correct many of the bogus state and county codes that
+exist in the dataset by following this simple protocol:
+
+1. reset all state and county names and codes to "missing"
+2. For 9-character, all-digit AQSIDs
+ - state code = digits 1:2
+ - county code = digits 1:5
+3. For 12-character, all-digit AQSIDs
+ - state code = digits 4:5
+ - county code = digits 4:8
+4. Replace state name based on the corrected state code
+ 
+Let's try it out:
+
+```{r fix_state_county_codes}
+# 1) Replace values with the AirNow code for "missing"
+sites$stateCode <- "N/A"
+sites$stateName <- "N/A"
+sites$countyCode <- "N/A"
+
+# 2) 9-character, all-digit mask
+mask <- stringr::str_detect(sites$AQSID, "^[:digit:]{9}$")
+sites$stateCode[mask] <- stringr::str_sub(sites$AQSID[mask], 1, 2)
+sites$countyCode[mask] <- stringr::str_sub(sites$AQSID[mask], 1, 5)
+
+# 3) 12-character, all-digit mask
+mask <- stringr::str_detect(sites$AQSID, "^[:digit:]{12}$")
+sites$stateCode[mask] <- stringr::str_sub(sites$AQSID[mask], 4, 5)
+sites$countyCode[mask] <- stringr::str_sub(sites$AQSID[mask], 4, 8)
+
+# 4) Replace state name
+sites$stateName <- MazamaSpatialUtils::US_stateFIPSToCode(sites$stateCode)
+
+# Check our results interactively
+MazamaLocationUtils::table_leaflet(
+  sites,
+  extraVars = c("countryCode", "stateName", "stateCode", "countyCode")
+)
+```
+
+Things look much better now.
+
 ----
 
-```
-# Learn about non US state codes
-setdiff(unique(sites$stateCode), MazamaSpatialUtils::US_stateCodes$stateFIPS)
+This ends the quick review of the AirNow sites metadata file.
 
-# Investigate 12-character AQSIDs
-table(stringr::str_length(sites$AQSID))
+I hope this review points out a few improvements that can be quickly implemented 
+for an improved sites metadata file.
 
-sites$AQSID %>% stringr::str_subset("^[:alnum:]{12}$") %>% stringr::str_sub(1,3) %>% table()
+Hopefully, it also demonstrates how data validation like this can be done in
+an _open_, _transparent_ and _reproducible_ manner.
 
-# Investigate alpha AQSIDs
-sites$AQSID %>% stringr::str_subset("^[:alnum:]{9}$") %>% stringr::str_subset("[:alpha:]") %>% stringr::str_sub(1,2) %>% table()
-
-
-```
-
+_Best hopes for improved site metadata!_

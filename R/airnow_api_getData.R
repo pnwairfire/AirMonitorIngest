@@ -74,6 +74,13 @@ airnow_api_getData <- function(
   starttime <- MazamaCoreUtils::parseDatetime(starttime, timezone = timezone)
   endtime <- MazamaCoreUtils::parseDatetime(endtime, timezone = timezone)
 
+  airnow_API_KEY <- getAPIKey("airnow")
+  if ( is.null(airnow_API_KEY) )
+    stop(paste0(
+      "The AirNow API_KEY is not set. Please set it with:\n\n",
+      "  setAPIKey(\"airnow\", <your-api-key>)"
+    ))
+
   # ----- Loop over multi-hour chunks ------------------------------------------
 
   pollutantCount <- length(pollutant)
@@ -102,12 +109,19 @@ airnow_api_getData <- function(
 
   for ( i in seq_along(startTimes) ) {
 
-    if ( MazamaCoreUtils::logger.isInitialized() )
+    if ( MazamaCoreUtils::logger.isInitialized() ) {
+
+      chunkHourCount <-
+        difftime(endTimes[i], startTimes[i], units = "hours") %>%
+        as.numeric() + 1
+
       logger.trace(
         "Requesting %d hours of data starting at %s ",
-        hourCount,
+        chunkHourCount,
         strftime(startTimes[i], tz = "UTC", usetz = TRUE)
       )
+
+    }
 
     # Obtain a chunk of AirNow data
     result <- try({
