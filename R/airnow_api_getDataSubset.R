@@ -9,7 +9,6 @@
 #' @param timezone Olson timezone used to interpret dates (required).
 #' @param pollutant One or more EPA AQS criteria pollutants.
 #' @param monitorType Subset of all monitors to select.
-#' @param includeSiteMeta Logical specifying whether to request site metadata.
 #' @param baseUrl Base URL for archived hourly data.
 #'
 #' @return Tibble of AirNow hourly data.
@@ -30,11 +29,10 @@
 #' tbl <-
 #'   airnow_api_getData(
 #'     starttime = 2021101200,
-#'     endtime = 2021101300,
+#'     endtime = 2021101200,
 #'     timezone = "America/Los_Angeles",
 #'     pollutant = "PM2.5",
-#'     monitorType = "permanent",
-#'     includeSiteMeta = TRUE
+#'     monitorType = "permanent"
 #'    )
 #'
 #' }
@@ -45,7 +43,6 @@ airnow_api_getDataSubset <- function(
   timezone = "UTC",
   pollutant = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
   monitorType = c("permanent", "mobile", "both"),
-  includeSiteMeta = TRUE,
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 
@@ -61,7 +58,6 @@ airnow_api_getDataSubset <- function(
   pollutant <- match.arg(pollutant, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
 
-  MazamaCoreUtils::setIfNull(includeSiteMeta, TRUE)
   MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
   if ( !timezone %in% base::OlsonNames() )
@@ -133,14 +129,6 @@ airnow_api_getDataSubset <- function(
       both = 2
     )
 
-  # verbose
-
-  if ( includeSiteMeta ) {
-    verbose <- 1
-  } else {
-    verbose <- 0
-  }
-
   # ----- Guess at max size ----------------------------------------------------
 
   # NOTE:  It appears I can get 12 hours of permament monitoring data for PM2.5.
@@ -172,7 +160,8 @@ airnow_api_getDataSubset <- function(
   # NOTE:  We hardcode certain options:
   # NOTE:  datatype = "B"      -- always get both concentration and AQI values
   # NOTE:  format = "text/csv" -- always get the most compact format
-  # NOTE:  includeraw... = "0" -- never request raw concentrations
+  # NOTE:  verbose = "1" -- always get site metadata
+  # NOTE:  includeraw... = "1" -- always get raw concentrations
 
   # Create URL parameters
   .params <- list(
@@ -184,8 +173,8 @@ airnow_api_getDataSubset <- function(
     datatype = "B",
     format = "text/csv",
     api_key = airnow_API_KEY,
-    verbose = verbose,
-    includerawconcentrations = "0"
+    verbose = "1",
+    includerawconcentrations = "1"
   )
 
   # ----- Download data --------------------------------------------------------
@@ -220,6 +209,9 @@ airnow_api_getDataSubset <- function(
 
   # ----- Parse data -----------------------------------------------------------
 
+  # NOTE:  Full description of the data format at:
+  # NOTE:    https://docs.airnowapi.org/Data/docs
+
   ### NOTE:  Opportunity to filter out bad lines
   ###
   ### lines <- readr::read_lines(fileString)
@@ -228,48 +220,40 @@ airnow_api_getDataSubset <- function(
 
   fakeFile <- fileString
 
-  if ( !includeSiteMeta ) {
+  columnNames <- c(
+    "latitude",
+    "longitude",
+    "utcTime",
+    "parameterName",
+    "parameterConcentration", # NowCast for Ozone, PM2.5 and PM10
+    "parameterUnits",
+    "parameterRawConcentration",
+    "parameterAQI",
+    "parameterAQC",
+    "siteName",
+    "agencyName",
+    "AQSID",
+    "fullAQSID"
+  )
 
-    columnNames <- c(
-      "latitude",
-      "longitude",
-      "utcTime",
-      "parameterName",
-      "parameterValue",
-      "parameterUnits",
-      "parameterAQI",
-      "parameterAQC"
-    )
-
-    columnTypes <- "ddTcdcdd"
-
-  } else {
-
-    columnNames <- c(
-      "latitude",
-      "longitude",
-      "utcTime",
-      "parameterName",
-      "parameterValue",
-      "parameterUnits",
-      "parameterAQI",
-      "parameterAQC",
-      "siteName",
-      "agencyName",
-      "AQSID",
-      "fullAQSID"
-    )
-
-    columnTypes <- "ddTcdcddcccc"
-
-  }
+  columnTypes <- "ddTcdcddcccc"
 
   tbl <-
     readr::read_csv(
       fakeFile,
       col_names = columnNames,
       col_types = columnTypes
+    ) %>%
+    # They are using -999 as a numeric missing value flag and "N/A" for characters
+    dplyr::mutate(
+      parameterConcentration = dplyr::na_if(.data$parameterConcentration, -999),
+      parameterRawConcentration = dplyr::na_if(.data$parameterRawConcentration, -999),
+      parameterAQI = dplyr::na_if(.data$parameterAQI, -999),
+      siteName = dplyr::na_if(.data$siteName, "N/A"),
+      agencyName = dplyr::na_if(.data$agencyName, "N/A")
     )
+
+
 
   # ----- Return ---------------------------------------------------------------
 
@@ -287,12 +271,12 @@ if ( FALSE ) {
 
   library(AirMonitorIngest)
 
-  starttime <- 2021101914
-  endtime <- 2021102002
+  starttime <- 2021102402
+  endtime <- 2021102402
   timezone <- "America/Los_Angeles"
   pollutant <- "PM2.5"
   monitorType <- "permanent"
-  includeSiteMeta <- TRUE
+  baseUrl <- "https://www.airnowapi.org/aq/data/"
 
   tbl <-
     airnow_api_getDataSubset(
@@ -300,8 +284,7 @@ if ( FALSE ) {
       endtime = endtime,
       timezone = timezone,
       pollutant = pollutant,
-      monitorType = monitorType,
-      includeSiteMeta = includeSiteMeta
+      monitorType = monitorType
     )
 
 

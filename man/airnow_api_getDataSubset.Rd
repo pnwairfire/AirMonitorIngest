@@ -10,7 +10,6 @@ airnow_api_getDataSubset(
   timezone = "UTC",
   pollutant = c("PM2.5"),
   monitorType = c("permanent", "mobile", "both"),
-  includeSiteMeta = TRUE,
   baseUrl = "https://www.airnowapi.org/aq/data/"
 )
 }
@@ -24,8 +23,6 @@ airnow_api_getDataSubset(
 \item{pollutant}{One or more EPA AQS criteria pollutants.}
 
 \item{monitorType}{Subset of all monitors to select.}
-
-\item{includeSiteMeta}{Logical specifying whether to request site metadata.}
 
 \item{baseUrl}{Base URL for archived hourly data.}
 }
@@ -48,11 +45,10 @@ library(AirMonitorIngest)
 tbl <-
   airnow_api_getData(
     starttime = 2021101200,
-    endtime = 2021101300,
+    endtime = 2021101200,
     timezone = "America/Los_Angeles",
     pollutant = "PM2.5",
-    monitorType = "permanent",
-    includeSiteMeta = TRUE
+    monitorType = "permanent"
    )
 
 }

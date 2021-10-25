@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.2.1
+
+* Updated `airnow_api_getDataSubset()` to request more variables.
+* Removed `includeSiteMeta` argument from `airnow_api_getData~()`. Now we always get it.
+
 # AirMonitorIngest 0.2.0
 
 Version 0.2 focuses on data ingest from AirNow using the AirNow API.
@@ -6,6 +11,7 @@ Initial functions include:
 
 * `airnow_getSites()`
 * `airnow_api_getData()`
+* `airnow_api_getDataSubset()`
 * `airnow_openWebPages()`
 * `get/setAPIKey()`
 

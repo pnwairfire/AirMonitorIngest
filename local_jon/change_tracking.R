@@ -7,14 +7,15 @@ logger.setLevel(TRACE)
 
 library(AirMonitorIngest)
 
-trackingFile <- path.expand("~/Data/AirNow/airnow_permanent_pm25_tracking.rda")
+trackingFile <- path.expand("~/Data/monitoring-latency-v1/airnow/airnow_permanent_PM2.5_202110.rda")
 
 if ( file.exists(trackingFile) ) {
   load(trackingFile)
 }
 
 now <- lubridate::now(tzone = "UTC")
-starttime <- now - lubridate::dhours(11)
+#starttime <- now - lubridate::dhours(23)
+starttime <- now - lubridate::dhours(0)
 
 # Get the data
 
@@ -25,10 +26,9 @@ updateTbl <-
     starttime = starttime,
     endtime = now,
     pollutant = "PM2.5",
-    monitorType = "permanent",
-    includeSiteMeta = TRUE
+    monitorType = "permanent"
   ) %>%
-  dplyr::select(utcTime, parameterValue, AQSID) %>%
+  dplyr::select(utcTime, parameterConcentration, parameterRawConcentration, parameterAQI, AQSID) %>%
   dplyr::distinct() %>%
 
   # Add a data access time
@@ -40,23 +40,23 @@ updateTbl <-
   ) %>%
 
   # Simplified dataset with just what we need
-  dplyr::select(dataAccessTime, measurementTime, AQSID, parameterValue)
+  dplyr::select(dataAccessTime, measurementTime, AQSID, parameterConcentration, parameterRawConcentration, parameterAQI)
 
 
-if ( !exists("trackingTbl") ) {
+if ( !exists("latencyTbl") ) {
 
-  trackingTbl <- updateTbl
+  latencyTbl <- updateTbl
 
 } else {
 
   # Create a new table with only distinct measurements
-  trackingTbl <-
-    dplyr::bind_rows(trackingTbl, updateTbl) %>%
-    dplyr::distinct(measurementTime, AQSID, parameterValue, .keep_all = TRUE)
+  latencyTbl <-
+    dplyr::bind_rows(latencyTbl, updateTbl) %>%
+    dplyr::distinct(measurementTime, AQSID, parameterConcentration, parameterRawConcentration, parameterAQI, .keep_all = TRUE)
 
 }
 
-save(trackingTbl, file = trackingFile)
+save(latencyTbl, file = trackingFile)
 
 
 # ===== PLOTTING ===============================================================
@@ -113,17 +113,17 @@ if ( FALSE ) {
     # Plot begins here
     ggplot() +
     geom_point(
-      aes(measurementTime, parameterValue),
+      aes(measurementTime, parameterConcentration),
       color = "red",
       size = 2
     ) +
     geom_line(
       data = lastReceivedData,
-      mapping = aes(measurementTime, parameterValue)
+      mapping = aes(measurementTime, parameterConcentration)
     ) +
     geom_point(
       data = lastReceivedData,
-      mapping = aes(measurementTime, parameterValue),
+      mapping = aes(measurementTime, parameterConcentration),
       color = "black",
       size = 2
     ) +

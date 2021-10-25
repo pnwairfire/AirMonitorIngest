@@ -9,7 +9,6 @@
 #' @param timezone Olson timezone used to interpret dates (required).
 #' @param pollutant One or more EPA AQS criteria pollutants.
 #' @param monitorType Subset of all monitors to select.
-#' @param includeSiteMeta Logical specifying whether to request site metadata.
 #' @param baseUrl Base URL for archived hourly data.
 #'
 #' @return Tibble of AirNow hourly data.
@@ -33,8 +32,7 @@
 #'     endtime = 2021101300,
 #'     timezone = "America/Los_Angeles",
 #'     pollutant = "PM2.5",
-#'     monitorType = "permanent",
-#'     includeSiteMeta = TRUE
+#'     monitorType = "permanent"
 #'    )
 #'
 #' }
@@ -45,7 +43,6 @@ airnow_api_getData <- function(
   timezone = "UTC",
   pollutant = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
   monitorType = c("permanent", "mobile", "both"),
-  includeSiteMeta = TRUE,
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 
@@ -65,7 +62,6 @@ airnow_api_getData <- function(
   if ( length(pollutant) > 1 )
     stop("only a single 'pollutant' may be specified")
 
-  MazamaCoreUtils::setIfNull(includeSiteMeta, TRUE)
   MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
   if ( !timezone %in% base::OlsonNames() )
@@ -132,7 +128,6 @@ airnow_api_getData <- function(
           timezone = timezone,
           pollutant = pollutant,
           monitorType = monitorType,
-          includeSiteMeta = includeSiteMeta,
           baseUrl = baseUrl
         )
     }, silent = TRUE)
@@ -175,8 +170,8 @@ if ( FALSE ) {
   endtime <- 2021101802
   timezone <- "America/Los_Angeles"
   pollutant <- "PM2.5"
+  monitorType <- "mobile"
   monitorType <- "permanent"
-  includeSiteMeta <- TRUE
 
 
 
@@ -186,8 +181,7 @@ if ( FALSE ) {
       endtime = endtime,
       timezone = timezone,
       pollutant = pollutant,
-      monitorType = monitorType,
-      includeSiteMeta = includeSiteMeta
+      monitorType = monitorType
     )
 
 
@@ -199,5 +193,6 @@ if ( FALSE ) {
     extraVars = c("siteName", "agencyName", "AQSID"),
     weight = 1
   )
+
 
 }
