@@ -9,13 +9,15 @@
 #'
 #' \itemize{
 #' \item{\url{https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf}}
-#' \item{\url{https://docs.airnowapi.org/docs/}}
+#' \item{\url{https://docs.airnowapi.org/docs}}
+#' \item{\url{https://docs.airnowapi.org/files}}
 #' }
 #'
 
 airnow_openWebPages <- function() {
 
   utils::browseURL("https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf")
-  utils::browseURL("https://docs.airnowapi.org/docs/")
+  utils::browseURL("https://docs.airnowapi.org/docs")
+  utils::browseURL("https://docs.airnowapi.org/files")
 
 }

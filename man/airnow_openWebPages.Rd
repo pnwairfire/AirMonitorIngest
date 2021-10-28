@@ -13,6 +13,7 @@ to open them quickly.
 
 \itemize{
 \item{\url{https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf}}
-\item{\url{https://docs.airnowapi.org/docs/}}
+\item{\url{https://docs.airnowapi.org/docs}}
+\item{\url{https://docs.airnowapi.org/files}}
 }
 }

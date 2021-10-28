@@ -9,7 +9,7 @@ airnow_api_getDataSubset(
   endtime = NULL,
   timezone = "UTC",
   pollutant = c("PM2.5"),
-  monitorType = c("permanent", "mobile", "both"),
+  monitorType = c("both", "permanent", "mobile"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 )
 }

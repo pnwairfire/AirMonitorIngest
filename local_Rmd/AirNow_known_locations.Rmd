@@ -1,7 +1,7 @@
 ---
-title: "AirNow: Create 'known locations' Table"
+title: "AirNow: Sites 'known locations' Table"
 author: "Jonathan Callahan"
-date: "October 19, 2021"
+date: "October 27, 2021"
 output:
   html_document:
     toc: TRUE
@@ -15,59 +15,26 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
 
 This tutorial demonstrates how to use the **MazamaLocationUtils** and
-**AirMonitorIngest** R packages to work with AirNow sites data. Target
-audiences include grad students, researchers and any member of the public
-interested in air quality and comfortable working with R and RStudio.
-
-Tutorials in this series include:
-
-* AQS 88101 Tutorial 1: Explore AQS Data
-* AQS 88101 Tutorial 2: Create 'known locations' Table
-* AQS 88101 Tutorial 3: Create Monitor 'meta' Table
-
-This tutorial is a duplicate of AQS 88101 Tutorial 2 but using parameterCode
-42101 instead. The result will be a "known locations" table for parameterCode 42101.
+**AirMonitorIngest** R packages to work with AirNow sites data. The result will 
+be a "known locations" table for AirNow "permanent" monitors.
 
 # Setup
 
-In the first tutorial we explored AQS data and determined that there was 
-agreement between the monitor and sites data associated with parameter 42101.
-
-We need to pick up where we left off in step 1:
+We begin by loading sites metadata from AirNow:
 
 ```{r setup_data, message = FALSE}
 library(MazamaCoreUtils)
 library(AirMonitorIngest)
 
-AQS_sites <- epa_aqs_getSites(downloadDir = "~/Data/EPA")
-AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
-
-AQS_monitors_42101 <-
-  AQS_monitors %>%
-  # Subset
-  dplyr::filter(`Parameter Code` == "42101") %>%
-  # Add AQSID as a useful unique identifier
-  dplyr::mutate(
-    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
-  )
-
-AQS_sites_42101 <-
-  AQS_sites %>%
-  # Add AQSID as a useful unique identifier
-  dplyr::mutate(
-    AQSID = paste0(`State Code`, `County Code`, `Site Number`)
-  ) %>%
-  # Subset
-  dplyr::filter(AQSID %in% AQS_monitors_42101$AQSID)
-
+airnow_sites <- airnow_getSites()
 ```
 
 ----
 
 # Standardize the Sites Table
 
-We will modify the `AQS_sites_42101` table using the 
-**MazamaLocationUtils** package. This will involve:
+We will modify the `airnow` table using the  **MazamaLocationUtils** package. 
+This will involve:
 
 * creating standardized variables
 * adding spatial metadata
@@ -88,7 +55,7 @@ known_location_columns <-
   names()
 ```
 
-Standardization of `AQS_sites_42101` will take place in several 
+Standardization of `airnow_sites` will take place in several 
 stages.
 
 ## Create required variables
@@ -116,28 +83,46 @@ columns. Some are filled in here. Others will be handled below.
 ```{r harmonizing_variables, results = "hold"}
 sites_locationTbl <-
   
-  # Start with AQS_sites_42101
-  AQS_sites_42101 %>%
+  # Start with airnow_sites
+  airnow_sites %>%
+  
+  # Drop the "empty" fields
+  dplyr::select(-dplyr::starts_with("empty")) %>%
+  
+  # Filter for PM2.5 in North America
+  dplyr::filter(parameterName == "PM2.5") %>%
+  dplyr::filter(GMTOffsetHours < 0) %>%
+  dplyr::filter(latitude > 15.0) %>%
 
-  # Rename all existing columns with "AQS_"
-  dplyr::rename_all(make.names) %>%
-  dplyr::rename_all(~ gsub("^", "AQS_", .x)) %>%
+  # Rename all existing columns with "airnow_"
+  dplyr::rename_all(~ gsub("^", "airnow_", .x)) %>%
 
-  # Add "known location" columns derived from AQS columns where possible
+  # Add "known location" columns derived from AirNow columns where possible
   dplyr::mutate(
     locationID = as.character(NA),
-    locationName = AQS_Local.Site.Name,
-    longitude = AQS_Longitude,
-    latitude = AQS_Latitude,
-    elevation = AQS_Elevation,
-    countryCode = as.character(NA),
-    stateCode = MazamaSpatialUtils::US_stateFIPSToCode(AQS_State.Code),
-    countyName = AQS_County.Name,
+    # locationName = airnow_siteName,
+    # longitude = airnow_longitude,
+    # latitude = airnow_latitude,
+    # elevation = airnow_elevation,
+    # countryCode = airnow_countryCode,
+    # stateCode = airnow_stateCode,
+    # countyName = airnow_countyName,
     timezone = as.character(NA),
     houseNumber = as.character(NA),
     street = as.character(NA),
-    city = AQS_City.Name,
-    zip = AQS_Zip.Code
+    city = as.character(NA),
+    zip = as.character(NA)
+  ) %>%
+  
+  # Rename columns where the data esists
+  dplyr::rename(
+    locationName = airnow_siteName,
+    longitude = airnow_longitude,
+    latitude = airnow_latitude,
+    elevation = airnow_elevation,
+    countryCode = airnow_countryCode,
+    stateCode = airnow_stateCode,
+    countyName = airnow_countyName
   ) %>%
   
   # Remove records with missing lons or lats
@@ -155,15 +140,15 @@ We reorder the columns at this point with "known location" columns first. This
 will make it easier to review the data with functions like `View()`.
 
 ```{r reorganize_columns, results = "hold"}
-# Get "AQS_" columns
-AQS_columns <-
+# Get "airnow_" columns
+airnow_columns <-
   names(sites_locationTbl) %>%
-  stringr::str_subset("AQS_.*")
+  stringr::str_subset("airnow_.*")
 
 # Reorder column names
 sites_locationTbl <-
   sites_locationTbl %>%
-  dplyr::select(dplyr::all_of(c(known_location_columns, AQS_columns)))
+  dplyr::select(dplyr::all_of(c(known_location_columns, airnow_columns)))
 ```
 
 ## Add/fix required columns
@@ -180,18 +165,6 @@ sites_locationTbl$locationID <-
     sites_locationTbl$latitude
   )
 
-# ----- Add ISO countryCodes ---------------------------------------------------
-
-sites_locationTbl$countryCode <-
-  dplyr::case_when(
-    sites_locationTbl$AQS_State.Code == "66" ~ "GU",
-    sites_locationTbl$AQS_State.Code == "72" ~ "PR",
-    sites_locationTbl$AQS_State.Code == "78" ~ "VI",
-    sites_locationTbl$AQS_State.Code == "80" ~ "MX",
-    sites_locationTbl$AQS_State.Code == "CC" ~ "CA",
-    TRUE ~ "US" # default
-  )
-
 # ----- Add timezones ----------------------------------------------------------
 
 sites_locationTbl$timezone <-
@@ -203,30 +176,27 @@ sites_locationTbl$timezone <-
     useBuffering = TRUE
 )
 
-# ----- Fix stateCodes ---------------------------------------------------------
+# ----- Replace countryCodes ---------------------------------------------------
 
-# NOTE:  AQS 'State Code' values do not map onto ISO 3166-2 alpha-2 values for 
-# NOTE:  locations outside the 50 US states. We correct that here.
+# NOTE:  Puerto Rico seems to be the only mis-assigned country code
 
-# Split, fix and then recombine
-US <- dplyr::filter(sites_locationTbl, countryCode == "US")
-non_US <- dplyr::filter(sites_locationTbl, countryCode != "US")
+sites_locationTbl$countryCode[sites_locationTbl$timezone == "America/Puerto Rico"] <- "PR"
 
-non_US$stateCode <-
+# ----- Replace stateCodes -----------------------------------------------------
+
+# NOTE:  AQS 'State Code' values are a mess because they are naively derived
+# NOTE:  from 9-digit AQS code positions and are incorrect for 12-digit AQS codes.
+
+MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1")
+
+sites_locationTbl$stateCode <-
   MazamaSpatialUtils::getStateCode(
-    non_US$longitude,
-    non_US$latitude,
-    dataset = "NaturalEarthAdm1",
-    countryCodes = c("CA", "MX", "VI", "GU"),
+    sites_locationTbl$longitude,
+    sites_locationTbl$latitude,
+    # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
+    countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
     useBuffering = TRUE
-  )
-
-# Combine two tables
-sites_locationTbl <-
-  dplyr::bind_rows(
-    US,
-    non_US
-  )
+)
 
 ```
 
@@ -244,34 +214,33 @@ any(duplicated(sites_locationTbl$locationID))
 
 ## Deal with duplicated sites
 
-Unfortunately, we have duplicated locations in the `sites_locationTbl`. Luckily,
-this involves only a single site which we can review with the following code:
+Unfortunately, we have duplicated locations in the `sites_locationTbl`. We can 
+review these locations with the following code:
 
 ```{r review_duplicated_sites}
 mask <- duplicated(sites_locationTbl$locationID)
 duplicate_locationIDs <- sites_locationTbl$locationID[mask]
 
-# Review duplicates visually
-sites_locationTbl %>%
-  dplyr::filter(locationID %in% duplicate_locationIDs) %>%
-  View()
+# # Review duplicates visually
+# sites_locationTbl %>%
+#   dplyr::filter(locationID %in% duplicate_locationIDs) %>%
+#   View()
 
 # Show the differentiating fields
 sites_locationTbl %>%
   dplyr::filter(locationID %in% duplicate_locationIDs) %>%
-  dplyr::select(AQS_Address, AQS_Owning.Agency, AQS_Site.Number)
+  dplyr::select(airnow_status, airnow_AQSID, airnow_agencyName)
 ```
 
-The duplicates appear to be renamed or nearby addresses. We choose to remove the 
-duplicated sites on the assumption they represent repositioning at a "location"
-that is identical from an atmospheric processes perspective.
+Most of these sites are `Inactive`. We choose to remove the 
+duplicated sites by ordering based on status, which will place "Active" ahead of
+"Inactive", and accepting whichever one comes first.
 
 ```{r remove_duplicated_sites}
-non_duplicated_indices <- which(!mask)
-
 sites_locationTbl <-
-  sites_locationTbl %>%
-  dplyr::slice(non_duplicated_indices)
+  sites_locationTbl %>% 
+  dplyr::arrange(airnow_status) %>%
+  dplyr:::distinct(locationID, .keep_all = TRUE)
 
 # Are any locations duplicated?
 any(duplicated(sites_locationTbl$locationID))
@@ -283,44 +252,14 @@ Now that we have truly unique locations, we can move to final steps.
 
 ## Remove unwanted columns
 
-A review of the contents of the `AQS_~` parameters shows that some are of little
-value, filled primarily with `NA` values. Will will remove these as well as 
-other columns of data that have been copied to standardized names or are 
-potentially outdated.
-
-```{r review_AQS_, results = "hold"}
-# Review "AQS_" parameters for removal
-lapply(sites_locationTbl, function(x) { sum(is.na(x)) }) %>% str()
-```
+We will remove only a few redundant columns.
 
 ```{r remove_non_spatial, results = "hold"}
 # Remove unwanted columns
 unwanted_columns <- c(
   # Renamed or redundant
-  "AQS_State.Code",     # captured in AQSID
-  "AQS_County.Code",    # captured in AQSID
-  "AQS_Site.Number",    # captured in AQSID
-  "AQS_Latitude",
-  "AQS_Longitude",
-  "AQS_Elevation",
-  "AQS_Zip.Code",
-  "AQS_State.Name",
-  "AQS_County.Name",
-  "AQS_City.Name",
-  "AQS_Local.Site.Name",
-  # Not useful or potentially no longer accurate
-  "AQS_Datum",
-  "AQS_Land.Use",
-  "AQS_Location.Setting",
-  # Very little data found
-  "AQS_Met.Site.State.Code",
-  "AQS_Met.Site.County.Code",
-  "AQS_Met.Site.Site.Number",
-  "AQS_Met.Site.Type",
-  "AQS_Met.Site.Distance",
-  "AQS_Met.Site.Direction",
-  # Not purely spatial
-  "AQS_Extraction.Date"
+  "airnow_FIPSStateCode",
+  "airnow_GNISCountyCode"
 )
 
 sites_locationTbl <- 
@@ -334,15 +273,29 @@ After a quick review with `View(sites_locationTbl)`, a few more _data janitor_
 tasks can be dealt with here:
 
 ```{r finishing_touches, results = "hold"}
-# Uniform casing of locationName
+# Rename AQSID
+sites_locationTbl <-
+  sites_locationTbl %>%
+  dplyr::rename(
+    AQSID = airnow_AQSID
+  )
+
+# Uniform casing of locationName and countyName
 sites_locationTbl$locationName <- 
   stringr::str_to_title(sites_locationTbl$locationName)
 
-# Use'NA' where appropriate
+sites_locationTbl$countyName <- 
+  stringr::str_to_title(sites_locationTbl$countyName)
+
+# Use NA where appropriate
 sites_locationTbl <-
   sites_locationTbl %>%
-  dplyr::mutate(city = dplyr::na_if(city, "Not in a City")) %>%
-  dplyr::mutate(city = dplyr::na_if(city, "Not in a city"))
+  dplyr::mutate(locationName = dplyr::na_if(locationName, "N/A")) %>%
+  dplyr::mutate(countyName = dplyr::na_if(countyName, "N/A"))
+
+# Reset incorrect county names in foreign countries
+sites_locationTbl$countyName[sites_locationTbl$countryCode == "CA"] <- NA
+sites_locationTbl$countyName[sites_locationTbl$countryCode == "MX"] <- NA
 
 dplyr::glimpse(sites_locationTbl)
 ```
@@ -355,9 +308,23 @@ display core metadata.
 ```{r final_result_leaflet}
 table_leaflet(
   sites_locationTbl,
-  extraVars = c("AQS_AQSID", "AQS_Site.Established.Date", "AQS_Site.Closed.Date"),
-  weight = 1
+  extraVars = c("AQSID", "airnow_agencyName")
 )
+```
+
+## Fix a few border locations
+
+A couple of locations along border have incorrect state codes. We fix those
+manuall here:
+
+```{r manually_fix_border_sites}
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "160211007"] <- "ID"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "000065701"] <- "ON"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "000041501"] <- "NB"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "480610006"] <- "TX"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "484790313"] <- "TX"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "481410055"] <- "TX"
+sites_locationTbl$stateCode[sites_locationTbl$AQSID == "481410053"] <- "TX"
 ```
 
 ## Save our work
@@ -366,33 +333,32 @@ We will save our newly vetted "known locations" table in a dedicated directory.
 
 ```{r save}
 setLocationDataDir("~/Data/Known_Locations")
-table_save(sites_locationTbl, "AQS_42101_sites")
+table_save(sites_locationTbl, "airnow_PM2.5_sites")
 
 table_csv <- table_export(sites_locationTbl)
-readr::write_csv(sites_locationTbl, file = file.path(getLocationDataDir(), "AQS_42101_sites.csv"))
+readr::write_csv(sites_locationTbl, file = file.path(getLocationDataDir(), "airnow_PM2.5_sites.csv"))
 ```
 
-# Compare with 88101
+# Compare with EPA AQS 88101
 
-Both parameterCode 88101 (PM2.5 FRM/FEM) and parameterCode 42101 (PM2.5 non-FRM/FEM)
-measure pm2.5. Let's take at the known locations table for each.:
+Let's compare this table with sites from EPA AQS:
 
 ```{r compare_88101_42101}
 # Set "known locations" directory
 MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
+kl_airnow_PM2.5 <- MazamaLocationUtils::table_load("airnow_PM2.5_sites")
 kl_88101 <- MazamaLocationUtils::table_load("AQS_88101_sites")
-kl_42101 <- MazamaLocationUtils::table_load("AQS_42101_sites")
 
-kl_88101 %>% 
+kl_airnow_PM2.5 %>% 
   MazamaLocationUtils::table_leaflet(
-    opacity = 0.0, 
-    fillColor = "red"
+    opacity = 0.0,
+    color = "black"
   ) %>% 
   MazamaLocationUtils::table_leafletAdd(
-    kl_42101, 
-    weight = 2, 
-    color = "black", 
+    kl_88101, 
+    weight = 2,
+    color = "black",
     fillOpacity = 0
   )
 ```

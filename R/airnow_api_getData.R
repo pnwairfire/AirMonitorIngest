@@ -42,7 +42,7 @@ airnow_api_getData <- function(
   endtime = NULL,
   timezone = "UTC",
   pollutant = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
-  monitorType = c("permanent", "mobile", "both"),
+  monitorType = c("both", "permanent", "mobile"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 

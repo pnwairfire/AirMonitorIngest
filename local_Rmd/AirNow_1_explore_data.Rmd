@@ -62,9 +62,14 @@ For our initial "known locations" table, we will focus on AirNow sites reporting
 library(MazamaCoreUtils)
 
 library(AirMonitorIngest)
+setAPIKey("airnow", "<your-api-key>")
 
 # Create a directory specifically for EPA data
 dir.create("~/Data/AirNow", showWarnings = FALSE, recursive = TRUE)
+```
+
+```{r api_key, include = FALSE}
+setAPIKey("airnow", "XXX")
 ```
 
 We will begin with a current table of AirNow site and a recent table of hourly
@@ -99,14 +104,20 @@ The `airnow_data` table is a synoptic file with a 1-hr snapshot of data from
 all monitors being tracked by AirNow.
 
 ```{r airnow_data, message = FALSE, results = "hold"}
+
+#setAPIKey("airnow", <your-api-key>)
+
 # Get monitor metadata
-datestamp <- 
-  MazamaCoreUtils::timeStamp(
-    lubridate::now() - 3600, 
-    timezone = "UTC", 
-    unit = "hour"
-  )
-airnow_data <- airnow_getHourlyData(datestamp)
+endtime <- lubridate::now(tz = "UTC")
+starttime <- endtime
+
+airnow_data <- 
+  airnow_api_getData(
+  starttime = starttime,
+  endtime = endtime,
+  pollutant = c("PM2.5"),
+  monitorType = c("permanent")
+)
 ```
 
 The `airnow_data` table is a "long form" data table containing 
@@ -131,9 +142,11 @@ data_only_AQSID
 stringr::str_sub(data_only_AQSID, 5)
 ```
 
+On 2021-10-27 15:00 UTC, there were no offending sites.
+
 On 2021-10-19 20:00 UTC, the only offending site has a siteID of `99991`. Looks like folks
 somewhere up the pipeline decided to use `9999` as special case sites that don't
-need to appear in `aqs_sites`. Let's have a look at these records:
+need to appear in `aqs_sites`. Let's have a look at these records if any exist:
 
 ```{r data_only_AQSID, results = "hold"}
 airnow_data %>% dplyr::filter(AQSID %in% data_only_AQSID)
@@ -196,7 +209,7 @@ Note that several fields associated with these records have mostly bogus data.
 Corrupted fields include: `countryCode`, `FIPSStateCode`, `stateCode`, 
 `GNISCountyCode`, `countyName`.
 
-### AQSIDs with > 10 digits
+### AQSIDs with > 19 digits
 
 Many of the AQSIDs with characters have a length great that the standard 9.
 Let's see if there are any other, all-numeric AQSIDs with more than 9 digits:
@@ -220,10 +233,21 @@ airnow_sites %>%
   sort() %>% unique()
 ```
 
-Not sure what the significance of these 3-digit prefixes is but all of these
-sites appear to be in North America.
+As mentioned in the documentation, "Full AQSIDs" contain a 3-digit "ISO 3166-1 
+numeric" country code. 
 
-These records also have a lot of similarly bogus data. 
+From a personal communication with folks at AirNow:
+
+> We had some large international datasets begin to come into AirNow back in 
+> 2018, and they used some 9 digit site codes which already existed in the 
+> system and caused a bit of a mess with overlapping data, so we had to 
+> implement a measure to separate sites with the same 9 digit code that are in 
+> different countries. For that reason, new sites since around June 2018 have 12 
+> digit “AQS IDs” with the country code. Sites existing before that point had 
+> some backend changes to stay 9 digit “AQS IDs”, mainly to avoid any 
+> programmatical issues downstream with existing processes.
+
+These 12-character AQSID records also have a lot of similarly bogus data. 
 Corrupted fields include: `countryCode`, `FIPSStateCode`, `stateCode`, 
 `GNISCountyCode`, `countyName`.
 
