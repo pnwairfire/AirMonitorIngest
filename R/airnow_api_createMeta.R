@@ -1,0 +1,240 @@
+#' @export
+#' @importFrom utils read.table
+#' @importFrom rlang .data
+#'
+#' @title Create a 'meta' dataframe with required monitor metadata
+#'
+#' @description
+#' Create a \code{meta} dataframe with AirNow monitor metadata appropriate
+#' for use with the \pkg{MazamaTimeSeries} package.
+#'
+#' The data model is that monitor metadata are stored in a tibble named \code{meta}.
+#' with a \code{deviceDeploymentID} unique identifier that is matched by column
+#' names in an associated \code{data} file.
+#'
+#' @param airnow_data Table of monitor data obtained with \code{epa_api_getData()}.
+#' @param sites_locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
+#' @param pollutant a named AirNow pollutant.
+#'
+#' @return Tibble of device-deployment metadata.
+#'
+
+airnow_api_createMeta <- function(
+  airnow_data = NULL,
+  sites_locationTbl = NULL,
+  pollutant = NULL
+) {
+
+  if ( logger.isInitialized() )
+    logger.debug(" ----- epa_aqs_createMeta() ----- ")
+
+  # ----- Validate Parameters --------------------------------------------------
+
+  MazamaCoreUtils::stopIfNull(airnow_data)
+  MazamaCoreUtils::stopIfNull(sites_locationTbl)
+  MazamaCoreUtils::stopIfNull(pollutant)
+
+  # TODO: un-hack this
+  pollutant <- "UG/M3"
+
+  # ----- Simplify airnow_data -------------------------------------------------
+
+  airnow_data <-
+    airnow_data %>%
+    # Saw some AQSID with two records per hour, one with and one without paramterAQI
+    dplyr::arrange(parameterAQI) %>%
+    dplyr::distinct(.data$AQSID, .keep_all = TRUE) %>%
+    # Remove records with missing or zero lon/lat
+    dplyr::filter(
+      is.finite(.data$longitude),
+      is.finite(.data$latitude),
+      .data$longitude != 0,
+      .data$latitude != 0
+    )
+
+  # ----- Meta for existing sites ----------------------------------------------
+
+  AQSID_shared <- intersect(airnow_data$AQSID, sites_locationTbl$AQSID)
+
+  meta_shared <-
+    sites_locationTbl %>%
+    dplyr::filter(.data$AQSID %in% !!AQSID_shared) %>%
+    # Unique instrument ID = AQSID as we have nothing more specific
+    dplyr::mutate(
+      deviceID = .data$AQSID
+    ) %>%
+    # Unique "device deployment" ID
+    dplyr::mutate(
+      deviceDeploymentID = paste(.data$locationID, .data$deviceID, sep = "_")
+    ) %>%
+    # Other required metadata
+    dplyr::mutate(
+      deviceType = as.character(NA),
+      deviceDescription = as.character(NA),
+      deviceExtra = as.character(NA),
+      pollutant = !!pollutant,
+      units = !!units,
+      dataIngestSource = "AirNow",
+      dataIngestURL = "https://www.airnowapi.org/aq/data/",
+      dataIngestUnitID = as.character(NA),
+      dataIngestExtra = as.character(NA),
+      dataIngestDescription = as.character(NA)
+    )
+
+
+  # ============================================================================
+  # ============================================================================
+  # ============================================================================
+  # TODO:  This function should fail if there are new metadata
+  # TODO:  A calling function should call airnow_updateSiteLocations() first and
+  # TODO:  then pass the same airnow_data and the updated siteLocationTbl to
+  # TODO:  this function.
+  # ============================================================================
+  # ============================================================================
+  # ============================================================================
+
+
+
+
+
+
+  # # ----- Meta for new sites ---------------------------------------------------
+  #
+  # AQSID_new <- setdiff(airnow_data$AQSID, sites_locationTbl$AQSID)
+  #
+  # airnow_data_new <-
+  #   airnow_data %>%
+  #   dplyr::filter(.data$AQSID %in% !!AQSID_new)
+  #
+  # # > print(names(airnow_data_new), width = 75)
+  # # [1] "latitude"                  "longitude"
+  # # [3] "utcTime"                   "parameterName"
+  # # [5] "parameterConcentration"    "parameterUnits"
+  # # [7] "parameterRawConcentration" "parameterAQI"
+  # # [9] "parameterAQC"              "siteName"
+  # # [11] "agencyName"                "AQSID"
+  # # [13] "fullAQSID"
+  #
+  # result <- try({
+  #
+  #   # * update "known locations" -----
+  #
+  #   MazamaLocationUtils::mazama_initialize()
+  #   sites_locationTbl <-
+  #     sites_locationTbl %>%
+  #     table_addLocation(
+  #       airnow_data_new$longitude,
+  #       airnow_data_new$latitude,
+  #       distance_threshold = 100,            # TODO:  Hardcoded value!
+  #       verbose = FALSE
+  #     )
+  #
+  #   # * save "known locations" -----
+  #
+  #   MazamaLocationUtils::table_save(
+  #     sites_locationTbl,
+  #     collectionName = "airnow",
+  #     backup = TRUE,
+  #     outputType = "rda"
+  #   )
+  #
+  #   # * create 'meta' -----
+  #
+  #   meta_new <-
+  #     sites_locationTbl %>%
+  #     dplyr::filter(.data$AQSID %in% !!AQSID_shared) %>%
+  #     # Unique instrument ID = AQSID as we have nothing more specific
+  #     dplyr::mutate(
+  #       deviceID = .data$AQSID
+  #     ) %>%
+  #     # Unique "device deployment" ID
+  #     dplyr::mutate(
+  #       deviceDeploymentID = paste(.data$locationID, .data$deviceID, sep = "_")
+  #     ) %>%
+  #     # Other required metadata
+  #     dplyr::mutate(
+  #       deviceType = as.character(NA),
+  #       deviceDescription = as.character(NA),
+  #       deviceExtra = as.character(NA),
+  #       pollutant = !!pollutant,
+  #       units = !!units,
+  #       dataIngestSource = "AirNow",
+  #       dataIngestURL = "https://www.airnowapi.org/aq/data/",
+  #       dataIngestUnitID = as.character(NA),
+  #       dataIngestExtra = as.character(NA),
+  #       dataIngestDescription = as.character(NA)
+  #     )
+  #
+  # }, silent = TRUE)
+  #
+  # if ( "try-error" %in% class(result) ) {
+  #
+  #   if ( logger.isInitialized() ) {
+  #     err_msg <- geterrmessage()
+  #     logger.warning(" ----- epa_aqs_createMeta() ----- ")
+  #   }
+  #
+  # }
+  #
+  # # * combine tibbles -----
+  #
+  # if ( exists("meta_shared") ) {
+  #   meta <- dplyr::bind_rows(meta_shared, meta_new)
+  # } else {
+  #   meta <- meta_shared
+  # }
+
+  # ----- Reorder columns ------------------------------------------------------
+
+  coreNames <- AirMonitor::coreMetadataNames
+  missingCoreNames <- setdiff(coreNames, names(meta))
+  airnowNames <- setdiff(names(meta), coreNames)
+
+  for ( name in missingCoreNames ) {
+    meta[[name]] <- as.character(NA)
+  }
+
+  meta <-
+    meta %>%
+    dplyr::select(dplyr::all_of(c(coreNames, airnowNames)))
+
+  # ----- Return ---------------------------------------------------------------
+
+  return(meta)
+
+}
+
+# ===== DEBUGGING ==============================================================
+
+if ( FALSE ) {
+
+
+  library(MazamaCoreUtils)
+  logger.setLevel(TRACE)
+
+  library(AirMonitorIngest)
+  setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
+
+
+  MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
+  sites_locationTbl <- MazamaLocationUtils::table_load("airnow_PM2.5_sites")
+
+  starttime <- 2021102700
+  endtime <- 2021102700
+  timezone <- "America/Los_Angeles"
+  pollutant <- "PM2.5"
+  monitorType <- "both"
+
+  airnow_data <-
+    airnow_api_getData(
+      starttime = starttime,
+      endtime = endtime,
+      timezone = timezone,
+      pollutant = pollutant,
+      monitorType = monitorType
+    )
+
+
+
+
+}

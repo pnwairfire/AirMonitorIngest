@@ -17,7 +17,7 @@
 #' @param sites_locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param parameterCode EPA "Parameter Code".
 #'
-#' @return Restructured tibble  with data organized as timeseries columns.
+#' @return Tibble of device-deployment metadata.
 #'
 
 epa_aqs_createMeta <- function(

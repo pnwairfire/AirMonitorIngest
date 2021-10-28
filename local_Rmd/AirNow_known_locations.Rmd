@@ -353,7 +353,7 @@ kl_88101 <- MazamaLocationUtils::table_load("AQS_88101_sites")
 kl_airnow_PM2.5 %>% 
   MazamaLocationUtils::table_leaflet(
     opacity = 0.0,
-    color = "black"
+    color = "red"
   ) %>% 
   MazamaLocationUtils::table_leafletAdd(
     kl_88101, 
