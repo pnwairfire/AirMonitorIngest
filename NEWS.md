@@ -1,3 +1,9 @@
+# AirMonitorIngest 0.2.2
+
+* Renamed `airnow_api_~()` functions to just `airnow_~()`.
+* Renamed `pollutant` to `parameterName` in `airnow_getData~()` for harmony with
+`epa_aqs_~()` functions.
+
 # AirMonitorIngest 0.2.1
 
 * Updated `airnow_api_getDataSubset()` to request more variables.

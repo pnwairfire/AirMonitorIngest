@@ -18,7 +18,7 @@ epa_aqs_createMeta(
 \item{parameterCode}{EPA "Parameter Code".}
 }
 \value{
-Restructured tibble  with data organized as timeseries columns.
+Tibble of device-deployment metadata.
 }
 \description{
 Create a \code{meta} dataframe with EPA AQS monitor metadata appropriate

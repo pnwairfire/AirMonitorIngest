@@ -7,7 +7,7 @@
 #' @param starttime Desired start datetime (ISO 8601).
 #' @param endtime Desired end datetime (ISO 8601).
 #' @param timezone Olson timezone used to interpret dates (required).
-#' @param pollutant One or more EPA AQS criteria pollutants.
+#' @param parameterName One or more EPA AQS criteria parameter names.
 #' @param monitorType Subset of all monitors to select.
 #' @param baseUrl Base URL for archived hourly data.
 #'
@@ -27,27 +27,27 @@
 #' library(AirMonitorIngest)
 #'
 #' tbl <-
-#'   airnow_api_getData(
+#'   airnow_getData(
 #'     starttime = 2021101200,
 #'     endtime = 2021101300,
 #'     timezone = "America/Los_Angeles",
-#'     pollutant = "PM2.5",
+#'     parameterName = "PM2.5",
 #'     monitorType = "permanent"
 #'    )
 #'
 #' }
 
-airnow_api_getData <- function(
+airnow_getData <- function(
   starttime = NULL,
   endtime = NULL,
   timezone = "UTC",
-  pollutant = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
+  parameterName = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
   monitorType = c("both", "permanent", "mobile"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 
   if ( MazamaCoreUtils::logger.isInitialized() )
-    logger.debug(" ----- airnow_api_getData() ----- ")
+    logger.debug(" ----- airnow_getData() ----- ")
 
   # ----- Validate parameters --------------------------------------------------
 
@@ -55,12 +55,12 @@ airnow_api_getData <- function(
   MazamaCoreUtils::stopIfNull(endtime)
   MazamaCoreUtils::stopIfNull(timezone)
 
-  pollutant <- match.arg(pollutant, several.ok = TRUE)
+  parameterName <- match.arg(parameterName, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
 
   # TODO:  Only one parameter at a time for now
-  if ( length(pollutant) > 1 )
-    stop("only a single 'pollutant' may be specified")
+  if ( length(parameterName) > 1 )
+    stop("only a single 'parameterName' may be specified")
 
   MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
@@ -79,17 +79,17 @@ airnow_api_getData <- function(
 
   # ----- Loop over multi-hour chunks ------------------------------------------
 
-  pollutantCount <- length(pollutant)
+  parameterNameCount <- length(parameterName)
 
-  if ( pollutantCount == 1 ) {
+  if ( parameterNameCount == 1 ) {
     hourCount <- 12
-  } else if ( pollutantCount == 2 ) {
+  } else if ( parameterNameCount == 2 ) {
     hourCount <- 6
-  } else if ( pollutantCount == 3 ) {
+  } else if ( parameterNameCount == 3 ) {
     hourCount <- 4
-  } else if ( pollutantCount == 4 ) {
+  } else if ( parameterNameCount == 4 ) {
     hourCount <- 3
-  } else if ( pollutantCount <= 6 ) {
+  } else if ( parameterNameCount <= 6 ) {
     hourCount <- 2
   } else {
     hourCount <- 1
@@ -122,11 +122,11 @@ airnow_api_getData <- function(
     # Obtain a chunk of AirNow data
     result <- try({
       tbl <-
-        airnow_api_getDataSubset(
+        airnow_getDataSubset(
           starttime = startTimes[i],
           endtime = endTimes[i],
           timezone = timezone,
-          pollutant = pollutant,
+          parameterName = parameterName,
           monitorType = monitorType,
           baseUrl = baseUrl
         )
@@ -169,18 +169,18 @@ if ( FALSE ) {
   starttime <- 2021101802
   endtime <- 2021101802
   timezone <- "America/Los_Angeles"
-  pollutant <- "PM2.5"
+  parameterName <- "PM2.5"
   monitorType <- "mobile"
   monitorType <- "permanent"
 
 
 
   tbl <-
-    airnow_api_getData(
+    airnow_getData(
       starttime = starttime,
       endtime = endtime,
       timezone = timezone,
-      pollutant = pollutant,
+      parameterName = parameterName,
       monitorType = monitorType
     )
 
