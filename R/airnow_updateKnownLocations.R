@@ -69,8 +69,7 @@ airnow_updateKnownLocations <- function(
       .data$latitude != 0
     ) %>%
 
-    # Filter for PM2.5 in North America
-    dplyr::filter(.data$parameterName == "PM2.5") %>%
+    # Filter for North America
     dplyr::filter(.data$GMTOffsetHours < 0) %>%
     dplyr::filter(.data$latitude > 15.0) %>%
 

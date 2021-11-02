@@ -82,30 +82,36 @@ airnow_update <- function(
   # NOTE:  At that point, every location in airnow_data will be represented by
   # NOTE:  a "known location" in locationTbl.
 
+  # Find individual locations assuming last-is-best
+  airnow_data_locations <-
+    airnow_data %>%
+    dplyr::arrange(dplyr::desc(.data$utcTime)) %>%
+    dplyr::distinct(.data$longitude, .data$latitude, .keep_all = TRUE)
+
   # Add locationID
-  airnow_data$locationID <-
+  airnow_data_locations$locationID <-
     MazamaLocationUtils::table_getLocationID(
       locationTbl = locationTbl,
-      longitude = airnow_data$longitude,
-      latitude = airnow_data$latitude,
+      longitude = airnow_data_locations$longitude,
+      latitude = airnow_data_locations$latitude,
       distanceThreshold = distanceThreshold,
       measure = "geodesic"
     )
 
   # Split known/unknown
   airnow_known <-
-    airnow_data %>%
+    airnow_data_locations %>%
     dplyr::filter(!is.na(.data$locationID))
 
   airnow_unknown <-
-    airnow_data %>%
+    airnow_data_locations %>%
     dplyr::filter(is.na(.data$locationID))
 
   # Add records for the "unknown" locations
   locationTbl <-
     airnow_updateUnknownLocations(
       locationTbl,
-      airnow_data,
+      airnow_unknown,
       distanceThreshold
     )
 
@@ -113,11 +119,12 @@ airnow_update <- function(
 
   # ----- Create 'meta' --------------------------------------------------------
 
-  # meta <-
-  #   airnow_createMeta(
-  #     locationTbl,
-  #     airnow_data
-  #   )
+  meta <-
+    airnow_createMeta(
+      locationTbl,
+      airnow_data,
+      distanceThreshold
+    )
 
   # ----- Create 'data' --------------------------------------------------------
 
@@ -148,6 +155,7 @@ if ( FALSE ) {
   MazamaSpatialUtils::loadSpatialData("EEZCountries")
   MazamaSpatialUtils::loadSpatialData("OSMTimezones")
   MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1")
+  MazamaSpatialUtils::loadSpatialData("USCensusCounties")
 
   library(AirMonitorIngest)
   setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))

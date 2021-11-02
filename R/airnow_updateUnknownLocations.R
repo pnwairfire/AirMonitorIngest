@@ -34,6 +34,12 @@ airnow_updateUnknownLocations <- function(
   MazamaCoreUtils::stopIfNull(airnow_data)
   MazamaCoreUtils::stopIfNull(distanceThreshold)
 
+  # Find individual locations assuming last-is-best
+  airnow_data_locations <-
+    airnow_data %>%
+    dplyr::arrange(dplyr::desc(.data$utcTime)) %>%
+    dplyr::distinct(.data$longitude, .data$latitude, .keep_all = TRUE)
+
   # ----- Identify new locations -----------------------------------------------
 
   # NOTE:  Do this to be sure we don't overwrite existing known locations.
@@ -52,203 +58,109 @@ airnow_updateUnknownLocations <- function(
     airnow_data %>%
     dplyr::filter(is.na(.data$locationID))
 
+  # ----- Create new "known_locations" records ---------------------------------
 
+  new_locationTbl <-
+    MazamaLocationUtils::table_initializeExisting(
+      airnow_unknown,
+      countryCodes = c("CA", "US", "MX", "PR", "VI", "GU"),
+      distanceThreshold = distanceThreshold,
+      measure = "geodesic",
+      verbose = FALSE
+    )
 
+  # NOTE:  This is what we have:
 
+  #   > dplyr::glimpse(new_locationTbl, width = 75)
+  #   Rows: 3
+  #   Columns: 24
+  #   $ locationID                <chr> "3047c3852b3b0037", "8e8530836c4b45f5",
+  #   $ locationName              <chr> "us.ca_3047c3", "us.ca_8e8530", "us.nm_
+  #   $ longitude                 <dbl> -121.9518, -119.7435, -105.8956
+  #   $ latitude                  <dbl> 41.26162, 37.46455, 35.68705
+  #   $ elevation                 <dbl> NA, NA, NA
+  #   $ countryCode               <chr> "US", "US", "US"
+  #   $ stateCode                 <chr> "CA", "CA", "NM"
+  #   $ countyName                <chr> NA, NA, NA
+  #   $ timezone                  <chr> "America/Los_Angeles", "America/Los_Ang
+  #   $ houseNumber               <chr> NA, NA, NA
+  #   $ street                    <chr> NA, NA, NA
+  #   $ city                      <chr> NA, NA, NA
+  #   $ zip                       <chr> NA, NA, NA
+  #   $ utcTime                   <dttm> 2021-11-02 22:00:00, 2021-11-02 22:00:0
+  #   $ parameterName             <chr> "PM2.5", "PM2.5", "PM2.5"
+  #   $ parameterConcentration    <dbl> 0.0, 4.1, 30.7
+  #   $ parameterUnits            <chr> "UG/M3", "UG/M3", "UG/M3"
+  #   $ parameterRawConcentration <dbl> NA, NA, 39
+  #   $ parameterAQI              <dbl> 0, 17, 90
+  #   $ parameterAQC              <chr> "1", "1", "2"
+  #   $ siteName                  <chr> NA, NA, "Unit386"
+  #   $ agencyName                <chr> "California Air Resources Board", "Cali
+  #   $ AQSID                     <chr> "840MMCA82040", "840MMCA82036", "MMFS10
+  #   $ fullAQSID                 <chr> "840MMCA82040", "840MMCA82036", "840MMF
 
+  # NOTE:  And this is what we want to have:
 
+  #   > dplyr::glimpse(locationTbl, width=75)
+  #   Rows: 1,617
+  #   Columns: 23
+  #   $ locationID            <chr> "57bc483da6023722", "86726ac7458c6f20", "9e
+  #   $ locationName          <chr> "Haverhill", "Hinds Cc", "Saint-Simon", "Ma
+  #   $ longitude             <dbl> -71.10280, -90.22593, -73.46860, -77.40027,
+  #   $ latitude              <dbl> 42.77080, 32.34690, 45.44310, 37.55652, 47.
+  #   $ elevation             <dbl> 0.0, 0.0, 40.3, 58.6, 79.3, 0.0, 0.0, 80.8,
+  #   $ countryCode           <chr> "US", "US", "CA", "US", "US", "CA", "US", "
+  #   $ stateCode             <chr> "MA", "MS", "QC", "VA", "WA", "BC", "OR", "
+  #   $ countyName            <chr> "Essex", "Hinds", NA, "Henrico", "Chelan",
+  #   $ timezone              <chr> "America/New_York", "America/Chicago", "Ame
+  #   $ houseNumber           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  #   $ street                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  #   $ city                  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  #   $ zip                   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  #   $ AQSID                 <chr> "250095005", "280490021", "000052201", "510
+  #   $ airnow_parameterName  <chr> "PM2.5", "PM2.5", "PM2.5", "PM2.5", "PM2.5"
+  #   $ airnow_siteCode       <chr> "5005", "0021", "2201", "0014", "0011", "55
+  #   $ airnow_status         <chr> "Active", "Active", "Active", "Active", "Ac
+  #   $ airnow_agencyID       <chr> "MA1", "MS1", "QC1", "VA1", "WA1", "BC1", "
+  #   $ airnow_agencyName     <chr> "Massachusetts Dept. of Environmental Prote
+  #   $ airnow_EPARegion      <chr> "R1", "R4", "CA", "R3", "R10", "CA", "R10",
+  #   $ airnow_GMTOffsetHours <dbl> -5, -6, -5, -5, -8, -8, -8, -8, -5, -8, -8,
+  #   $ airnow_FIPSMSACode    <chr> "14460", "27140", NA, "40060", NA, NA, "389
+  #   $ airnow_MSAName        <chr> " Boston-Cambridge-Quincy, MA-NH ", " Jacks
 
+  # NOTE:  This step is not easy with dplyr
 
+  # Replace locationName with siteName where siteName is defined
+  mask <- !is.na(new_locationTbl$siteName)
+  new_locationTbl$locationName[mask] <- new_locationTbl$siteName[mask]
 
+  unwantedColumns <- setdiff(names(new_locationTbl), names(locationTbl))
 
+  new_locationTbl <-
 
+    new_locationTbl %>%
 
+    # Add required columns
+    dplyr::mutate(
+      airnow_parameterName = .data$parameterName,
+      airnow_siteCode = as.character(NA),
+      airnow_status = "Active",
+      airnow_agencyID = as.character(NA),
+      airnow_agencyName = .data$agencyName,
+      airnow_EPARegion = as.character(NA),
+      airnow_GMTOffsetHours = as.numeric(NA),
+      airnow_FIPSMSACode = as.character(NA),
+      airnow_MSAName = as.character(NA)
+    ) %>%
 
+    # Remove unwanted columns
+    dplyr::select(-dplyr::all_of(unwantedColumns))
 
-  # # ----- Simplify airnow_data -------------------------------------------------
-  #
-  # airnow_data <-
-  #
-  #   airnow_data %>%
-  #
-  #   # Saw some AQSID with two records per hour, one with and one without paramterAQI
-  #   dplyr::arrange(parameterAQI) %>%
-  #   dplyr::distinct(.data$AQSID, .keep_all = TRUE) %>%
-  #
-  #   # Remove records with missing or zero lon/lat
-  #   dplyr::filter(
-  #     is.finite(.data$longitude),
-  #     is.finite(.data$latitude),
-  #     .data$longitude != 0,
-  #     .data$latitude != 0
-  #   )
-  #
-  # # ----- Find nearest known locations -----------------------------------------
-  #
-  # known_locations <-
-  #   MazamaLocationUtils::table_getNearestLocation(
-  #     locationTbl,
-  #     airnow_data$longitude,
-  #     airnow_data$latitude,
-  #     500
-  #   )
-  #
-  # # NOTE:  Any airnow_data records that do not match will have missing values
-  # # NOTE:  for locationID
-  #
-  # # ----- Meta for existing locations ------------------------------------------
-  #
-  # meta_shared <-
-  #
-  #   known_locations %>%
-  #
-  #   # All locations found in locationTbl
-  #   dplyr::filter(!is.na(.data$locationID)) %>%
-  #
-  #   # Unique instrument ID = AQSID as we have nothing more specific
-  #   dplyr::mutate(
-  #     deviceID = .data$AQSID
-  #   ) %>%
-  #
-  #   # Unique "device deployment" ID
-  #   dplyr::mutate(
-  #     deviceDeploymentID = paste(.data$locationID, .data$deviceID, sep = "_")
-  #   ) %>%
-  #
-  #   # Other required metadata
-  #   dplyr::mutate(
-  #     deviceType = as.character(NA),
-  #     deviceDescription = as.character(NA),
-  #     deviceExtra = as.character(NA),
-  #     parameterName = !!parameterName,
-  #     units = !!units,
-  #     dataIngestSource = "AirNow",
-  #     dataIngestURL = "https://www.airnowapi.org/aq/data/",
-  #     dataIngestUnitID = as.character(NA),
-  #     dataIngestExtra = as.character(NA),
-  #     dataIngestDescription = as.character(NA)
-  #   )
+  # ----- Return ---------------------------------------------------------------
 
+  locationTbl <- dplyr::bind_rows(locationTbl, new_locationTbl)
 
-  # ============================================================================
-  # ============================================================================
-  # ============================================================================
-  # TODO:  This function should fail if there are new metadata
-  # TODO:  A calling function should call airnow_updateSiteLocations() first and
-  # TODO:  then pass the same airnow_data and the updated siteLocationTbl to
-  # TODO:  this function.
-  # ============================================================================
-  # ============================================================================
-  # ============================================================================
-
-
-
-
-
-
-  # # ----- Meta for new sites ---------------------------------------------------
-  #
-  # AQSID_new <- setdiff(airnow_data$AQSID, sites_locationTbl$AQSID)
-  #
-  # airnow_data_new <-
-  #   airnow_data %>%
-  #   dplyr::filter(.data$AQSID %in% !!AQSID_new)
-  #
-  # # > print(names(airnow_data_new), width = 75)
-  # # [1] "latitude"                  "longitude"
-  # # [3] "utcTime"                   "parameterName"
-  # # [5] "parameterConcentration"    "parameterUnits"
-  # # [7] "parameterRawConcentration" "parameterAQI"
-  # # [9] "parameterAQC"              "siteName"
-  # # [11] "agencyName"                "AQSID"
-  # # [13] "fullAQSID"
-  #
-  # result <- try({
-  #
-  #   # * update "known locations" -----
-  #
-  #   MazamaLocationUtils::mazama_initialize()
-  #   sites_locationTbl <-
-  #     sites_locationTbl %>%
-  #     table_addLocation(
-  #       airnow_data_new$longitude,
-  #       airnow_data_new$latitude,
-  #       distance_threshold = 100,            # TODO:  Hardcoded value!
-  #       verbose = FALSE
-  #     )
-  #
-  #   # * save "known locations" -----
-  #
-  #   MazamaLocationUtils::table_save(
-  #     sites_locationTbl,
-  #     collectionName = "airnow",
-  #     backup = TRUE,
-  #     outputType = "rda"
-  #   )
-  #
-  #   # * create 'meta' -----
-  #
-  #   meta_new <-
-  #     sites_locationTbl %>%
-  #     dplyr::filter(.data$AQSID %in% !!AQSID_shared) %>%
-  #     # Unique instrument ID = AQSID as we have nothing more specific
-  #     dplyr::mutate(
-  #       deviceID = .data$AQSID
-  #     ) %>%
-  #     # Unique "device deployment" ID
-  #     dplyr::mutate(
-  #       deviceDeploymentID = paste(.data$locationID, .data$deviceID, sep = "_")
-  #     ) %>%
-  #     # Other required metadata
-  #     dplyr::mutate(
-  #       deviceType = as.character(NA),
-  #       deviceDescription = as.character(NA),
-  #       deviceExtra = as.character(NA),
-  #       parameterName = !!parameterName,
-  #       units = !!units,
-  #       dataIngestSource = "AirNow",
-  #       dataIngestURL = "https://www.airnowapi.org/aq/data/",
-  #       dataIngestUnitID = as.character(NA),
-  #       dataIngestExtra = as.character(NA),
-  #       dataIngestDescription = as.character(NA)
-  #     )
-  #
-  # }, silent = TRUE)
-  #
-  # if ( "try-error" %in% class(result) ) {
-  #
-  #   if ( logger.isInitialized() ) {
-  #     err_msg <- geterrmessage()
-  #     logger.warning(" ----- epa_aqs_createMeta() ----- ")
-  #   }
-  #
-  # }
-  #
-  # # * combine tibbles -----
-  #
-  # if ( exists("meta_shared") ) {
-  #   meta <- dplyr::bind_rows(meta_shared, meta_new)
-  # } else {
-  #   meta <- meta_shared
-  # }
-
-  # # ----- Reorder columns ------------------------------------------------------
-  #
-  # coreNames <- AirMonitor::coreMetadataNames
-  # missingCoreNames <- setdiff(coreNames, names(meta))
-  # airnowNames <- setdiff(names(meta), coreNames)
-  #
-  # for ( name in missingCoreNames ) {
-  #   meta[[name]] <- as.character(NA)
-  # }
-  #
-  # meta <-
-  #   meta %>%
-  #   dplyr::select(dplyr::all_of(c(coreNames, airnowNames)))
-  #
-  # # ----- Return ---------------------------------------------------------------
-  #
-  # return(meta)
+  return(locationTbl)
 
 }
 
