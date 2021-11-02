@@ -4,12 +4,12 @@
 #'
 #' @title Update the AirNow "known locations" table
 #'
-#' @param collectionName Character identifier for this table.
+#' @param locationTbl Table of "known locations".
 #' @param distanceThreshold Separation distance in meters between "known locations".
 #' @param parameterName An EPA AQS criteria parameter name.
 #'
 #' @description
-#' Create/update a "known locations" table with AirNow monitor metadata.
+#' Update a "known locations" table with AirNow monitor metadata.
 #'
 #' The latest "sites metadata" file is downloaded from AirNow and cleaned up so
 #' that records can be added to the "known locations" table identified by
@@ -22,9 +22,9 @@
 #'
 
 airnow_updateKnownLocations <- function(
-  collectionName = NULL,
+  locationTbl = NULL,
   distanceThreshold = 100,
-  parameterName = c("PM2.5") ###, "CO", "OZONE", "PM10"),
+  parameterName = c("PM2.5") ###, "CO", "OZONE", "PM10")
 ) {
 
   if ( logger.isInitialized() )
@@ -32,26 +32,11 @@ airnow_updateKnownLocations <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  MazamaCoreUtils::stopIfNull(collectionName)
+  MazamaCoreUtils::stopIfNull(locationTbl)
 
   parameterName <- match.arg(parameterName)
 
-  locationDataDir <- MazamaLocationUtils::getLocationDataDir()
-
-  MazamaCoreUtils::stopIfNull(
-    locationDataDir,
-    "locationDataDir is not set. Set it with MazamaLocationUtils::setLocationDataDir()."
-  )
-
-  locationsFilePath <- file.path(locationDataDir, paste0(collectionName, ".rda"))
-
   # ----- Load data ------------------------------------------------------------
-
-  if ( file.exists(locationsFilePath) ) {
-    locationTbl <- MazamaLocationUtils::table_load(collectionName)
-  } else {
-    locationTbl <- MazamaLocationUtils::table_initialize()
-  }
 
   result <- try({
     airnow_sites <- airnow_getSites()
@@ -94,123 +79,133 @@ airnow_updateKnownLocations <- function(
       locationID = MazamaLocationUtils::location_createID(.data$longitude, .data$latitude)
     ) %>%
 
-    # Remove already known locations
-    dplyr::filter(!.data$locationID %in% locationTbl$locationID) %>%
-
     # Drop the "empty" fields
-    dplyr::select(-dplyr::starts_with("empty"))
+    dplyr::select(-dplyr::starts_with("empty")) %>%
 
-  # ----- Harmonize variables --------------------------------------------------
+  # Remove already known locations
+    dplyr::filter(!.data$locationID %in% locationTbl$locationID)
 
-  newSites_locationTbl <-
+  # ===== NEW SITES FOUND ======================================================
 
-    # Start with airnow_sites
-    airnow_sites %>%
+  if ( nrow(airnow_sites) > 0 ) {
 
-    # Rename all existing columns with "airnow_"
-    dplyr::rename_all(~ gsub("^", "airnow_", .x)) %>%
+    logger.trace("Adding %d new locations", nrow(airnow_sites))
 
-    # Rename columns where the data exists
-    dplyr::rename(
-      AQSID = .data$airnow_AQSID,
-      locationID = .data$airnow_locationID,
-      locationName = .data$airnow_siteName,
-      longitude = .data$airnow_longitude,
-      latitude = .data$airnow_latitude,
-      elevation = .data$airnow_elevation,
-      countryCode = .data$airnow_countryCode,
-      stateCode = .data$airnow_stateCode,
-      countyName = .data$airnow_countyName
-    ) %>%
+    # ----- Harmonize variables ------------------------------------------------
 
-    # Add "known location" columns derived from AirNow columns where possible
-    dplyr::mutate(
-      timezone = as.character(NA),
-      houseNumber = as.character(NA),
-      street = as.character(NA),
-      city = as.character(NA),
-      zip = as.character(NA)
-    ) %>%
+    newSites_locationTbl <-
 
-    # Remove columns we don't want
-    dplyr::select(
-      -.data$airnow_FIPSStateCode,
-      -.data$airnow_GNISCountyCode
+      # Start with airnow_sites
+      airnow_sites %>%
+
+      # Rename all existing columns with "airnow_"
+      dplyr::rename_all(~ gsub("^", "airnow_", .x)) %>%
+
+      # Rename columns where the data exists
+      dplyr::rename(
+        AQSID = .data$airnow_AQSID,
+        locationID = .data$airnow_locationID,
+        locationName = .data$airnow_siteName,
+        longitude = .data$airnow_longitude,
+        latitude = .data$airnow_latitude,
+        elevation = .data$airnow_elevation,
+        countryCode = .data$airnow_countryCode,
+        stateCode = .data$airnow_stateCode,
+        countyName = .data$airnow_countyName
+      ) %>%
+
+      # Add "known location" columns derived from AirNow columns where possible
+      dplyr::mutate(
+        timezone = as.character(NA),
+        houseNumber = as.character(NA),
+        street = as.character(NA),
+        city = as.character(NA),
+        zip = as.character(NA)
+      ) %>%
+
+      # Remove columns we don't want
+      dplyr::select(
+        -.data$airnow_FIPSStateCode,
+        -.data$airnow_GNISCountyCode
+      )
+
+    # ----- Reorganize columns -------------------------------------------------
+
+    # Get "airnow_" columns
+    airnow_columns <-
+      names(newSites_locationTbl) %>%
+      stringr::str_subset("airnow_.*")
+
+    # NOTE:  Include the "AQSID" column for AirNow data
+    newColumns <- c(
+      "AQSID",
+      MazamaLocationUtils::coreMetadataNames,
+      airnow_columns
     )
 
-  # ----- Reorganize columns -----------------------------------------------------
+    # Reorder column names
+    newSites_locationTbl <-
+      newSites_locationTbl %>%
+      dplyr::select(dplyr::all_of(newColumns))
 
-  # Get "airnow_" columns
-  airnow_columns <-
-    names(newSites_locationTbl) %>%
-    stringr::str_subset("airnow_.*")
+    # ----- Fix/add columns ----------------------------------------------------
 
-  # NOTE:  Include the "AQSID" column for AirNow data
-  newColumns <- c(
-    "AQSID",
-    MazamaLocationUtils::coreMetadataNames,
-    airnow_columns
-  )
+    # * countyName casing -----
 
-  # Reorder column names
-  newSites_locationTbl <-
-    newSites_locationTbl %>%
-    dplyr::select(dplyr::all_of(newColumns))
+    newSites_locationTbl$countyName <-
+      stringr::str_to_title(newSites_locationTbl$countyName)
 
-  # ----- Fix/add columns ------------------------------------------------------
+    # * Invalidate elevation = 0.0 -----
 
-  # * countyName casing -----
+    mask <- newSites_locationTbl$elevation == 0
+    newSites_locationTbl$elevation[mask] <- as.numeric(NA)
 
-  newSites_locationTbl$countyName <-
-    stringr::str_to_title(newSites_locationTbl$countyName)
+    # * Add timezones -----
 
-  # * Invalidate elevation = 0.0 -----
+    newSites_locationTbl$timezone <-
+      MazamaSpatialUtils::getTimezone(
+        newSites_locationTbl$longitude,
+        newSites_locationTbl$latitude,
+        # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
+        countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
+        useBuffering = TRUE
+      )
 
-  mask <- newSites_locationTbl$elevation == 0
-  newSites_locationTbl$elevation[mask] <- as.numeric(NA)
+    # * Replace countryCodes -----
 
-  # * Add timezones -----
+    # NOTE:  Puerto Rico seems to be the only mis-assigned country code
+    mask <- newSites_locationTbl$timezone == "America/Puerto Rico"
+    newSites_locationTbl$countryCode[mask] <- "PR"
 
-  newSites_locationTbl$timezone <-
-    MazamaSpatialUtils::getTimezone(
-      newSites_locationTbl$longitude,
-      newSites_locationTbl$latitude,
-      # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
-      countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
-      useBuffering = TRUE
-    )
+    # * Replace stateCodes -----
 
-  # * Replace countryCodes -----
+    # NOTE:  AQS 'State Code' values are a mess because they are naively derived
+    # NOTE:  from 9-digit AQS code positions and are incorrect for 12-digit AQS codes.
 
-  # NOTE:  Puerto Rico seems to be the only mis-assigned country code
-  mask <- newSites_locationTbl$timezone == "America/Puerto Rico"
-  newSites_locationTbl$countryCode[mask] <- "PR"
+    newSites_locationTbl$stateCode <-
+      MazamaSpatialUtils::getStateCode(
+        newSites_locationTbl$longitude,
+        newSites_locationTbl$latitude,
+        # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
+        countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
+        useBuffering = TRUE
+      )
 
-  # * Replace stateCodes -----
+    # * Replace countyNames -----
 
-  # NOTE:  AQS 'State Code' values are a mess because they are naively derived
-  # NOTE:  from 9-digit AQS code positions and are incorrect for 12-digit AQS codes.
+    # NOTE:  For foreign countries, AirNow is using level-2 names, rather than
+    # NOTE:  level-3 names.
 
-  newSites_locationTbl$stateCode <-
-    MazamaSpatialUtils::getStateCode(
-      newSites_locationTbl$longitude,
-      newSites_locationTbl$latitude,
-      # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
-      countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
-      useBuffering = TRUE
-    )
+    mask <- newSites_locationTbl$countryCode != "US"
+    newSites_locationTbl$countyName[mask] <- as.character(NA)
 
-  # * Replace countyNames -----
+    locationTbl <- dplyr::bind_rows(locationTbl, newSites_locationTbl)
 
-  # NOTE:  For foreign countries, AirNow is using level-2 names, rather thane
-  # NOTE:  level-3 names.
+  }
 
-  mask <- newSites_locationTbl$countryCode != "US"
-  newSites_locationTbl$countyName[mask] <- as.character(NA)
+  # ===== END NEW SITES FOUND ==================================================
 
   # ----- Return ---------------------------------------------------------------
-
-  locationTbl <- dplyr::bind_rows(locationTbl, newSites_locationTbl)
 
   return(locationTbl)
 
@@ -226,17 +221,26 @@ if ( FALSE ) {
   library(MazamaCoreUtils)
   logger.setLevel(TRACE)
 
-  MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
-  MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
+  library(MazamaSpatialUtils)
+  MazamaSpatialUtils::setSpatialDataDir("~/Data/Spatial")
+  MazamaSpatialUtils::loadSpatialData("EEZCountries")
+  MazamaSpatialUtils::loadSpatialData("OSMTimezones")
+  MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1")
 
-  collectionName <- "NEW_airnow_PM2.5_sites"
+  library(AirMonitorIngest)
+  setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
+
+  MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
+
+  collectionName <- "airnow_PM2.5_sites"
   distanceThreshold <- 100
   parameterName <- "PM2.5"
 
+  locationTbl <- MazamaLocationUtils::table_load(collectionName)
 
 
   locationTbl <- airnow_updateKnownLocations(
-    collectionName = collectionName,
+    locationTbl = locationTbl,
     distanceThreshold = distanceThreshold,
     parameterName = parameterName
   )

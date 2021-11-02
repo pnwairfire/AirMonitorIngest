@@ -14,36 +14,37 @@
 #' #'
 #' #' @param airnow_data Table of monitor data obtained with \code{epa_api_getData()}.
 #' #' @param sites_locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
-#' #' @param pollutant a named AirNow pollutant.
+#' #' @param parameterName An EPA AQS criteria parameter name.
 #' #'
 #' #' @return Tibble of device-deployment metadata.
 #' #'
 #'
-#' airnow_api_createMeta <- function(
+#' airnow_createMeta <- function(
 #'   airnow_data = NULL,
 #'   sites_locationTbl = NULL,
-#'   pollutant = NULL
+#'   parameterName = c("PM2.5") ###, "CO", "OZONE", "PM10"),
 #' ) {
 #'
 #'   if ( logger.isInitialized() )
-#'     logger.debug(" ----- epa_aqs_createMeta() ----- ")
+#'     logger.debug(" ----- airnow_createMeta() ----- ")
 #'
 #'   # ----- Validate Parameters --------------------------------------------------
 #'
 #'   MazamaCoreUtils::stopIfNull(airnow_data)
 #'   MazamaCoreUtils::stopIfNull(sites_locationTbl)
-#'   MazamaCoreUtils::stopIfNull(pollutant)
 #'
-#'   # TODO: un-hack this
-#'   pollutant <- "UG/M3"
+#'   parameterName <- match.arg(parameterName)
 #'
 #'   # ----- Simplify airnow_data -------------------------------------------------
 #'
 #'   airnow_data <-
+#'
 #'     airnow_data %>%
+#'
 #'     # Saw some AQSID with two records per hour, one with and one without paramterAQI
 #'     dplyr::arrange(parameterAQI) %>%
 #'     dplyr::distinct(.data$AQSID, .keep_all = TRUE) %>%
+#'
 #'     # Remove records with missing or zero lon/lat
 #'     dplyr::filter(
 #'       is.finite(.data$longitude),
@@ -52,27 +53,44 @@
 #'       .data$latitude != 0
 #'     )
 #'
-#'   # ----- Meta for existing sites ----------------------------------------------
+#'   # ----- Find nearest known locations -----------------------------------------
 #'
-#'   AQSID_shared <- intersect(airnow_data$AQSID, sites_locationTbl$AQSID)
+#'   known_locations <-
+#'     MazamaLocationUtils::table_getNearestLocation(
+#'       locationTbl,
+#'       airnow_data$longitude,
+#'       airnow_data$latitude,
+#'       500
+#'     )
+#'
+#'   # NOTE:  Any airnow_data records that do not match will have missing values
+#'   # NOTE:  for locationID
+#'
+#'   # ----- Meta for existing locations ------------------------------------------
 #'
 #'   meta_shared <-
-#'     sites_locationTbl %>%
-#'     dplyr::filter(.data$AQSID %in% !!AQSID_shared) %>%
+#'
+#'     known_locations %>%
+#'
+#'     # All locations found in locationTbl
+#'     dplyr::filter(!is.na(.data$locationID)) %>%
+#'
 #'     # Unique instrument ID = AQSID as we have nothing more specific
 #'     dplyr::mutate(
 #'       deviceID = .data$AQSID
 #'     ) %>%
+#'
 #'     # Unique "device deployment" ID
 #'     dplyr::mutate(
 #'       deviceDeploymentID = paste(.data$locationID, .data$deviceID, sep = "_")
 #'     ) %>%
+#'
 #'     # Other required metadata
 #'     dplyr::mutate(
 #'       deviceType = as.character(NA),
 #'       deviceDescription = as.character(NA),
 #'       deviceExtra = as.character(NA),
-#'       pollutant = !!pollutant,
+#'       parameterName = !!parameterName,
 #'       units = !!units,
 #'       dataIngestSource = "AirNow",
 #'       dataIngestURL = "https://www.airnowapi.org/aq/data/",
@@ -156,7 +174,7 @@
 #'   #       deviceType = as.character(NA),
 #'   #       deviceDescription = as.character(NA),
 #'   #       deviceExtra = as.character(NA),
-#'   #       pollutant = !!pollutant,
+#'   #       parameterName = !!parameterName,
 #'   #       units = !!units,
 #'   #       dataIngestSource = "AirNow",
 #'   #       dataIngestURL = "https://www.airnowapi.org/aq/data/",
@@ -222,7 +240,7 @@
 #'   starttime <- 2021102700
 #'   endtime <- 2021102700
 #'   timezone <- "America/Los_Angeles"
-#'   pollutant <- "PM2.5"
+#'   parameterName <- "PM2.5"
 #'   monitorType <- "both"
 #'
 #'   airnow_data <-
@@ -230,7 +248,7 @@
 #'       starttime = starttime,
 #'       endtime = endtime,
 #'       timezone = timezone,
-#'       pollutant = pollutant,
+#'       parameterName = parameterName,
 #'       monitorType = monitorType
 #'     )
 #'

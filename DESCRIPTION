@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.2.2
+Version: 0.2.3
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
@@ -20,6 +20,7 @@ Imports:
     AirMonitor,
     dplyr,
     httr,
+    lubridate,
     MazamaCoreUtils (>= 0.4.9),
     MazamaLocationUtils (>= 0.1.3),
     MazamaSpatialUtils (>= 0.7.6),

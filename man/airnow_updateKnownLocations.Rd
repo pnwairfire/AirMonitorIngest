@@ -5,13 +5,13 @@
 \title{Update the AirNow "known locations" table}
 \usage{
 airnow_updateKnownLocations(
-  collectionName = NULL,
+  locationTbl = NULL,
   distanceThreshold = 100,
   parameterName = c("PM2.5")
 )
 }
 \arguments{
-\item{collectionName}{Character identifier for this table.}
+\item{locationTbl}{Table of "known locations".}
 
 \item{distanceThreshold}{Separation distance in meters between "known locations".}
 
@@ -21,7 +21,7 @@ airnow_updateKnownLocations(
 Tibble of unique "known locations".
 }
 \description{
-Create/update a "known locations" table with AirNow monitor metadata.
+Update a "known locations" table with AirNow monitor metadata.
 
 The latest "sites metadata" file is downloaded from AirNow and cleaned up so
 that records can be added to the "known locations" table identified by

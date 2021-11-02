@@ -1,3 +1,13 @@
+# AirMonitorIngest 0.2.3
+
+Added functions to create AirNow 'data' and 'meta' objects:
+
+* `airnow_update()`
+* `airnow_updateKnownLocations()`
+* `airnow_updateUnknownLocations()`
+* `airnow_createMeta()`
+* `airnow_createData()`
+
 # AirMonitorIngest 0.2.2
 
 * Renamed `airnow_api_~()` functions to just `airnow_~()`.

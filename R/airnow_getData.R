@@ -58,10 +58,6 @@ airnow_getData <- function(
   parameterName <- match.arg(parameterName, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
 
-  # TODO:  Only one parameter at a time for now
-  if ( length(parameterName) > 1 )
-    stop("only a single 'parameterName' may be specified")
-
   MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
   if ( !timezone %in% base::OlsonNames() )
@@ -112,7 +108,7 @@ airnow_getData <- function(
         as.numeric() + 1
 
       logger.trace(
-        "Requesting %d hours of data starting at %s ",
+        "Requesting %.1f hours of data starting at %s ",
         chunkHourCount,
         strftime(startTimes[i], tz = "UTC", usetz = TRUE)
       )
