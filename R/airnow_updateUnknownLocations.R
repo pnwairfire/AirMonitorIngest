@@ -44,18 +44,22 @@ airnow_updateUnknownLocations <- function(
 
   # NOTE:  Do this to be sure we don't overwrite existing known locations.
 
-  # Add locationID
-  airnow_data$locationID <-
-    MazamaLocationUtils::table_getLocationID(
-      locationTbl = locationTbl,
-      longitude = airnow_data$longitude,
-      latitude = airnow_data$latitude,
-      distanceThreshold = distanceThreshold,
-      measure = "geodesic"
-    )
-
   airnow_unknown <-
-    airnow_data %>%
+
+    airnow_data_locations %>%
+
+    # Add locationID for "known locations"
+    dplyr::mutate(
+      locationID = MazamaLocationUtils::table_getLocationID(
+        locationTbl = !!locationTbl,
+        longitude = .data$longitude,
+        latitude = .data$latitude,
+        distanceThreshold = !!distanceThreshold,
+        measure = "geodesic"
+      )
+    ) %>%
+
+    # Filter for "unknown locations"
     dplyr::filter(is.na(.data$locationID))
 
   # ----- Create new "known_locations" records ---------------------------------

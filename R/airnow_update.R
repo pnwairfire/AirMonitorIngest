@@ -128,11 +128,12 @@ airnow_update <- function(
 
   # ----- Create 'data' --------------------------------------------------------
 
-  # data <-
-  #   airnow_createData(
-  #     locationTbl,
-  #     airnow_data
-  #   )
+  data <-
+    airnow_createData(
+      meta,
+      airnow_data,
+      distanceThreshold
+    )
 
   # ----- Return 'monitor' object ----------------------------------------------
 
@@ -165,6 +166,9 @@ if ( FALSE ) {
   collectionName <- "airnow_PM2.5_sites"
   distanceThreshold <- 100
   parameterName <- "PM2.5"
+
+  total_time <- proc.time() - ptm
+  print(total_time)
 
 
 

@@ -49,7 +49,7 @@ airnow_createMeta <- function(
 
     airnow_data %>%
 
-    # Saw some AQSID with two records per hour, one with and one without paramterAQI
+    # Saw some AQSID with two records per hour, one with and one without parameterAQI
     dplyr::arrange(.data$parameterAQI) %>%
     dplyr::distinct(.data$AQSID, .keep_all = TRUE) %>%
 
@@ -74,7 +74,7 @@ airnow_createMeta <- function(
   # NOTE:  Assume that all the work has been done to update known_locations so
   # NOTE:  that all locations in airnow_data are "known".
   # NOTE:
-  # NOTE:  Any that are not will be removed with a warning message
+  # NOTE:  Any that are not will be removed with a warning message.
 
   if ( anyNA(known_locations$locationID) ) {
     err_msg <- sprintf(
@@ -118,7 +118,19 @@ airnow_createMeta <- function(
       dataIngestUnitID = as.character(NA),
       dataIngestExtra = as.character(NA),
       dataIngestDescription = as.character(NA)
-    )
+    ) %>%
+
+    # NOTE:  The use of table_getNearestLocation() above may have assigned
+    # NOTE:  multiple records from airnow_data with marginally different
+    # NOTE:  longitude or latitude values to the same locationID. This is
+    # NOTE:  exactly as designed. (We have seen mobile monitors behind the
+    # NOTE:  CARB office in Sacramento reporting slightly different locations.)
+    # NOTE:
+    # NOTE:  Because of this, we need to filter out any records with duplicate
+    # NOTE:  deviceDeploymentIDs.
+
+    # Guarantee unique deviceDeploymentIDs
+    dplyr::distinct(.data$deviceDeploymentID, .keep_all = TRUE)
 
   # ----- Reorder columns ------------------------------------------------------
 
