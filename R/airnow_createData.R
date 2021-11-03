@@ -13,15 +13,19 @@
 #' with a \code{deviceDeploymentID} unique identifier that is matched by column
 #' names in an associated \code{data} file.
 #'
+#' @param locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param meta Table of metadata produced with \code{airnow_createMeta}.
 #' @param airnow_data Table of monitor data obtained with \code{airnow_getData()}.
+#' @param distanceThreshold Separation distance in meters between "known locations".
 #'
 #' @return Tibble of device-deployment metadata.
 #'
 
 airnow_createData <- function(
+  locationTbl = NULL,
   meta = NULL,
-  airnow_data = NULL
+  airnow_data = NULL,
+  distanceThreshold = NULL
 ) {
 
   if ( logger.isInitialized() )
@@ -90,38 +94,20 @@ airnow_createData <- function(
     warning(err_msg)
   }
 
+  # ----- Create hourly axis ---------------------------------------------------
 
+  # NOTE:  We want to guarantee that there is a record for every single hour
+  # NOTE:  even if no data are available in that hour.
 
+  # Create a tibble with a regular time axis
+  hourlyTbl <- dplyr::tibble(
+    datetime = seq(
+      min(airnow_data$datetime, na.rm = TRUE),
+      max(airnow_data$datetime, na.rm = TRUE),
+      by = "hours")
+  )
 
-
-
-  # NOTE:  Locations found in the data files have been found to be up to 20+
-  # NOTE:  meters off from locations reported for the same State-County-Site-POC
-  # NOTE:  in Sites or Monitors tables. But 'deviceID' should match.
-
-  # NOTE:  For AQS_88101_meta:
-  # NOTE:    > any(duplicated(meta$deviceID))
-  # NOTE:    [1] FALSE
-
-  # NOTE:  We will use 'deviceID' as the monitor unique identifier and obtain
-  # NOTE:  the 'deviceDeploymentID' from it.
-
-  # # Use a named vector to quickly match deviceIDs to deviceDeploymentIDs
-  # deviceDeploymentID <- meta$deviceDeploymentID
-  # names(deviceDeploymentID) <- meta$deviceID
-  #
-  # AQS_data$deviceDeploymentID <- deviceDeploymentID[AQS_data$deviceID]
-  #
-  #
-  #
-  #
-
-
-
-
-
-
-  # ----- Reshape data ---------------------------------------------------------
+  # ----- Reshape raw data -----------------------------------------------------
 
   rawData <-
 
@@ -138,60 +124,59 @@ airnow_createData <- function(
     ) %>%
     reshape2::dcast(datetime ~ deviceDeploymentID)
 
+  # > setdiff(names(rawData), meta$deviceDeploymentID)
+  # [1] "datetime"
 
+  # Merge the two dataframes together with a left join
+  rawData <- dplyr::left_join(hourlyTbl, rawData, by = "datetime") %>%
+    # Order columns to reflect meta
+    dplyr::select(all_of(c('datetime', meta$deviceDeploymentID)))
 
+  if ( logger.isInitialized() )
+    logger.trace("rawData' has %d rows and %d columns", nrow(rawData), ncol(rawData))
 
+  # > all(names(rawData) == c('datetime', meta$deviceDeploymentID))
+  # [1] TRUE
 
+  # ----- Reshape NowCast data -------------------------------------------------
 
+  nowcastData <-
 
-  #'   # Use dplyr and reshape2 packages to seprate the data by parameter and restructure each data frame
-  #'   for ( parameter in parameters ) {
-  #'
-  #'     logger.trace("Reshaping data for %s ...", parameter)
-  #'
-  #'     # Create datetime variable
-  #'     tbl <- dplyr::filter(airnowTbl, airnowTbl$ParameterName == parameter)
-  #'     datestamp <- paste0(tbl$ValidDate, ' ', tbl$ValidTime)
-  #'     tbl$datetime <- lubridate::mdy_hm(datestamp) # 'mdy_hm', not 'ymd_hm'
-  #'     # Guarantee unique rows
-  #'     tbl <- dplyr::distinct(tbl)
-  #'     # Melt and recast (convert tibbles to dataframes)
-  #'     melted <- reshape2::melt(tbl, id.vars=c('datetime','monitorID'), measure.vars=c('Value'))
-  #'     dfList[[parameter]] <- reshape2::dcast(melted, datetime ~ monitorID)
-  #'
-  #'   }
-  #'
-  #'   # NOTE:  Some parameters, especially those with few monitors, may not have
-  #'   # NOTE:  measurements for for every single hour. Here we guarantee that the
-  #'   # NOTE:  reshaped dataframes we return will have a row for every single hour
-  #'   # NOTE:  in a month, even if that row is filled with NAs.
-  #'
-  #'   # Guarantee that all times are present by starting with a dataframe containing only a uniform time axis.
-  #'   starttime <- MazamaCoreUtils::parseDatetime(startdate, timezone = "UTC")
-  #'   timeAxis <- seq(starttime, starttime + lubridate::dhours(hours-1), by = 'hours')
-  #'   hourlyDF <- data.frame(datetime=timeAxis)
-  #'
-  #'   logger.trace("Putting data on a uniform time axis ...")
-  #'
-  #'   for ( parameter in parameters ) {
-  #'
-  #'     # Join data to uniform time axis
-  #'     dfList[[parameter]] <- suppressMessages({
-  #'       dplyr::full_join(hourlyDF, dfList[[parameter]])
-  #'     })
-  #'
-  #'     # NOTE:  Check this URL for some EPA defined levels:
-  #'     # NOTE:    https://aqs.epa.gov/aqsweb/documents/codetables/aqi_breakpoints.csv
-  #'
-  #'     # Assume this data has been QC'ed and let everything through
-  #'     dfList[[parameter]] <- airnow_qualityControl(dfList[[parameter]],
-  #'                                                  limits = c(-Inf,Inf))
-  #'
-  #'   }
+    airnow_data %>%
 
+    # Guarantee that we only have one record per hour
+    dplyr::select(all_of(c("datetime", "parameterConcentration", "deviceDeploymentID"))) %>%
+    dplyr::distinct() %>%
+
+    # Reshape to [datetime x deviceDeploymentID]
+    reshape2::melt(
+      id.vars = c("datetime", "deviceDeploymentID"),
+      measure.vars = c("parameterConcentration")
+    ) %>%
+    reshape2::dcast(datetime ~ deviceDeploymentID)
+
+  # > setdiff(names(nowcastData), meta$deviceDeploymentID)
+  # [1] "datetime"
+
+  # Merge the two dataframes together with a left join
+  nowcastData <-
+    dplyr::left_join(hourlyTbl, nowcastData, by = "datetime") %>%
+    # Order columns to reflect meta
+    dplyr::select(all_of(c('datetime', meta$deviceDeploymentID)))
+
+  if ( logger.isInitialized() )
+    logger.trace("'nowcastData' has %d rows and %d columns", nrow(nowcastData), ncol(nowcastData))
+
+  # > all(names(nowcastData) == c('datetime', meta$deviceDeploymentID))
+  # [1] TRUE
 
   # ----- Return ---------------------------------------------------------------
 
-  return(data)
+  dataList = list(
+    raw = rawData,
+    nowcast = nowcastData
+  )
+
+  return(dataList)
 
 }

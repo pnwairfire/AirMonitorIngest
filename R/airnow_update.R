@@ -130,6 +130,7 @@ airnow_update <- function(
 
   data <-
     airnow_createData(
+      locationTbl,
       meta,
       airnow_data,
       distanceThreshold

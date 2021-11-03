@@ -63,7 +63,7 @@ airnow_createMeta <- function(
 
   # ----- Find nearest known locations -----------------------------------------
 
-  known_locations <-
+  airnow_data_locations <-
     MazamaLocationUtils::table_getNearestLocation(
       locationTbl,
       airnow_data$longitude,
@@ -71,34 +71,41 @@ airnow_createMeta <- function(
       distanceThreshold = distanceThreshold
     )
 
-  # NOTE:  Assume that all the work has been done to update known_locations so
-  # NOTE:  that all locations in airnow_data are "known".
+  # NOTE:  Assume that all the work has been done to update the incoming
+  # NOTE:  locationTbl so that all locations in airnow_data are "known".
   # NOTE:
   # NOTE:  Any that are not will be removed with a warning message.
 
-  if ( anyNA(known_locations$locationID) ) {
+  if ( anyNA(airnow_data_locations$locationID) ) {
+
     err_msg <- sprintf(
       "%d locations are still unknown and will be removed",
-      length(is.na(known_locations$locationID))
+      length(is.na(airnow_data_locations$locationID))
     )
     if ( logger.isInitialized() ) logger.warn(err_msg)
     warning(err_msg)
-  }
 
-  # Retain only truly "known" locations
-  known_locations <-
-    known_locations %>%
-    dplyr::filter(!is.na(.data$locationID))
+    # Retain only truly "known" locations
+    airnow_data_locations <-
+      airnow_data_locations %>%
+      dplyr::filter(!is.na(.data$locationID))
+
+  }
 
   # ----- Create 'meta' --------------------------------------------------------
 
+  # NOTE:  At this point, airnow_data_locations and airnow_data have the same
+  # NOTE:  number of rows. There may be duplicate locationIDs in airnow_data_locations
+  # NOTE:  associated with different AQSIDs in airnow_data
+
   meta <-
 
-    known_locations %>%
+    airnow_data_locations %>%
 
     # Unique instrument ID = AQSID as we have nothing more specific
     dplyr::mutate(
-      deviceID = .data$AQSID
+      AQSID = airnow_data$AQSID,
+      deviceID = airnow_data$AQSID
     ) %>%
 
     # Unique "device deployment" ID
