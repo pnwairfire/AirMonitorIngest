@@ -6,19 +6,19 @@
 \usage{
 airnow_createData(
   locationTbl = NULL,
+  distanceThreshold = NULL,
   meta = NULL,
-  airnow_data = NULL,
-  distanceThreshold = NULL
+  airnow_data = NULL
 )
 }
 \arguments{
 \item{locationTbl}{Table of "known locations" produced with \pkg{MazamaLocationUtils}.}
 
+\item{distanceThreshold}{Separation distance in meters between "known locations".}
+
 \item{meta}{Table of metadata produced with \code{airnow_createMeta}.}
 
 \item{airnow_data}{Table of monitor data obtained with \code{airnow_getData()}.}
-
-\item{distanceThreshold}{Separation distance in meters between "known locations".}
 }
 \value{
 Tibble of device-deployment metadata.

@@ -14,18 +14,18 @@
 #' names in an associated \code{data} file.
 #'
 #' @param locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
+#' @param distanceThreshold Separation distance in meters between "known locations".
 #' @param meta Table of metadata produced with \code{airnow_createMeta}.
 #' @param airnow_data Table of monitor data obtained with \code{airnow_getData()}.
-#' @param distanceThreshold Separation distance in meters between "known locations".
 #'
 #' @return Tibble of device-deployment metadata.
 #'
 
 airnow_createData <- function(
   locationTbl = NULL,
+  distanceThreshold = NULL,
   meta = NULL,
-  airnow_data = NULL,
-  distanceThreshold = NULL
+  airnow_data = NULL
 ) {
 
   if ( logger.isInitialized() )
@@ -33,6 +33,8 @@ airnow_createData <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
+  MazamaCoreUtils::stopIfNull(locationTbl)
+  MazamaCoreUtils::stopIfNull(distanceThreshold)
   MazamaCoreUtils::stopIfNull(meta)
   MazamaCoreUtils::stopIfNull(airnow_data)
 

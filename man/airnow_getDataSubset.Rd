@@ -5,22 +5,22 @@
 \title{Download and parse hourly data from the AirNow data API}
 \usage{
 airnow_getDataSubset(
+  parameterName = c("PM2.5"),
   starttime = NULL,
   endtime = NULL,
   timezone = "UTC",
-  parameterName = c("PM2.5"),
   monitorType = c("both", "permanent", "mobile"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 )
 }
 \arguments{
+\item{parameterName}{One or more EPA AQS criteria parameter names.}
+
 \item{starttime}{Desired start datetime (ISO 8601).}
 
 \item{endtime}{Desired end datetime (ISO 8601).}
 
 \item{timezone}{Olson timezone used to interpret dates (required).}
-
-\item{parameterName}{One or more EPA AQS criteria parameter names.}
 
 \item{monitorType}{Subset of all monitors to select.}
 
@@ -44,10 +44,10 @@ library(AirMonitorIngest)
 
 tbl <-
   airnow_getData(
+    parameterName = "PM2.5",
     starttime = 2021101200,
     endtime = 2021101200,
     timezone = "America/Los_Angeles",
-    parameterName = "PM2.5",
     monitorType = "permanent"
    )
 

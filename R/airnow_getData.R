@@ -4,10 +4,10 @@
 #'
 #' @title Download and parse hourly data from the AirNow data API
 #'
+#' @param parameterName One or more EPA AQS criteria parameter names.
 #' @param starttime Desired start datetime (ISO 8601).
 #' @param endtime Desired end datetime (ISO 8601).
 #' @param timezone Olson timezone used to interpret dates (required).
-#' @param parameterName One or more EPA AQS criteria parameter names.
 #' @param monitorType Subset of all monitors to select.
 #' @param baseUrl Base URL for archived hourly data.
 #'
@@ -28,20 +28,20 @@
 #'
 #' tbl <-
 #'   airnow_getData(
+#'     parameterName = "PM2.5",
 #'     starttime = 2021101200,
 #'     endtime = 2021101300,
 #'     timezone = "America/Los_Angeles",
-#'     parameterName = "PM2.5",
 #'     monitorType = "permanent"
 #'    )
 #'
 #' }
 
 airnow_getData <- function(
+  parameterName = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
   starttime = NULL,
   endtime = NULL,
   timezone = "UTC",
-  parameterName = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
   monitorType = c("both", "permanent", "mobile"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
@@ -119,10 +119,10 @@ airnow_getData <- function(
     result <- try({
       tbl <-
         airnow_getDataSubset(
+          parameterName = parameterName,
           starttime = startTimes[i],
           endtime = endTimes[i],
           timezone = timezone,
-          parameterName = parameterName,
           monitorType = monitorType,
           baseUrl = baseUrl
         )

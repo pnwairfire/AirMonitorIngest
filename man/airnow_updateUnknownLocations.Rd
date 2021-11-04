@@ -6,16 +6,16 @@
 \usage{
 airnow_updateUnknownLocations(
   locationTbl = NULL,
-  airnow_data = NULL,
-  distanceThreshold = NULL
+  distanceThreshold = NULL,
+  airnow_data = NULL
 )
 }
 \arguments{
 \item{locationTbl}{Table of "known locations" produced with \pkg{MazamaLocationUtils}.}
 
-\item{airnow_data}{Table of monitor data obtained with \code{epa_api_getData()}.}
-
 \item{distanceThreshold}{Separation distance in meters between "known locations".}
+
+\item{airnow_data}{Table of monitor data obtained with \code{epa_api_getData()}.}
 }
 \value{
 Tibble of device-deployment metadata.

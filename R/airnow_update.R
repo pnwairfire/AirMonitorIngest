@@ -65,10 +65,10 @@ airnow_update <- function(
 
   airnow_data <-
     airnow_getData(
+      parameterName = parameterName,
       starttime = starttime,
       endtime = endtime,
       timezone = timezone,
-      parameterName = parameterName,
       monitorType = "both"
     )
 
@@ -111,8 +111,8 @@ airnow_update <- function(
   locationTbl <-
     airnow_updateUnknownLocations(
       locationTbl,
-      airnow_unknown,
-      distanceThreshold
+      distanceThreshold,
+      airnow_unknown
     )
 
   # NOTE:  locationTbl now has records for data NOT found in AirNow's sites metadata file
@@ -122,8 +122,8 @@ airnow_update <- function(
   meta <-
     airnow_createMeta(
       locationTbl,
-      airnow_data,
-      distanceThreshold
+      distanceThreshold,
+      airnow_data
     )
 
   # ----- Create 'data' --------------------------------------------------------
@@ -131,9 +131,9 @@ airnow_update <- function(
   dataList <-
     airnow_createData(
       locationTbl,
+      distanceThreshold,
       meta,
-      airnow_data,
-      distanceThreshold
+      airnow_data
     )
 
   # ----- Return 'monitor' object ----------------------------------------------
@@ -166,7 +166,7 @@ if ( FALSE ) {
   MazamaSpatialUtils::loadSpatialData("USCensusCounties")
 
   library(AirMonitorIngest)
-  setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
+  AirMonitorIngest::setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
 
   MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 

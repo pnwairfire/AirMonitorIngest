@@ -2,8 +2,7 @@
 #'
 #' @title Download and parse AirNow sites metadata
 #'
-#' @param baseUrl URL of the AirNow monitoring site locations file.
-#' @param sitesFile Name of the AirNow monitoring site locations file.
+#' @param url URL of the AirNow monitoring site locations file.
 #' @param quiet Logical passed on to
 #' \code{readr::read_delim(progress = !quiet)}.
 #'
@@ -42,8 +41,7 @@
 #' }
 
 airnow_getSites <- function(
-  baseUrl = "https://files.airnowtech.org/airnow/today/",
-  sitesFile = "monitoring_site_locations.dat",
+  url = "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat",
   quiet = TRUE
 ) {
 
@@ -52,12 +50,10 @@ airnow_getSites <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  MazamaCoreUtils::stopIfNull(sitesFile)
-  MazamaCoreUtils::stopIfNull(baseUrl)
+  MazamaCoreUtils::setIfNull(url, "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat")
+  MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # ----- Download data --------------------------------------------------------
-
-  url <- paste0(baseUrl, sitesFile)
 
   # NOTE:  Information on the structure of this file come from the Monitoring
   # NOTE:  Site Factsheet (June, 2019).
@@ -110,7 +106,8 @@ airnow_getSites <- function(
     col_names = col_names,
     col_types = col_types,
     locale = locale,
-    progress = !quiet
+    progress = !quiet,
+    show_col_types = !quiet
   )
 
   return(tbl)

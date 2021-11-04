@@ -5,15 +5,12 @@
 \title{Download and parse AirNow sites metadata}
 \usage{
 airnow_getSites(
-  baseUrl = "https://files.airnowtech.org/airnow/today/",
-  sitesFile = "monitoring_site_locations.dat",
+  url = "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat",
   quiet = TRUE
 )
 }
 \arguments{
-\item{baseUrl}{URL of the AirNow monitoring site locations file.}
-
-\item{sitesFile}{Name of the AirNow monitoring site locations file.}
+\item{url}{URL of the AirNow monitoring site locations file.}
 
 \item{quiet}{Logical passed on to
 \code{readr::read_delim(progress = !quiet)}.}
