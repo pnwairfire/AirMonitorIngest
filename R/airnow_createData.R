@@ -113,9 +113,11 @@ airnow_createData <- function(
 
     airnow_data %>%
 
-    # Guarantee that we only have one record per hour
+    # Select the columns we need
     dplyr::select(all_of(c("datetime", "parameterRawConcentration", "deviceDeploymentID"))) %>%
-    dplyr::distinct() %>%
+
+    # Guarantee that we only have one record per hour
+    dplyr::distinct(.data$datetime, .data$deviceDeploymentID, .keep_all = TRUE) %>%
 
     # Reshape to [datetime x deviceDeploymentID]
     reshape2::melt(
@@ -144,9 +146,22 @@ airnow_createData <- function(
 
     airnow_data %>%
 
-    # Guarantee that we only have one record per hour
+    # NOTE:  Data returned by airnow_getData() can have multiple parameterConcentration
+    # NOTE:  records per hour. It appears that the valid one will also typically
+    # NOTE:  (but not always) have an associated AQI value.
+    # NOTE:
+    # NOTE:  To guarantee that we only get the preferred record for each hour,
+    # NOTE:  We arrange() by parameterAQI which will put the NA values last so
+    # NOTE:  that distinct() will get the value associated with a valid
+    # NOTE:  parameterAQI if it exists.
+
+    dplyr::arrange(.data$parameterAQI) %>%
+
+    # Select the columns we need
     dplyr::select(all_of(c("datetime", "parameterConcentration", "deviceDeploymentID"))) %>%
-    dplyr::distinct() %>%
+
+    # Guarantee that we only have one record per hour
+    dplyr::distinct(.data$datetime, .data$deviceDeploymentID, .keep_all = TRUE) %>%
 
     # Reshape to [datetime x deviceDeploymentID]
     reshape2::melt(

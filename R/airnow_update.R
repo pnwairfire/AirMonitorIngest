@@ -128,7 +128,7 @@ airnow_update <- function(
 
   # ----- Create 'data' --------------------------------------------------------
 
-  data <-
+  dataList <-
     airnow_createData(
       locationTbl,
       meta,
@@ -138,7 +138,13 @@ airnow_update <- function(
 
   # ----- Return 'monitor' object ----------------------------------------------
 
+  tblList <- list(
+    meta = meta,
+    raw = dataList$raw,
+    nowcast = dataList$nowcast
+  )
 
+  return(tblList)
 
 }
 
@@ -171,9 +177,7 @@ if ( FALSE ) {
   total_time <- proc.time() - ptm
   print(total_time)
 
-
-
-  locationTbl <- airnow_update(
+  tblList <- airnow_update(
     collectionName = collectionName,
     distanceThreshold = distanceThreshold,
     parameterName = parameterName
