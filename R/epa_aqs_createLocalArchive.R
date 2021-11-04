@@ -35,10 +35,10 @@
 #' function will then discover the downloaded files in the \code{downloadDir}.
 #'
 #' @param sites_locationTbl EPA AQS "known locations" table for \code{parameterCode} monitors.
-#' @param downloadDir Directory in which to save downloaded EPA .zip files. If \code{NULL}, a temp directory is used.
 #' @param parameterCode EPA "Parameter Code".
 #' @param years Vector of years for which to transform data.
 #' @param archiveBaseDir Path under which the directory structure will be created.
+#' @param downloadDir Directory in which to save downloaded EPA .zip files. If \code{NULL}, a temp directory is used.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
 #' @return Returns 0 on success.
@@ -46,10 +46,10 @@
 
 epa_aqs_createLocalArchive <- function(
   sites_locationTbl = NULL,
-  downloadDir = NULL,
   parameterCode = NULL,
   years = NULL,
   archiveBaseDir = NULL,
+  downloadDir = NULL,
   quiet = FALSE
 ) {
 
@@ -119,8 +119,8 @@ epa_aqs_createLocalArchive <- function(
 
         zipFile <-
           epa_aqs_downloadHourlyData(
-            year = year,
             parameterCode = parameterCode,
+            year = year,
             downloadDir = downloadDir,
             quiet = quiet
           )

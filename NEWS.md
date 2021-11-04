@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.2.4
+
+Harmonize argument names and order in `epa_aqs_~()` and `airnow_~()` function signatures.
+
 # AirMonitorIngest 0.2.3
 
 Added functions to create AirNow 'data' and 'meta' objects:

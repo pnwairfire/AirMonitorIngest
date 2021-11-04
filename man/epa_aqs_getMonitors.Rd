@@ -5,15 +5,15 @@
 \title{Download and parse EPA AQS monitor metadata}
 \usage{
 epa_aqs_getMonitors(
+  url = "https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip",
   downloadDir = tempdir(),
-  baseUrl = "https://aqs.epa.gov/aqsweb/airdata/",
   quiet = TRUE
 )
 }
 \arguments{
-\item{downloadDir}{Directory where .zip file will be saved.}
+\item{url}{URL for the \code{aqs_monitors.zip} file.}
 
-\item{baseUrl}{Character base URL for the EPA AQS archive.}
+\item{downloadDir}{Directory where .zip file will be saved.}
 
 \item{quiet}{Logical passed on to \code{utils::download.file()}.}
 }

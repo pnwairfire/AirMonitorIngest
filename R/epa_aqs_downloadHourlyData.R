@@ -35,10 +35,10 @@
 #' timed out, please download files manually. Functions that process these files
 #' will then discover the downloaded files in the \code{downloadDir}.
 
-#' @param year Ingeter year.
 #' @param parameterCode Character pollutant code.
-#' @param downloadDir Directory where .zip file will be saved.
+#' @param year Ingeter year.
 #' @param baseUrl Character base URL for the EPA AQS archive.
+#' @param downloadDir Directory where .zip file will be saved.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
 #' @return Filepath of the downloaded zip file.
@@ -57,17 +57,23 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Save the download in ~/Data/EPA
-#' zipFile <- epa_aqs_downloadHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
+#' zipFile <-
+#'   epa_aqs_downloadHourlyData(
+#'     parameterCode = "88101",
+#'     year = 2008,
+#'     downloadDir = "~/Data/EPA/",
+#'     quiet = FALSE
+#'   )
 #'
 #' # Uncompress and parse into a tibble
 #' tbl <- epa_aqs_parseHourlyData(zipFile)
 #' }
 
 epa_aqs_downloadHourlyData <- function(
-  year = NULL,
   parameterCode = "88101",
-  downloadDir = tempdir(),
+  year = NULL,
   baseUrl = 'https://aqs.epa.gov/aqsweb/airdata/',
+  downloadDir = tempdir(),
   quiet = TRUE
 ) {
 
@@ -76,10 +82,11 @@ epa_aqs_downloadHourlyData <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  MazamaCoreUtils::stopIfNull(year)
   MazamaCoreUtils::stopIfNull(parameterCode)
-  MazamaCoreUtils::stopIfNull(downloadDir)
+  MazamaCoreUtils::stopIfNull(year)
   MazamaCoreUtils::stopIfNull(baseUrl)
+  MazamaCoreUtils::stopIfNull(downloadDir)
+  MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # * Parameter code -----
   validParameterCodes <- c(

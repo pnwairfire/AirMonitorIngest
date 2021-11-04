@@ -7,8 +7,8 @@
 #' Download site metadata from the US EPA and save it to a directory. Then
 #' uncompress and parse the data into a tibble.
 #'
+#' @param url URL for the \code{aqs_sites.zip} file.
 #' @param downloadDir Directory where .zip file will be saved.
-#' @param baseUrl Character base URL for the EPA AQS archive.
 #' @param quiet Logical passed on to \code{utils::download.file()}.
 #'
 #' @return Tibble of EPA site metadata.
@@ -31,8 +31,8 @@
 #' }
 
 epa_aqs_getSites <- function(
+  url = "https://aqs.epa.gov/aqsweb/airdata/aqs_sites.zip",
   downloadDir = tempdir(),
-  baseUrl = 'https://aqs.epa.gov/aqsweb/airdata/',
   quiet = TRUE
 ) {
 
@@ -41,13 +41,13 @@ epa_aqs_getSites <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
+  MazamaCoreUtils::stopIfNull(url)
   MazamaCoreUtils::stopIfNull(downloadDir)
-  MazamaCoreUtils::stopIfNull(baseUrl)
+  MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # ----- Download data --------------------------------------------------------
 
   # Set up file names and paths
-  url <- paste0(baseUrl, "aqs_sites.zip")
   zipFile <- path.expand( file.path(downloadDir, "aqs_sites.zip") )
 
   if ( !file.exists(zipFile) ) {
@@ -133,7 +133,12 @@ epa_aqs_getSites <- function(
     logger.trace('Parsing %s ...', csvFile)
 
   result <- try({
-    tbl <- readr::read_csv(csvFile, col_types = col_types, progress = !quiet)
+    tbl <- readr::read_csv(
+      csvFile,
+      col_types = col_types,
+      progress = !quiet,
+      show_col_types = !quiet
+    )
   }, silent = quiet)
 
   if ( "try-error" %in% class(result) ) {

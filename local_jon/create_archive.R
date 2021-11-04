@@ -7,10 +7,11 @@ MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
 MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
 parameterCodes <- c("42101", "44201", "81102", "88101", "88502")
+parameterCodes <- c("88101")
 
 for ( parameterCode in parameterCodes ) {
 
-  logDir <- file.path("~/Data/monitoring/epa_aqs/", parameterCode)
+  logDir <- file.path("~/Data/monitoring-data-v2/epa_aqs/", parameterCode)
   dir.create(logDir, showWarnings = FALSE, recursive = TRUE)
   MazamaCoreUtils::initializeLogging(logDir)
   MazamaCoreUtils::logger.setLevel(DEBUG)
@@ -19,7 +20,7 @@ for ( parameterCode in parameterCodes ) {
 
   library(MazamaLocationUtils)
   MazamaLocationUtils::mazama_initialize()
-  MazamaLocationUtils::setLocationDataDir("~/Data/monitoring/known_locations")
+  MazamaLocationUtils::setLocationDataDir("~/Data/monitoring-data-v2/known_locations")
 
   sites_locationTbl <-
     MazamaLocationUtils::table_load(sprintf("AQS_%s_sites", parameterCode))
@@ -32,10 +33,10 @@ for ( parameterCode in parameterCodes ) {
 
   epa_aqs_createLocalArchive(
     sites_locationTbl = sites_locationTbl,
-    downloadDir = "~/Data/EPA",
     parameterCode = parameterCode,
     years = 2015:2018,
-    archiveBaseDir = "~/Data/monitoring",
+    archiveBaseDir = "~/Data/monitoring-data-v2",
+    downloadDir = "~/Data/EPA",
     quiet = FALSE
   )
 

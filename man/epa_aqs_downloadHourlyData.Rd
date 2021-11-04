@@ -5,21 +5,21 @@
 \title{Download hourly EPA air quality data}
 \usage{
 epa_aqs_downloadHourlyData(
-  year = NULL,
   parameterCode = "88101",
-  downloadDir = tempdir(),
+  year = NULL,
   baseUrl = "https://aqs.epa.gov/aqsweb/airdata/",
+  downloadDir = tempdir(),
   quiet = TRUE
 )
 }
 \arguments{
-\item{year}{Ingeter year.}
-
 \item{parameterCode}{Character pollutant code.}
 
-\item{downloadDir}{Directory where .zip file will be saved.}
+\item{year}{Ingeter year.}
 
 \item{baseUrl}{Character base URL for the EPA AQS archive.}
+
+\item{downloadDir}{Directory where .zip file will be saved.}
 
 \item{quiet}{Logical passed on to \code{utils::download.file()}.}
 }
@@ -70,7 +70,13 @@ MazamaCoreUtils::initializeLogging(logDir = "~/Data/EPA/")
 logger.setLevel(TRACE)
 
 # Save the download in ~/Data/EPA
-zipFile <- epa_aqs_downloadHourlyData(2008, "88101", "~/Data/EPA/", quiet = FALSE)
+zipFile <-
+  epa_aqs_downloadHourlyData(
+    parameterCode = "88101",
+    year = 2008,
+    downloadDir = "~/Data/EPA/",
+    quiet = FALSE
+  )
 
 # Uncompress and parse into a tibble
 tbl <- epa_aqs_parseHourlyData(zipFile)

@@ -6,16 +6,13 @@
 \usage{
 epa_aqs_getCodes(
   tableName = NULL,
-  baseUrl = "https://aqs.epa.gov/aqsweb/documents/codetables/",
-  quiet = TRUE
+  baseUrl = "https://aqs.epa.gov/aqsweb/documents/codetables/"
 )
 }
 \arguments{
 \item{tableName}{Character name associated with the code table.}
 
 \item{baseUrl}{Character base URL for EPA AQS code tables.}
-
-\item{quiet}{Logical passed on to \code{readr::read_csv(progress = !quiet)}.}
 }
 \value{
 Tibble of EPA AQS codes.
@@ -46,7 +43,7 @@ MazamaCoreUtils::initializeLogging(logDir = "~/Data/EPA/")
 logger.setLevel(TRACE)
 
 # Get a table of parameter codes
-parameter_codes <- epa_aqs_getCodes(tableName = "parameters", quiet = FALSE)
+parameter_codes <- epa_aqs_getCodes(tableName = "parameters")
 }
 }
 \references{

@@ -18,7 +18,6 @@
 #'
 #' @param tableName Character name associated with the code table.
 #' @param baseUrl Character base URL for EPA AQS code tables.
-#' @param quiet Logical passed on to \code{readr::read_csv(progress = !quiet)}.
 #'
 #' @return Tibble of EPA AQS codes.
 #'
@@ -36,13 +35,12 @@
 #' logger.setLevel(TRACE)
 #'
 #' # Get a table of parameter codes
-#' parameter_codes <- epa_aqs_getCodes(tableName = "parameters", quiet = FALSE)
+#' parameter_codes <- epa_aqs_getCodes(tableName = "parameters")
 #' }
 
 epa_aqs_getCodes <- function(
   tableName = NULL,
-  baseUrl = 'https://aqs.epa.gov/aqsweb/documents/codetables/',
-  quiet = TRUE
+  baseUrl = 'https://aqs.epa.gov/aqsweb/documents/codetables/'
 ) {
 
   if ( logger.isInitialized() )
@@ -63,8 +61,8 @@ epa_aqs_getCodes <- function(
     logger.trace('Parsing %s ...', csvFile)
 
   result <- try({
-    tbl <- readr::read_csv(csvFile, progress = !quiet)
-  }, silent = quiet)
+    tbl <- readr::read_csv(csvFile, progress = FALSE, show_col_types = FALSE)
+  }, silent = TRUE)
 
   if ( "try-error" %in% class(result) ) {
     err_msg <- geterrmessage()

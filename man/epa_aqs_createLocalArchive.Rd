@@ -6,23 +6,23 @@
 \usage{
 epa_aqs_createLocalArchive(
   sites_locationTbl = NULL,
-  downloadDir = NULL,
   parameterCode = NULL,
   years = NULL,
   archiveBaseDir = NULL,
+  downloadDir = NULL,
   quiet = FALSE
 )
 }
 \arguments{
 \item{sites_locationTbl}{EPA AQS "known locations" table for \code{parameterCode} monitors.}
 
-\item{downloadDir}{Directory in which to save downloaded EPA .zip files. If \code{NULL}, a temp directory is used.}
-
 \item{parameterCode}{EPA "Parameter Code".}
 
 \item{years}{Vector of years for which to transform data.}
 
 \item{archiveBaseDir}{Path under which the directory structure will be created.}
+
+\item{downloadDir}{Directory in which to save downloaded EPA .zip files. If \code{NULL}, a temp directory is used.}
 
 \item{quiet}{Logical passed on to \code{utils::download.file()}.}
 }
