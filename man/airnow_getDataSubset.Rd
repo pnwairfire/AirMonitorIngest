@@ -38,18 +38,3 @@ Datetimes can be anything that is understood by
 \code{MazamaCoreUtils::parseDatetime()}. For non-POSIXct values, the
 recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".
 }
-\examples{
-\dontrun{
-library(AirMonitorIngest)
-
-tbl <-
-  airnow_getData(
-    parameterName = "PM2.5",
-    starttime = 2021101200,
-    endtime = 2021101200,
-    timezone = "America/Los_Angeles",
-    monitorType = "permanent"
-   )
-
-}
-}

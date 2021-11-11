@@ -26,6 +26,8 @@
 #' \dontrun{
 #' library(AirMonitorIngest)
 #'
+#' setAPIKey("airnow", "<AIRNOW_API_KEY>")
+#'
 #' tbl <-
 #'   airnow_getData(
 #'     parameterName = "PM2.5",
@@ -66,11 +68,11 @@ airnow_getData <- function(
   starttime <- MazamaCoreUtils::parseDatetime(starttime, timezone = timezone)
   endtime <- MazamaCoreUtils::parseDatetime(endtime, timezone = timezone)
 
-  airnow_API_KEY <- getAPIKey("airnow")
-  if ( is.null(airnow_API_KEY) )
+  AIRNOW_API_KEY <- getAPIKey("airnow")
+  if ( is.null(AIRNOW_API_KEY) )
     stop(paste0(
-      "The AirNow API_KEY is not set. Please set it with:\n\n",
-      "  setAPIKey(\"airnow\", <your-api-key>)"
+      "The AirNow API key is not set. Please set it with:\n\n",
+      "  setAPIKey(\"airnow\", <AIRNOW_API_KEY>)"
     ))
 
   # ----- Loop over multi-hour chunks ------------------------------------------

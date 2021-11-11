@@ -1,6 +1,11 @@
+# AirMonitorIngest 0.2.5
+
+* Removed `~APIKey()` functionality. Now importing this from 
+`MazamaCoreUtils` 0.4.10.
+
 # AirMonitorIngest 0.2.4
 
-Harmonize argument names and order in `epa_aqs_~()` and `airnow_~()` function 
+* Harmonized argument names and order in `epa_aqs_~()` and `airnow_~()` function 
 signatures.
 
 # AirMonitorIngest 0.2.3

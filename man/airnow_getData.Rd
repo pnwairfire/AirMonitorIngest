@@ -42,6 +42,8 @@ recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".
 \dontrun{
 library(AirMonitorIngest)
 
+setAPIKey("airnow", "<AIRNOW_API_KEY>")
+
 tbl <-
   airnow_getData(
     parameterName = "PM2.5",

@@ -166,7 +166,7 @@ if ( FALSE ) {
   MazamaSpatialUtils::loadSpatialData("USCensusCounties")
 
   library(AirMonitorIngest)
-  AirMonitorIngest::setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
+  setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
 
   MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 

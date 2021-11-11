@@ -21,21 +21,6 @@
 #' \code{MazamaCoreUtils::parseDatetime()}. For non-POSIXct values, the
 #' recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".
 #'
-#'
-#' @examples
-#' \dontrun{
-#' library(AirMonitorIngest)
-#'
-#' tbl <-
-#'   airnow_getData(
-#'     parameterName = "PM2.5",
-#'     starttime = 2021101200,
-#'     endtime = 2021101200,
-#'     timezone = "America/Los_Angeles",
-#'     monitorType = "permanent"
-#'    )
-#'
-#' }
 
 airnow_getDataSubset <- function(
   parameterName = c("PM2.5"), ###, "CO", "OZONE", "PM10"),
@@ -63,11 +48,11 @@ airnow_getDataSubset <- function(
   if ( !timezone %in% base::OlsonNames() )
     stop(sprintf("'timezone = %s' is not found in OlsonNames()", timezone))
 
-  airnow_API_KEY <- getAPIKey("airnow")
-  if ( is.null(airnow_API_KEY) )
+  AIRNOW_API_KEY <- getAPIKey("airnow")
+  if ( is.null(AIRNOW_API_KEY) )
     stop(paste0(
       "The AirNow API_KEY is not set. Please set it with:\n\n",
-      "  setAPIKey(\"airnow\", <your-api-key>)"
+      "  setAPIKey(\"airnow\", <AIRNOW_API_KEY>)"
     ))
 
   # ----- Prepare request ------------------------------------------------------
@@ -172,7 +157,7 @@ airnow_getDataSubset <- function(
     monitortype = monitortype,
     datatype = "B",
     format = "text/csv",
-    api_key = airnow_API_KEY,
+    api_key = AIRNOW_API_KEY,
     verbose = "1",
     includerawconcentrations = "1"
   )
