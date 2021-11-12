@@ -9,9 +9,14 @@
 #' Create a \code{data} dataframe with AirNow monitor data appropriate
 #' for use with the \pkg{MazamaTimeSeries} package.
 #'
-#' The data model is that monitor metadata are stored in a tibble named \code{meta}.
+#' The data model has monitor metadata stored in a tibble named \code{meta}.
 #' with a \code{deviceDeploymentID} unique identifier that is matched by column
 #' names in an associated \code{data} file.
+#'
+#' @note
+#' Some records in \code{meta} may not be represented in \code{airnow_data}.
+#' Further work is requried to guarantee an exaxt match between \code{meta} and
+#' the tibbles returned by this function.
 #'
 #' @param locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param distanceThreshold Separation distance in meters between "known locations".
@@ -63,7 +68,6 @@ airnow_createData <- function(
 
   if ( logger.isInitialized() ) logger.trace("Adding standard data ...")
 
-
   airnow_data <-
 
     airnow_data %>%
@@ -98,6 +102,8 @@ airnow_createData <- function(
 
   # ----- Create hourly axis ---------------------------------------------------
 
+  if ( logger.isInitialized() ) logger.trace("Creating hourly axis ...")
+
   # NOTE:  We want to guarantee that there is a record for every single hour
   # NOTE:  even if no data are available in that hour.
 
@@ -110,6 +116,8 @@ airnow_createData <- function(
   )
 
   # ----- Reshape raw data -----------------------------------------------------
+
+  if ( logger.isInitialized() ) logger.trace("Reshaping raw data ...")
 
   rawData <-
 
@@ -128,21 +136,22 @@ airnow_createData <- function(
     ) %>%
     reshape2::dcast(datetime ~ deviceDeploymentID)
 
+  # NOTE:  rawData may have fewer but should never have more monitors than meta
   # > setdiff(names(rawData), meta$deviceDeploymentID)
   # [1] "datetime"
 
+  if ( logger.isInitialized() ) logger.trace("Adding hourly axis ...")
+
   # Merge the two dataframes together with a left join
-  rawData <- dplyr::left_join(hourlyTbl, rawData, by = "datetime") %>%
-    # Order columns to reflect meta
-    dplyr::select(all_of(c('datetime', meta$deviceDeploymentID)))
+  rawData <- dplyr::left_join(hourlyTbl, rawData, by = "datetime")
 
   if ( logger.isInitialized() )
     logger.trace("rawData' has %d rows and %d columns", nrow(rawData), ncol(rawData))
 
-  # > all(names(rawData) == c('datetime', meta$deviceDeploymentID))
-  # [1] TRUE
 
   # ----- Reshape NowCast data -------------------------------------------------
+
+  if ( logger.isInitialized() ) logger.trace("Reshaping nowcast data ...")
 
   nowcastData <-
 
@@ -172,20 +181,19 @@ airnow_createData <- function(
     ) %>%
     reshape2::dcast(datetime ~ deviceDeploymentID)
 
+  # NOTE:  nowcastData may have fewer but should never have more monitors than meta
   # > setdiff(names(nowcastData), meta$deviceDeploymentID)
   # [1] "datetime"
 
+  if ( logger.isInitialized() ) logger.trace("Adding hourly axis ...")
+
   # Merge the two dataframes together with a left join
   nowcastData <-
-    dplyr::left_join(hourlyTbl, nowcastData, by = "datetime") %>%
-    # Order columns to reflect meta
-    dplyr::select(all_of(c('datetime', meta$deviceDeploymentID)))
+    dplyr::left_join(hourlyTbl, nowcastData, by = "datetime")
 
   if ( logger.isInitialized() )
     logger.trace("'nowcastData' has %d rows and %d columns", nrow(nowcastData), ncol(nowcastData))
 
-  # > all(names(nowcastData) == c('datetime', meta$deviceDeploymentID))
-  # [1] TRUE
 
   # ----- Return ---------------------------------------------------------------
 

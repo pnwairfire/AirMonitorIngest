@@ -27,7 +27,12 @@ Tibble of device-deployment metadata.
 Create a \code{data} dataframe with AirNow monitor data appropriate
 for use with the \pkg{MazamaTimeSeries} package.
 
-The data model is that monitor metadata are stored in a tibble named \code{meta}.
+The data model has monitor metadata stored in a tibble named \code{meta}.
 with a \code{deviceDeploymentID} unique identifier that is matched by column
 names in an associated \code{data} file.
+}
+\note{
+Some records in \code{meta} may not be represented in \code{airnow_data}.
+Further work is requried to guarantee an exaxt match between \code{meta} and
+the tibbles returned by this function.
 }

@@ -8,7 +8,7 @@
 #' Create a \code{meta} dataframe with AirNow monitor metadata appropriate
 #' for use with the \pkg{MazamaTimeSeries} package.
 #'
-#' The data model is that monitor metadata are stored in a tibble named \code{meta}.
+#' The data model has monitor metadata stored in a tibble named \code{meta}.
 #' with a \code{deviceDeploymentID} unique identifier that is matched by column
 #' names in an associated \code{data} file.
 #'

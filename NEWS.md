@@ -1,6 +1,8 @@
 # AirMonitorIngest 0.2.6
 
 * Fixed a bug in `airnow_createMeta()`.
+* Removed expectation in `airnow_createData()` that all monitors in `meta`
+will be represted in the incoming data.
 
 # AirMonitorIngest 0.2.5
 
