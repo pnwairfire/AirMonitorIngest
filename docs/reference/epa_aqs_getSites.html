@@ -73,7 +73,7 @@ uncompress and parse the data into a tibble." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.6</span>
       </span>
     </div>
 
@@ -123,8 +123,8 @@ uncompress and parse the data into a tibble.</p>
     </div>
 
     <pre class="usage"><span class='fu'>epa_aqs_getSites</span><span class='op'>(</span>
+  url <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/airdata/aqs_sites.zip"</span>,
   downloadDir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  baseUrl <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/airdata/"</span>,
   quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
 <span class='op'>)</span></pre>
 
@@ -132,12 +132,12 @@ uncompress and parse the data into a tibble.</p>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>downloadDir</th>
-      <td><p>Directory where .zip file will be saved.</p></td>
+      <th>url</th>
+      <td><p>URL for the <code>aqs_sites.zip</code> file.</p></td>
     </tr>
     <tr>
-      <th>baseUrl</th>
-      <td><p>Character base URL for the EPA AQS archive.</p></td>
+      <th>downloadDir</th>
+      <td><p>Directory where .zip file will be saved.</p></td>
     </tr>
     <tr>
       <th>quiet</th>

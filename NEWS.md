@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.2.6
+
+* Fixed a bug in `airnow_createMeta()`.
+
 # AirMonitorIngest 0.2.5
 
 * Removed `~APIKey()` functionality. Now importing this from 

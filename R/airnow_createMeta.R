@@ -86,26 +86,27 @@ airnow_createMeta <- function(
     warning(err_msg)
 
     # Retain only truly "known" locations
-    airnow_data_locations <-
-      airnow_data_locations %>%
-      dplyr::filter(!is.na(.data$locationID))
+    mask <- !is.na(.data$locationID)
+    airnow_data_locations <- airnow_data_locations[mask,]
+
+    # NOTE:  At this point, there may be duplicate locationIDs associated with
+    # NOTE:  different AQSIDs in airnow_data. Make sure we are using the latest
+    # NOTE:  AQSIDs from airnow_data.
+
+    # Add AQSID
+    airnow_data_locations$AQSID <- airnow_data$AQSID[mask]
 
   }
 
   # ----- Create 'meta' --------------------------------------------------------
 
-  # NOTE:  At this point, airnow_data_locations and airnow_data have the same
-  # NOTE:  number of rows. There may be duplicate locationIDs in airnow_data_locations
-  # NOTE:  associated with different AQSIDs in airnow_data
-
   meta <-
 
     airnow_data_locations %>%
 
-    # Unique instrument ID = AQSID as we have nothing more specific
+    # Unique device ID = AQSID as we have nothing more specific
     dplyr::mutate(
-      AQSID = airnow_data$AQSID,
-      deviceID = airnow_data$AQSID
+      deviceID = .data$AQSID
     ) %>%
 
     # Unique "device deployment" ID
@@ -172,7 +173,9 @@ if ( FALSE ) {
 
 
   MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
-  sites_locationTbl <- MazamaLocationUtils::table_load("airnow_PM2.5_sites")
+  locationTbl <- MazamaLocationUtils::table_load("airnow_PM2.5_sites")
+
+  distanceThreshold <- 100
 
   starttime <- 2021102700
   endtime <- 2021102700
@@ -181,11 +184,11 @@ if ( FALSE ) {
   monitorType <- "both"
 
   airnow_data <-
-    airnow_api_getData(
+    airnow_getData(
+      parameterName = parameterName,
       starttime = starttime,
       endtime = endtime,
       timezone = timezone,
-      parameterName = parameterName,
       monitorType = monitorType
     )
 

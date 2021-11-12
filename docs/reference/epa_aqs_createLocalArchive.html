@@ -90,7 +90,7 @@ epa_aqs_&amp;lt;parameterCode&amp;gt;_&amp;lt;year&amp;gt;_data.[rda|csv|csv.gz]
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.6</span>
       </span>
     </div>
 
@@ -158,10 +158,10 @@ epa_aqs_&lt;parameterCode&gt;_&lt;year&gt;_data.[rda|csv|csv.gz]
 
     <pre class="usage"><span class='fu'>epa_aqs_createLocalArchive</span><span class='op'>(</span>
   sites_locationTbl <span class='op'>=</span> <span class='cn'>NULL</span>,
-  downloadDir <span class='op'>=</span> <span class='cn'>NULL</span>,
   parameterCode <span class='op'>=</span> <span class='cn'>NULL</span>,
   years <span class='op'>=</span> <span class='cn'>NULL</span>,
   archiveBaseDir <span class='op'>=</span> <span class='cn'>NULL</span>,
+  downloadDir <span class='op'>=</span> <span class='cn'>NULL</span>,
   quiet <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
@@ -171,10 +171,6 @@ epa_aqs_&lt;parameterCode&gt;_&lt;year&gt;_data.[rda|csv|csv.gz]
     <tr>
       <th>sites_locationTbl</th>
       <td><p>EPA AQS "known locations" table for <code>parameterCode</code> monitors.</p></td>
-    </tr>
-    <tr>
-      <th>downloadDir</th>
-      <td><p>Directory in which to save downloaded EPA .zip files. If <code>NULL</code>, a temp directory is used.</p></td>
     </tr>
     <tr>
       <th>parameterCode</th>
@@ -189,6 +185,10 @@ epa_aqs_&lt;parameterCode&gt;_&lt;year&gt;_data.[rda|csv|csv.gz]
       <td><p>Path under which the directory structure will be created.</p></td>
     </tr>
     <tr>
+      <th>downloadDir</th>
+      <td><p>Directory in which to save downloaded EPA .zip files. If <code>NULL</code>, a temp directory is used.</p></td>
+    </tr>
+    <tr>
       <th>quiet</th>
       <td><p>Logical passed on to <code><a href='https://rdrr.io/r/utils/download.file.html'>utils::download.file()</a></code>.</p></td>
     </tr>
@@ -197,6 +197,12 @@ epa_aqs_&lt;parameterCode&gt;_&lt;year&gt;_data.[rda|csv|csv.gz]
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>Returns 0 on success.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+
+    <p>Depending on your internet connection speeds, downloading files from the EPA
+site can take several minutes per file. If you see warning messages that you have
+timed out, please download files manually before running this function. This
+function will then discover the downloaded files in the <code>downloadDir</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

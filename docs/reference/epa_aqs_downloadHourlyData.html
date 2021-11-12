@@ -92,7 +92,7 @@ NONOxNOy (1980)
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.6</span>
       </span>
     </div>
 
@@ -161,10 +161,10 @@ NONOxNOy (1980)
     </div>
 
     <pre class="usage"><span class='fu'>epa_aqs_downloadHourlyData</span><span class='op'>(</span>
-  year <span class='op'>=</span> <span class='cn'>NULL</span>,
   parameterCode <span class='op'>=</span> <span class='st'>"88101"</span>,
-  downloadDir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
+  year <span class='op'>=</span> <span class='cn'>NULL</span>,
   baseUrl <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/airdata/"</span>,
+  downloadDir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
   quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
 <span class='op'>)</span></pre>
 
@@ -172,20 +172,20 @@ NONOxNOy (1980)
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>year</th>
-      <td><p>Ingeter year.</p></td>
-    </tr>
-    <tr>
       <th>parameterCode</th>
       <td><p>Character pollutant code.</p></td>
     </tr>
     <tr>
-      <th>downloadDir</th>
-      <td><p>Directory where .zip file will be saved.</p></td>
+      <th>year</th>
+      <td><p>Ingeter year.</p></td>
     </tr>
     <tr>
       <th>baseUrl</th>
       <td><p>Character base URL for the EPA AQS archive.</p></td>
+    </tr>
+    <tr>
+      <th>downloadDir</th>
+      <td><p>Directory where .zip file will be saved.</p></td>
     </tr>
     <tr>
       <th>quiet</th>
@@ -199,6 +199,10 @@ NONOxNOy (1980)
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
     <p>Unzipped CSV files are almost 100X larger than the compressed .zip files.</p>
+<p>Depending on your internet connection speeds, downloading files from the EPA
+site can take several minutes per file. If you see warning messages that you have
+timed out, please download files manually. Functions that process these files
+will then discover the downloaded files in the <code>downloadDir</code>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p><a href='https://aqs.epa.gov/aqsweb/airdata/download_files.html#Raw'>EPA AirData Pre-Generated Data Files</a></p>
@@ -215,7 +219,13 @@ NONOxNOy (1980)
 <span class='fu'>logger.setLevel</span><span class='op'>(</span><span class='va'>TRACE</span><span class='op'>)</span>
 
 <span class='co'># Save the download in ~/Data/EPA</span>
-<span class='va'>zipFile</span> <span class='op'>&lt;-</span> <span class='fu'>epa_aqs_downloadHourlyData</span><span class='op'>(</span><span class='fl'>2008</span>, <span class='st'>"88101"</span>, <span class='st'>"~/Data/EPA/"</span>, quiet <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='va'>zipFile</span> <span class='op'>&lt;-</span>
+  <span class='fu'>epa_aqs_downloadHourlyData</span><span class='op'>(</span>
+    parameterCode <span class='op'>=</span> <span class='st'>"88101"</span>,
+    year <span class='op'>=</span> <span class='fl'>2008</span>,
+    downloadDir <span class='op'>=</span> <span class='st'>"~/Data/EPA/"</span>,
+    quiet <span class='op'>=</span> <span class='cn'>FALSE</span>
+  <span class='op'>)</span>
 
 <span class='co'># Uncompress and parse into a tibble</span>
 <span class='va'>tbl</span> <span class='op'>&lt;-</span> <span class='fu'><a href='epa_aqs_parseHourlyData.html'>epa_aqs_parseHourlyData</a></span><span class='op'>(</span><span class='va'>zipFile</span><span class='op'>)</span>

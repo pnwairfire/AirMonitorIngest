@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.6</span>
       </span>
     </div>
 
@@ -114,6 +114,87 @@
       <small>Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="airmonitoringest-026" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.6">
+<a href="#airmonitoringest-026" class="anchor"></a>AirMonitorIngest 0.2.6</h1>
+<ul>
+<li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code>.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-025" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.5">
+<a href="#airmonitoringest-025" class="anchor"></a>AirMonitorIngest 0.2.5</h1>
+<ul>
+<li>Removed <code>~APIKey()</code> functionality. Now importing this from <code>MazamaCoreUtils</code> 0.4.10.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-024" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.4">
+<a href="#airmonitoringest-024" class="anchor"></a>AirMonitorIngest 0.2.4</h1>
+<ul>
+<li>Harmonized argument names and order in <code>epa_aqs_~()</code> and <code>airnow_~()</code> function signatures.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-023" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.3">
+<a href="#airmonitoringest-023" class="anchor"></a>AirMonitorIngest 0.2.3</h1>
+<p>Added functions to create AirNow ‘data’ and ‘meta’ objects:</p>
+<ul>
+<li><code><a href="../reference/airnow_update.html">airnow_update()</a></code></li>
+<li><code><a href="../reference/airnow_updateKnownLocations.html">airnow_updateKnownLocations()</a></code></li>
+<li><code><a href="../reference/airnow_updateUnknownLocations.html">airnow_updateUnknownLocations()</a></code></li>
+<li><code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code></li>
+<li><code><a href="../reference/airnow_createData.html">airnow_createData()</a></code></li>
+</ul>
+</div>
+    <div id="airmonitoringest-022" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.2">
+<a href="#airmonitoringest-022" class="anchor"></a>AirMonitorIngest 0.2.2</h1>
+<ul>
+<li>Renamed <code>airnow_api_~()</code> functions to just <code>airnow_~()</code>.</li>
+<li>Renamed <code>pollutant</code> to <code>parameterName</code> in <code>airnow_getData~()</code> for harmony with <code>epa_aqs_~()</code> functions.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-021" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.1">
+<a href="#airmonitoringest-021" class="anchor"></a>AirMonitorIngest 0.2.1</h1>
+<ul>
+<li>Updated <code>airnow_api_getDataSubset()</code> to request more variables.</li>
+<li>Removed <code>includeSiteMeta</code> argument from <code>airnow_api_getData~()</code>. Now we always get it.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-020" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.0">
+<a href="#airmonitoringest-020" class="anchor"></a>AirMonitorIngest 0.2.0</h1>
+<p>Version 0.2 focuses on data ingest from AirNow using the AirNow API.</p>
+<p>Initial functions include:</p>
+<ul>
+<li><code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code></li>
+<li><code>airnow_api_getData()</code></li>
+<li><code>airnow_api_getDataSubset()</code></li>
+<li><code><a href="../reference/airnow_openWebPages.html">airnow_openWebPages()</a></code></li>
+<li><code>get/setAPIKey()</code></li>
+</ul>
+</div>
+    <div id="airmonitoringest-013" class="section level1">
+<h1 class="page-header" data-toc-text="0.1.3">
+<a href="#airmonitoringest-013" class="anchor"></a>AirMonitorIngest 0.1.3</h1>
+<ul>
+<li>Support for EPA AQS 81102 – PM10.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-011" class="section level1">
+<h1 class="page-header" data-toc-text="0.1.1">
+<a href="#airmonitoringest-011" class="anchor"></a>AirMonitorIngest 0.1.1</h1>
+<ul>
+<li>Importing <strong>AirMonitor</strong>.</li>
+<li>Updates to support <code><a href="https://rdrr.io/pkg/AirMonitor/man/coreMetadataNames.html">AirMonitor::coreMetadataNames</a></code>.</li>
+<li>Support for EPA AQS 88101 – PM2.5 FRM/FEM.</li>
+<li>Support for EPA AQS 88402 – PM2.5 non-FRM/FEM.</li>
+<li>Support for EPA AQS 42101 – CO.</li>
+<li>Support for EPA AQS 44201 – OZONE.</li>
+</ul>
+</div>
     <div id="airmonitoringest-010" class="section level1">
 <h1 class="page-header" data-toc-text="0.1.0">
 <a href="#airmonitoringest-010" class="anchor"></a>AirMonitorIngest 0.1.0</h1>

@@ -75,7 +75,7 @@ the tableName for the &quot;General &amp;gt; Parameters&quot; table is &quot;par
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.6</span>
       </span>
     </div>
 
@@ -128,8 +128,7 @@ the <code>tableName</code> for the "General &gt; Parameters" table is "parameter
 
     <pre class="usage"><span class='fu'>epa_aqs_getCodes</span><span class='op'>(</span>
   tableName <span class='op'>=</span> <span class='cn'>NULL</span>,
-  baseUrl <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/documents/codetables/"</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
+  baseUrl <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/documents/codetables/"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -142,10 +141,6 @@ the <code>tableName</code> for the "General &gt; Parameters" table is "parameter
     <tr>
       <th>baseUrl</th>
       <td><p>Character base URL for EPA AQS code tables.</p></td>
-    </tr>
-    <tr>
-      <th>quiet</th>
-      <td><p>Logical passed on to <code><a href='https://readr.tidyverse.org/reference/read_delim.html'>readr::read_csv(progress = !quiet)</a></code>.</p></td>
     </tr>
     </table>
 
@@ -175,7 +170,7 @@ based on the first 1000 rows of input. In addition, any column matching
 <span class='fu'>logger.setLevel</span><span class='op'>(</span><span class='va'>TRACE</span><span class='op'>)</span>
 
 <span class='co'># Get a table of parameter codes</span>
-<span class='va'>parameter_codes</span> <span class='op'>&lt;-</span> <span class='fu'>epa_aqs_getCodes</span><span class='op'>(</span>tableName <span class='op'>=</span> <span class='st'>"parameters"</span>, quiet <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='va'>parameter_codes</span> <span class='op'>&lt;-</span> <span class='fu'>epa_aqs_getCodes</span><span class='op'>(</span>tableName <span class='op'>=</span> <span class='st'>"parameters"</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>
