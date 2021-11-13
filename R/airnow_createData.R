@@ -72,6 +72,14 @@ airnow_createData <- function(
 
     airnow_data %>%
 
+    # NOTE:  Data come with repeated times because the NowCast is updated.
+    # NOTE:  Here we filter for the existence of raw data and allow only one
+    # NOTE:  distinct value per monitor-hour.
+
+    dplyr::filter(!is.na(.data$parameterRawConcentration)) %>%
+    dplyr::distinct(.data$utcTime, .data$AQSID, .keep_all = TRUE) %>%
+    dplyr::arrange(.data$utcTime) %>%
+
     dplyr::rename(
       datetime = .data$utcTime
     ) %>%
