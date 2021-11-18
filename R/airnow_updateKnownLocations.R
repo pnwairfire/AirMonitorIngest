@@ -222,9 +222,9 @@ if ( FALSE ) {
 
   library(MazamaSpatialUtils)
   MazamaSpatialUtils::setSpatialDataDir("~/Data/Spatial")
-  MazamaSpatialUtils::loadSpatialData("EEZCountries")
-  MazamaSpatialUtils::loadSpatialData("OSMTimezones")
-  MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1")
+  MazamaSpatialUtils::loadSpatialData("EEZCountries.rda")
+  MazamaSpatialUtils::loadSpatialData("OSMTimezones.rda")
+  MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1.rda")
 
   library(AirMonitorIngest)
   setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))

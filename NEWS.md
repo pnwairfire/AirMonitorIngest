@@ -1,3 +1,11 @@
+# AirMonitorIngest 0.2.7
+
+Updates for **AirMonitor** 0.0.4.
+
+* Fixed a bug in `airnow_createMeta()` that occurs only when new locations
+appear in the incoming raw data.
+* Now exporting `%>%`.
+
 # AirMonitorIngest 0.2.6
 
 * Fixed a bug in `airnow_createMeta()`.

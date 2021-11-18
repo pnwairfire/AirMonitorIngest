@@ -163,6 +163,7 @@ if ( FALSE ) {
   logger.setLevel(TRACE)
 
   library(AirMonitorIngest)
+  setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
 
   starttime <- 2021101802
   endtime <- 2021101802

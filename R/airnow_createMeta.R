@@ -80,13 +80,13 @@ airnow_createMeta <- function(
 
     err_msg <- sprintf(
       "%d locations are still unknown and will be removed",
-      length(is.na(airnow_data_locations$locationID))
+      sum(is.na(airnow_data_locations$locationID))
     )
     if ( logger.isInitialized() ) logger.warn(err_msg)
     warning(err_msg)
 
     # Retain only truly "known" locations
-    mask <- !is.na(.data$locationID)
+    mask <- !is.na(airnow_data_locations$locationID)
     airnow_data_locations <- airnow_data_locations[mask,]
 
     # NOTE:  At this point, there may be duplicate locationIDs associated with
@@ -193,6 +193,14 @@ if ( FALSE ) {
     )
 
 
+
+
+  meta <-
+    airnow_createMeta(
+      locationTbl = locationTbl,
+      distanceThreshold = distanceThreshold,
+      airnow_data = airnow_data
+    )
 
 
 }

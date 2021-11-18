@@ -7,7 +7,13 @@ library(MazamaSpatialUtils)
 library(MazamaLocationUtils)
 library(AirMonitorIngest)
 
-MazamaLocationUtils::mazama_initialize("~/Data/Spatial")
+MazamaSpatialUtils::setSpatialDataDir("~/Data/Spatial")
+
+MazamaSpatialUtils::loadSpatialData("EEZCountries.rda")
+MazamaSpatialUtils::loadSpatialData("OSMTimezones.rda")
+MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1.rda")
+MazamaSpatialUtils::loadSpatialData("USCensusCounties.rda")
+
 MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
 # ----- Get meta and data ------------------------------------------------------
@@ -15,7 +21,7 @@ MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 parameterCode <- "88101"
 sites_locationTbl <- MazamaLocationUtils::table_load("AQS_88101_sites")
 AQS_monitors <- epa_aqs_getMonitors(downloadDir = "~/Data/EPA")
-AQS_data <- epa_aqs_parseHourlyData("~/Data/EPA/hourly_88101_2008.zip")
+AQS_data <- epa_aqs_parseHourlyData("~/Data/EPA/hourly_88101_2010.zip")
 
 meta_ORIG <- epa_aqs_createMeta(sites_locationTbl, AQS_monitors, parameterCode)
 
