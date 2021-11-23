@@ -39,7 +39,7 @@ wrcc_qualityControl <- function(
 
   # Sanity check -- tbl must have a monitorType
   if ( !'monitorType' %in% names(tbl) ) {
-    logger.error("No 'monitorType' column found in 'tbl' tibble with columns: %s", paste0(names(tbl), collapse=", "))
+    logger.error("No 'monitorType' column found in 'tbl' tibble with columns: %s", paste0(names(tbl), collapse = ", "))
     stop(paste0("No 'monitorType' column found in 'tbl' tibble."))
   }
 
@@ -57,22 +57,16 @@ wrcc_qualityControl <- function(
 
   logger.trace('Applying %s QC rules ...', monitorType)
 
-  if ( monitorType == 'BAM1020' ) {
+  # NOTE:  Search for QC functions defined in the package or loaded by the top
+  # NOTE:  level executable script.
 
-    logger.warn("Tibble contains %s data -- no QC available, original tibble being returned", monitorType)
+  functionName <- sprintf("wrcc_%sQualityControl", monitorType)
 
-  } else if ( monitorType == 'EBAM' ) {
-
-    tbl <- wrcc_EBAMQualityControl(tbl, ...)
-
-  } else if ( monitorType == 'ESAM' ) {
-
-    tbl <- wrcc_ESAMQualityControl(tbl, ...)
-
+  if ( exists(functionName) ) {
+    FUN <- get(functionName)
+    tbl <- FUN(tbl, ...)
   } else {
-
     logger.warn("Tibble contains %s data -- no QC available, original tibble being returned", monitorType)
-
   }
 
   # ----- Return ---------------------------------------------------------------

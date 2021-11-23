@@ -47,11 +47,7 @@ wrcc_downloadData <- function(
   MazamaCoreUtils::stopIfNull(startdate)
   MazamaCoreUtils::stopIfNull(enddate)
   MazamaCoreUtils::stopIfNull(timezone)
-
-  if ( is.null(unitID) ) {
-    logger.error("Required parameter 'unitID' is missing")
-    stop(paste0("Required parameter 'unitID' is missing"))
-  }
+  MazamaCoreUtils::stopIfNull(unitID)
 
   # Get UTC times
   starttime <- MazamaCoreUtils::parseDatetime(startdate, timezone = "UTC")
@@ -59,7 +55,7 @@ wrcc_downloadData <- function(
 
   # ----- Download data --------------------------------------------------------
 
-  logger.trace("Downloading WRCC data for unitID %s", unitID)
+  logger.trace("Downloading WRCC data for unitID %s ...", unitID)
 
   # Create CGI parameters
   .params <- list(

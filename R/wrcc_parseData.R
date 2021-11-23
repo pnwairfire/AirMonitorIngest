@@ -29,6 +29,8 @@
 #' # Fail gracefully if any resources are not available
 #' try({
 #'
+#'   library(AirMonitorIngest)
+#'
 #'   fileString <- wrcc_downloadData(20150701, 20150930, unitID = 'SM16')
 #'   tbl <- wrcc_parseData(fileString)
 #'

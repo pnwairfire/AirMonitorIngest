@@ -10,6 +10,7 @@ Initial functions include:
 * `wrcc_qualityControl()`
 * `wrcc_EBAMQualityControl()`
 * `wrcc_ESAMQualityControl()`
+* `addClustering()`
 
 # AirMonitorIngest 0.2.7
 

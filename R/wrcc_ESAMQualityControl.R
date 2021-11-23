@@ -65,9 +65,9 @@ wrcc_ESAMQualityControl <- function(
   # ----- Missing Values -------------------------------------------------------
 
   # Handle various missing value flags (lots of variants of -99x???)
-  tbl[tbl < -900] <- NA
-  tbl[tbl == -9.9899] <- NA
-  tbl[tbl == 99999] <- NA
+  tbl[tbl < -900] <- as.numeric(NA)
+  tbl[tbl == -9.9899] <- as.numeric(NA)
+  tbl[tbl == 99999] <- as.numeric(NA)
 
   # ----- Setup for flagAndKeep argument utility -------------------------------
 
@@ -80,7 +80,7 @@ wrcc_ESAMQualityControl <- function(
     # duplicate tbl and add columns for flags
     tblFlagged <- tbl
     tblFlagged$QCFlag_anyBad <- FALSE
-    tblFlagged$QCFlag_reasonCode <- NA
+    tblFlagged$QCFlag_reasonCode <- as.character(NA)
     tblFlagged$QCFlag_badLon <- FALSE
     tblFlagged$QCFlag_badLat <- FALSE
     tblFlagged$QCFlag_badType <- FALSE # no type info for ESAMs
@@ -253,7 +253,8 @@ wrcc_ESAMQualityControl <- function(
 
   # ----- More QC --------------------------------------------------------------
 
-  # NOTE:  Additional QC would go here
+  # Lift negative concentrations to zero
+  tbl$ConcRT[tbl$ConcRT < 0] <- 0
 
   if ( flagAndKeep ) {
     logger.trace("Retaining %d rows of measurements; %d bad rows flagged", nrow(tbl), sum(tblFlagged$QCFlag_anyBad))

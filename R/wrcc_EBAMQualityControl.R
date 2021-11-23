@@ -123,8 +123,8 @@ wrcc_EBAMQualityControl <- function(
       tblFlagged$QCFlag_badLat[tbl$rowID[!goodLatMask]] <- TRUE
       tblFlagged$QCFlag_anyBad <- tblFlagged$QCFlag_anyBad | tblFlagged$QCFlag_badLon | tblFlagged$QCFlag_badLat
       # apply reason codes
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLonMask]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLonMask]],"badLon")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLatMask]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLatMask]],"badLat")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLonMask]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLonMask]], "badLon")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLatMask]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodLatMask]], "badLat")
     }
   }
 
@@ -253,7 +253,8 @@ wrcc_EBAMQualityControl <- function(
 
   # ----- More QC --------------------------------------------------------------
 
-  # NOTE:  Additional QC would go here
+  # Lift negative concentrations to zero
+  tbl$ConcRT[tbl$ConcRT < 0] <- 0
 
   if ( flagAndKeep ) {
     logger.trace("Retaining %d rows of measurements; %d bad rows flagged", nrow(tbl), sum(tblFlagged$QCFlag_anyBad))
