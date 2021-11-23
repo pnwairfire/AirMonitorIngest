@@ -144,7 +144,7 @@ airnow_updateUnknownLocations <- function(
 
     new_locationTbl %>%
 
-    # Add required columns
+    # Add spatial metadata
     dplyr::mutate(
       airnow_parameterName = .data$parameterName,
       airnow_siteCode = as.character(NA),
