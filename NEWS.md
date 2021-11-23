@@ -1,3 +1,16 @@
+# AirMonitorIngest 0.3.0
+
+Version 0.3 focuses on data ingest from WRCC using the WRCC API.
+
+Initial functions include:
+
+* `wrcc_downloadData()`
+* `wrcc_identifyMonitorType()`
+* `wrcc_parseData()`
+* `wrcc_qualityControl()`
+* `wrcc_EBAMQualityControl()`
+* `wrcc_ESAMQualityControl()`
+
 # AirMonitorIngest 0.2.7
 
 Updates for **AirMonitor** 0.0.4.
