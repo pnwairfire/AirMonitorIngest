@@ -2,10 +2,11 @@
 #' @importFrom utils read.table
 #' @importFrom rlang .data
 #'
-#' @title Create a 'meta' dataframe with required monitor metadata
+#' @title Create 'meta' dnad 'data' dataframes from WRCC data
 #'
 #' @description
-#' Create a \code{meta} dataframe with WRCC monitor metadata appropriate
+#' Create a \code{meta} dataframe with WRCC monitor metadata and a \code{data}
+#' dataframe with PM2.5 time sseries appropriate
 #' for use with the \pkg{MazamaTimeSeries} package.
 #'
 #' The data model has monitor metadata stored in a tibble named \code{meta}.
@@ -17,10 +18,14 @@
 #' @param wrcc_data Table of monitor data obtained with \code{epa_api_getData()}.
 #' @param unitID WRCC station identifier (will be upcased).
 #'
-#' @return Tibble of device-deployment metadata.
+#' @return List with two tibbles.
 #'
 
-wrcc_createMeta <- function(
+# NOTE:  We need to create both 'meta' and 'data' in a single function so that
+# NOTE:  we can take advantage of the clustering we attach to wrcc_data when
+# NOTE:  creating the 'data' dataframe.
+
+wrcc_createMetaAndData <- function(
   locationTbl = NULL,
   distanceThreshold = NULL,
   wrcc_data = NULL,
@@ -50,13 +55,14 @@ wrcc_createMeta <- function(
   usefulColumns <- c(
     "longitude",
     "latitude",
+    "clusterID",
     "wrcc_type",
     "wrcc_serialNumber",
     "wrcc_monitorName",
     "wrcc_monitorType"
   )
 
-  wrcc_data <-
+  wrcc_location_data <-
 
     wrcc_data %>%
 
@@ -86,8 +92,8 @@ wrcc_createMeta <- function(
   wrcc_data_locations <-
     MazamaLocationUtils::table_getNearestLocation(
       locationTbl,
-      wrcc_data$longitude,
-      wrcc_data$latitude,
+      wrcc_location_data$longitude,
+      wrcc_location_data$latitude,
       distanceThreshold = distanceThreshold
     )
 
@@ -113,13 +119,21 @@ wrcc_createMeta <- function(
 
   # ----- Create 'meta' --------------------------------------------------------
 
+  bindColumns <- c(
+    "clusterID",
+    "wrcc_type",
+    "wrcc_serialNumber",
+    "wrcc_monitorName",
+    "wrcc_monitorType"
+  )
+
   meta <-
 
     wrcc_data_locations %>%
 
     # Add device metadata
     dplyr::bind_cols(
-      dplyr::select(wrcc_data, dplyr::starts_with("wrcc_"))
+      dplyr::select(wrcc_location_data, dplyr::all_of(bindColumns))
     ) %>%
 
     # Unique device ID = AQSID as we have nothing more specific
@@ -146,7 +160,7 @@ wrcc_createMeta <- function(
       dataIngestDescription = as.character(NA)
     )
 
-  # ----- Reorder columns ------------------------------------------------------
+  # ----- Reorder 'meta' columns -----------------------------------------------
 
   coreNames <- AirMonitor::coreMetadataNames
   missingCoreNames <- setdiff(coreNames, names(meta))
@@ -160,9 +174,65 @@ wrcc_createMeta <- function(
     meta %>%
     dplyr::select(dplyr::all_of(c(coreNames, wrccNames)))
 
+  # ----- Create hourly axis ---------------------------------------------------
+
+  # NOTE:  We want to guarantee that there is a record for every single hour
+  # NOTE:  even if no data are available in that hour.
+
+  # Create a tibble with a regular time axis
+  hourlyTbl <- dplyr::tibble(
+    datetime = seq(
+      min(wrcc_data$datetime, na.rm = TRUE),
+      max(wrcc_data$datetime, na.rm = TRUE),
+      by = "hours")
+  )
+
+  # ----- Create 'data' --------------------------------------------------------
+
+  # Create a dataframe for reshaping
+  wrcc_data_enhanced <-
+
+    wrcc_data %>%
+
+    # Add deviceDeploymentID
+    dplyr::left_join(
+      dplyr::select(meta, dplyr::all_of(c("clusterID", "deviceDeploymentID"))),
+      by = "clusterID"
+    ) %>%
+
+    # Pull out columns for reshaping
+    dplyr::select(dplyr::all_of(c("datetime", "ConcRT", "deviceDeploymentID"))) %>%
+
+    # Use "later is better" logic to get one value per hour
+    dplyr::arrange(dplyr::desc(.data$datetime)) %>%
+    dplyr::distinct(.data$datetime, .keep_all  = TRUE) %>%
+    dplyr::arrange(.data$datetime)
+
+  # Reshape
+  melted <- reshape2::melt(
+    wrcc_data_enhanced,
+    id.vars = c("datetime", "deviceDeploymentID"),
+    measure.vars = "ConcRT"
+  )
+
+  data <- reshape2::dcast(melted, datetime ~ deviceDeploymentID, stats::median)
+
+  # Merge the two dataframes together with a left join
+  data <- dplyr::left_join(hourlyTbl, data, by = "datetime")
+
+  # ----- Clean up -------------------------------------------------------------
+
+  # Remove clusterID
+  meta$clusterID <- NULL
+
   # ----- Return ---------------------------------------------------------------
 
-  return(meta)
+  dataList = list(
+    meta = meta,
+    data = data
+  )
+
+  return(dataList)
 
 }
 

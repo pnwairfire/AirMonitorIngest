@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse WRCC data string — wrcc_parseData • AirMonitorIngest</title>
+<title>Add clustering information to a dataframe — addClustering • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,20 +39,19 @@
 
 
 
-<meta property="og:title" content="Parse WRCC data string — wrcc_parseData" />
-<meta property="og:description" content="Parse raw character data from WRCC into a tibble.
-The incoming fileString
-can be read in directly from WRCC using wrcc_downloadData() or from a
-local file using readr::read_file().
-The type of monitor represented by fileString is inferred from the
-column names using wrcc_identifyMonitorType() and appropriate column
-types are assigned. The character data are then processed, read into a tibble,
-and augmented in the following ways:
-
-Spaces at the beginning and end of each line are moved.
-All header lines beginning with ':' are removed.
-
-" />
+<meta property="og:title" content="Add clustering information to a dataframe — addClustering" />
+<meta property="og:description" content="Clustering is used to assign individual measurements to
+deployment locations.
+A temporary monitor will be moved around from time to time, sometimes across the country
+and sometimes across the street.  We need to assign unique identifiers to each
+new &quot;deployment&quot; but not when the monitor is moved a short distance.
+We use clustering to find an appropriate number of unique &quot;deployments&quot;.
+The sensitivity of this algorithm can be adjused with the clusterDiameter argument.
+Standard kmeans clustering does not work well when clusters can have widely
+differing numbers of members. A much better result is acheived with
+the Partitioning Around Medoids method available in cluster::pam().
+The value of clusterRadius is compared with the output of
+cluster::pam(...)$clusinfo[,'av_diss'] to determine the number of clusters." />
 
 
 
@@ -123,58 +122,74 @@ All header lines beginning with ':' are removed.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse WRCC data string</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/wrcc_parseData.R'><code>R/wrcc_parseData.R</code></a></small>
-    <div class="hidden name"><code>wrcc_parseData.Rd</code></div>
+    <h1>Add clustering information to a dataframe</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/addClustering.R'><code>R/addClustering.R</code></a></small>
+    <div class="hidden name"><code>addClustering.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse raw character data from WRCC into a tibble.
-The incoming <code>fileString</code>
-can be read in directly from WRCC using <code><a href='wrcc_downloadData.html'>wrcc_downloadData()</a></code> or from a
-local file using <code><a href='https://readr.tidyverse.org/reference/read_file.html'>readr::read_file()</a></code>.</p>
-<p>The type of monitor represented by <code>fileString</code> is inferred from the
-column names using <code><a href='wrcc_identifyMonitorType.html'>wrcc_identifyMonitorType()</a></code> and appropriate column
-types are assigned. The character data are then processed, read into a tibble,
-and augmented in the following ways:</p>
-<ol>
-<li><p>Spaces at the beginning and end of each line are moved.</p></li>
-<li><p>All header lines beginning with ':' are removed.</p></li>
-</ol>
-
+    <p>Clustering is used to assign individual measurements to
+deployment locations.</p>
+<p>A <em>temporary</em> monitor will be moved around from time to time, sometimes across the country
+and sometimes across the street.  We need to assign unique identifiers to each
+new "deployment" but not when the monitor is moved a short distance.</p>
+<p>We use clustering to find an appropriate number of unique "deployments".
+The sensitivity of this algorithm can be adjused with the clusterDiameter argument.</p>
+<p>Standard <code>kmeans</code> clustering does not work well when clusters can have widely
+differing numbers of members. A much better result is acheived with
+the Partitioning Around Medoids method available in <code><a href='https://rdrr.io/pkg/cluster/man/pam.html'>cluster::pam()</a></code>.</p>
+<p>The value of <code>clusterRadius</code> is compared with the output of
+<code>cluster::pam(...)$clusinfo[,'av_diss']</code> to determine the number of clusters.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wrcc_parseData</span><span class='op'>(</span>fileString <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>addClustering</span><span class='op'>(</span>
+  <span class='va'>tbl</span>,
+  clusterDiameter <span class='op'>=</span> <span class='fl'>1000</span>,
+  lonVar <span class='op'>=</span> <span class='st'>"longitude"</span>,
+  latVar <span class='op'>=</span> <span class='st'>"latitude"</span>,
+  maxClusters <span class='op'>=</span> <span class='fl'>50</span>,
+  flagAndKeep <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>fileString</th>
-      <td><p>Character string containing WRCC data.</p></td>
+      <th>tbl</th>
+      <td><p>Tibble with geolocation information (<em>e.g.</em> created by
+<code><a href='wrcc_qualityControl.html'>wrcc_qualityControl()</a></code> or <code>airsis_qualityControl</code>).</p></td>
+    </tr>
+    <tr>
+      <th>clusterDiameter</th>
+      <td><p>Diameter in meters used to determine the number of
+clusters (see description).</p></td>
+    </tr>
+    <tr>
+      <th>lonVar</th>
+      <td><p>Name of longitude variable in the incoming tibble.</p></td>
+    </tr>
+    <tr>
+      <th>latVar</th>
+      <td><p>Name of the latitude variable in the incoming tibble.</p></td>
+    </tr>
+    <tr>
+      <th>maxClusters</th>
+      <td><p>Maximum number of clusters to try.</p></td>
+    </tr>
+    <tr>
+      <th>flagAndKeep</th>
+      <td><p>Logical specifying flagging, rather than removal, of bad
+data during the QC process.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Dataframe of WRCC raw monitor data.</p>
+    <p>Input tibble with additional columns: <code>clusterLon, clusterLat</code>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><a href='https://wrcc.dri.edu/cgi-bin/smoke.pl'>Fire Cache Smoke Monitoring Archive</a></p>
+    <p><a href='https://working-with-data.mazamascience.com/2021/07/15/when-k-means-clustering-fails/'>When k-means clustering fails</a></p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># Fail gracefully if any resources are not available</span>
-<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='op'>{</span>
-
-  <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/pnwairfire/AirMonitorIngest'>AirMonitorIngest</a></span><span class='op'>)</span>
-
-  <span class='va'>fileString</span> <span class='op'>&lt;-</span> <span class='fu'><a href='wrcc_downloadData.html'>wrcc_downloadData</a></span><span class='op'>(</span><span class='fl'>20150701</span>, <span class='fl'>20150930</span>, unitID <span class='op'>=</span> <span class='st'>'SM16'</span><span class='op'>)</span>
-  <span class='va'>tbl</span> <span class='op'>&lt;-</span> <span class='fu'>wrcc_parseData</span><span class='op'>(</span><span class='va'>fileString</span><span class='op'>)</span>
-
-<span class='op'>}</span>, silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

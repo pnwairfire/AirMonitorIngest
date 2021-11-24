@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse WRCC data string — wrcc_parseData • AirMonitorIngest</title>
+<title>Create 'meta' dnad 'data' dataframes from WRCC data — wrcc_createMetaAndData • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,20 +39,13 @@
 
 
 
-<meta property="og:title" content="Parse WRCC data string — wrcc_parseData" />
-<meta property="og:description" content="Parse raw character data from WRCC into a tibble.
-The incoming fileString
-can be read in directly from WRCC using wrcc_downloadData() or from a
-local file using readr::read_file().
-The type of monitor represented by fileString is inferred from the
-column names using wrcc_identifyMonitorType() and appropriate column
-types are assigned. The character data are then processed, read into a tibble,
-and augmented in the following ways:
-
-Spaces at the beginning and end of each line are moved.
-All header lines beginning with ':' are removed.
-
-" />
+<meta property="og:title" content="Create 'meta' dnad 'data' dataframes from WRCC data — wrcc_createMetaAndData" />
+<meta property="og:description" content="Create a meta dataframe with WRCC monitor metadata and a data
+dataframe with PM2.5 time sseries appropriate
+for use with the MazamaTimeSeries package.
+The data model has monitor metadata stored in a tibble named meta.
+with a deviceDeploymentID unique identifier that is matched by column
+names in an associated data file." />
 
 
 
@@ -123,58 +116,52 @@ All header lines beginning with ':' are removed.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse WRCC data string</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/wrcc_parseData.R'><code>R/wrcc_parseData.R</code></a></small>
-    <div class="hidden name"><code>wrcc_parseData.Rd</code></div>
+    <h1>Create 'meta' dnad 'data' dataframes from WRCC data</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/wrcc_createMetaAndData.R'><code>R/wrcc_createMetaAndData.R</code></a></small>
+    <div class="hidden name"><code>wrcc_createMetaAndData.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse raw character data from WRCC into a tibble.
-The incoming <code>fileString</code>
-can be read in directly from WRCC using <code><a href='wrcc_downloadData.html'>wrcc_downloadData()</a></code> or from a
-local file using <code><a href='https://readr.tidyverse.org/reference/read_file.html'>readr::read_file()</a></code>.</p>
-<p>The type of monitor represented by <code>fileString</code> is inferred from the
-column names using <code><a href='wrcc_identifyMonitorType.html'>wrcc_identifyMonitorType()</a></code> and appropriate column
-types are assigned. The character data are then processed, read into a tibble,
-and augmented in the following ways:</p>
-<ol>
-<li><p>Spaces at the beginning and end of each line are moved.</p></li>
-<li><p>All header lines beginning with ':' are removed.</p></li>
-</ol>
-
+    <p>Create a <code>meta</code> dataframe with WRCC monitor metadata and a <code>data</code>
+dataframe with PM2.5 time sseries appropriate
+for use with the <span class="pkg">MazamaTimeSeries</span> package.</p>
+<p>The data model has monitor metadata stored in a tibble named <code>meta</code>.
+with a <code>deviceDeploymentID</code> unique identifier that is matched by column
+names in an associated <code>data</code> file.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wrcc_parseData</span><span class='op'>(</span>fileString <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wrcc_createMetaAndData</span><span class='op'>(</span>
+  locationTbl <span class='op'>=</span> <span class='cn'>NULL</span>,
+  distanceThreshold <span class='op'>=</span> <span class='cn'>NULL</span>,
+  wrcc_data <span class='op'>=</span> <span class='cn'>NULL</span>,
+  unitID <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>fileString</th>
-      <td><p>Character string containing WRCC data.</p></td>
+      <th>locationTbl</th>
+      <td><p>Table of "known locations" produced with <span class="pkg">MazamaLocationUtils</span>.</p></td>
+    </tr>
+    <tr>
+      <th>distanceThreshold</th>
+      <td><p>Separation distance in meters between "known locations".</p></td>
+    </tr>
+    <tr>
+      <th>wrcc_data</th>
+      <td><p>Table of monitor data obtained with <code>epa_api_getData()</code>.</p></td>
+    </tr>
+    <tr>
+      <th>unitID</th>
+      <td><p>WRCC station identifier (will be upcased).</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Dataframe of WRCC raw monitor data.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <p>List with two tibbles.</p>
 
-    <p><a href='https://wrcc.dri.edu/cgi-bin/smoke.pl'>Fire Cache Smoke Monitoring Archive</a></p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># Fail gracefully if any resources are not available</span>
-<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='op'>{</span>
-
-  <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/pnwairfire/AirMonitorIngest'>AirMonitorIngest</a></span><span class='op'>)</span>
-
-  <span class='va'>fileString</span> <span class='op'>&lt;-</span> <span class='fu'><a href='wrcc_downloadData.html'>wrcc_downloadData</a></span><span class='op'>(</span><span class='fl'>20150701</span>, <span class='fl'>20150930</span>, unitID <span class='op'>=</span> <span class='st'>'SM16'</span><span class='op'>)</span>
-  <span class='va'>tbl</span> <span class='op'>&lt;-</span> <span class='fu'>wrcc_parseData</span><span class='op'>(</span><span class='va'>fileString</span><span class='op'>)</span>
-
-<span class='op'>}</span>, silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

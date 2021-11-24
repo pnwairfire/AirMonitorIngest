@@ -33,6 +33,6 @@ names in an associated \code{data} file.
 }
 \note{
 Some records in \code{meta} may not be represented in \code{airnow_data}.
-Further work is requried to guarantee an exaxt match between \code{meta} and
+Further work is requried to guarantee an exact match between \code{meta} and
 the tibbles returned by this function.
 }
