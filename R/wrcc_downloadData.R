@@ -6,7 +6,7 @@
 #' @param startdate Desired start date (ISO 8601).
 #' @param enddate Desired end date (ISO 8601).
 #' @param timezone Olson timezone used to interpret dates (required).
-#' @param unitID Station identifier (will be upcased).
+#' @param unitID WRCC station identifier (will be upcased).
 #' @param baseUrl Base URL for data queries.
 #'
 #' @description Download data from a particular station for the desired time period.

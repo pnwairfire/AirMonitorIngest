@@ -19,7 +19,7 @@ wrcc_downloadData(
 
 \item{timezone}{Olson timezone used to interpret dates (required).}
 
-\item{unitID}{Station identifier (will be upcased).}
+\item{unitID}{WRCC station identifier (will be upcased).}
 
 \item{baseUrl}{Base URL for data queries.}
 }

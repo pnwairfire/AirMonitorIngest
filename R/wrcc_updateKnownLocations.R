@@ -219,12 +219,13 @@ if ( FALSE ) {
   library(AirMonitorIngest)
 
   distanceThreshold <- 1000
+  unitID <- "SM16"
 
   wrcc_data <-
     wrcc_downloadData(
       20150701,
       20150930,
-      unitID = "SM16"
+      unitID = unitID
     ) %>%
     wrcc_parseData() %>%
     wrcc_qualityControl() %>%
@@ -237,7 +238,7 @@ if ( FALSE ) {
     )
 
 
-  new_tbl <- wrcc_updateKnownLocations(
+  locationTbl <- wrcc_updateKnownLocations(
     wrcc_locationTbl = wrcc_locationTbl,
     airnow_locationTbl = airnow_locationTbl,
     distanceThreshold = distanceThreshold,

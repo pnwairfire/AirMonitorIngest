@@ -11,6 +11,7 @@ Initial functions include:
 * `wrcc_EBAMQualityControl()`
 * `wrcc_ESAMQualityControl()`
 * `wrcc_updateKnownLocations()`
+* `wrcc_createMeta()`
 * `addClustering()`
 
 # AirMonitorIngest 0.2.7

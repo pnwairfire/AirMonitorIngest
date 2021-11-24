@@ -96,6 +96,11 @@ wrcc_parseData <- function(
 
   # ----- Clean up -------------------------------------------------------------
 
+  # Fix serial numbers of -9999
+  if ( "SerialNumber" %in% names(tbl) ) {
+    tbl$SerialNumber[as.numeric(tbl$SerialNumber) < 0] <- as.character(NA)
+  }
+
   # Add monitor name
   tbl$monitorName <- monitorName
 
