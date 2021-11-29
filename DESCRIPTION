@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.3.1
+Version: 0.3.2
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
@@ -17,7 +17,7 @@ BugReports: https://github.com/pnwairfire/AirMonitorIngest/issues
 Depends:
     R (>= 3.5.0)
 Imports:
-    AirMonitor (>= 0.0.5),
+    AirMonitor (>= 0.0.6),
     cluster,
     dplyr,
     httr,

@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.3.2
+
+* Now depending on **AirMonitor** 0.0.6.
+
 # AirMonitorIngest 0.3.1
 
 * Added `wrcc_getDailyUnitIDs()`.
