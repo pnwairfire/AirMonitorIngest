@@ -5,10 +5,10 @@
 #'
 #' @param fileString Character string containing AIRSIS data.
 #'
-#' @description Examine the column names of the incoming character vector
-#' to identify different data formats provided by AIRSIS.
+#' @description Examine column names in the first line of raw ASCII
+#' data to identify different data formats provided by AIRSIS.
 #'
-#' Identified formats include:
+#' Recognized AIRSIS formats include:
 #'
 #' \itemize{
 #' \item{\code{"BAM 1020"}}

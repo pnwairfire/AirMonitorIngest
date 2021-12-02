@@ -58,8 +58,7 @@ airsis_parse_BAM.1020 <- function(
   col_types <- 'ccdddddddddcc'
 
   # NOTE:  We need to guarantee that fakeFile always ends with a newline so that
-  # NOTE:  read_lines() will interpret fakeFile as a single data record as
-  # NOTE:  literal data and not a path.
+  # NOTE:  read_lines() will interpret fakeFile as literal data.
 
   # Remove header line, leaving only data
   fakeFile <- paste0(paste0(lines[-1], collapse = '\n'),'\n')
@@ -80,25 +79,22 @@ airsis_parse_BAM.1020 <- function(
 
   # ----- Format specific cleanup ----------------------------------------------
 
-  # TODO:  provider = "USFS"; unitID = "49"; year = 2010
-  # TODO:  This file had every other row missing; also, no lat/lon info.
-  # TODO:  May want to look into this further if noticed in more recent data.
+  # None for BAM.1020
 
-
-  # ----- Harmonize column names -----------------------------------------------
+  # ----- Harmonize data -------------------------------------------------------
 
   # Core columns we keep
   columnNames <- c(
     "locationName",
     "datetime", "longitude", "latitude",
-    "flow", "AT", "RHi", "pm25", "voltage"
+    "flow", "AT", "RHi", "pm25"
   )
 
   # NOTE:  Assume that the TimeStamp is the time at which the just completed
   # NOTE:  hourly average is reported. So the average for the 08:00 hour will
   # NOTE:  complete at 09:00 but not be reported until, say, 09:14:49.
   # NOTE:  This is why we have to subtract one hour to get the correct
-  # NOTE:  beginning-of-the-hour datetime value.
+  # NOTE:  beginning-of-the-hour datetime this record will be assigned to.
 
   # Times -- "5/22/2013 9:14:49 PM"
   datetime <-
@@ -107,7 +103,7 @@ airsis_parse_BAM.1020 <- function(
 
   pm25 <- tbl[["Conc..\u00b5g.m3."]]
 
-  # NOTE:  Can't use the pm25 column name inside of dplyr becuase of:
+  # NOTE:  Can't use the original pm25 column name inside of dplyr because of:
   # NOTE:    "Error: \uxxxx sequences not supported inside backticks"
 
   tbl <-
@@ -125,8 +121,7 @@ airsis_parse_BAM.1020 <- function(
       flow = .data$Qtot..m3.,
       AT = .data$Ambient.Temp..C.,
       RHi = .data$RH....,
-      pm25 = !!pm25,
-      voltage = as.numeric(NA)
+      pm25 = !!pm25
     ) %>%
 
     # Copy information from and then remove GPS records

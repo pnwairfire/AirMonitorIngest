@@ -2,10 +2,10 @@
 #' @importFrom utils read.table
 #' @importFrom rlang .data
 #'
-#' @title Create 'meta' dnad 'data' dataframes from WRCC data
+#' @title Create 'meta' dnad 'data' dataframes from airsis_ data
 #'
 #' @description
-#' Create a \code{meta} dataframe with WRCC monitor metadata and a \code{data}
+#' Create a \code{meta} dataframe with AIRSIS monitor metadata and a \code{data}
 #' dataframe with PM2.5 time series appropriate for use with the
 #' \pkg{MazamaTimeSeries} package.
 #'
@@ -15,36 +15,36 @@
 #'
 #' @param locationTbl Tibble of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param distanceThreshold Separation distance in meters between "known locations".
-#' @param wrcc_data Tibble of WRCC monitor data after QC and clustering have
+#' @param airsis_data Tibble of AIRSIS monitor data after QC and clustering have
 #' been applied.
-#' @param unitID WRCC station identifier (will be upcased).
+#' @param unitID AIRSIS station identifier (will be upcased).
 #'
 #' @return List with two tibbles.
 #'
 
 # NOTE:  We need to create both 'meta' and 'data' in a single function so that
-# NOTE:  we can take advantage of the clustering we attach to wrcc_data when
+# NOTE:  we can take advantage of the clustering we attach to airsis_data when
 # NOTE:  creating the 'data' dataframe.
 
-wrcc_createMetaAndData <- function(
+airsis_createMetaAndData <- function(
   locationTbl = NULL,
   distanceThreshold = NULL,
-  wrcc_data = NULL,
+  airsis_data = NULL,
   unitID = NULL
 ) {
 
-  logger.debug(" ----- wrcc_createMeta() ----- ")
+  logger.debug(" ----- airsis_createMeta() ----- ")
 
   # ----- Validate Parameters --------------------------------------------------
 
   MazamaCoreUtils::stopIfNull(locationTbl)
   MazamaCoreUtils::stopIfNull(distanceThreshold)
-  MazamaCoreUtils::stopIfNull(wrcc_data)
+  MazamaCoreUtils::stopIfNull(airsis_data)
   MazamaCoreUtils::stopIfNull(unitID)
 
-  # ----- Simplify wrcc_data -------------------------------------------------
+  # ----- Simplify airsis_data -------------------------------------------------
 
-  #   > print(names(wrcc_data), width = 75)
+  #   > print(names(airsis_data), width = 75)
   #  [1] "DateTime"       "GPSLat"         "GPSLon"         "Type"
   #  [5] "SerialNumber"   "ConcRT"         "Conc_l_m"       "AvAirFlw"
   #  [9] "AvAirTemp"      "RelHumidity"    "BaromPress"     "SensorIntAT"
@@ -57,24 +57,24 @@ wrcc_createMetaAndData <- function(
     "longitude",
     "latitude",
     "clusterID",
-    "wrcc_type",
-    "wrcc_serialNumber",
-    "wrcc_monitorName",
-    "wrcc_monitorType"
+    "airsis_type",
+    "airsis_serialNumber",
+    "airsis_monitorName",
+    "airsis_monitorType"
   )
 
-  wrcc_location_data <-
+  airsis_location_data <-
 
-    wrcc_data %>%
+    airsis_data %>%
 
     dplyr::distinct(.data$clusterID, .keep_all = TRUE) %>%
     dplyr::rename(
       longitude = .data$clusterLon,
       latitude = .data$clusterLat,
-      wrcc_type = .data$Type,
-      wrcc_serialNumber = .data$SerialNumber,
-      wrcc_monitorName = .data$monitorName,
-      wrcc_monitorType = .data$monitorType
+      airsis_type = .data$Type,
+      airsis_serialNumber = .data$SerialNumber,
+      airsis_monitorName = .data$monitorName,
+      airsis_monitorType = .data$monitorType
     ) %>%
 
     # Remove records with missing or zero lon/lat
@@ -90,31 +90,31 @@ wrcc_createMetaAndData <- function(
 
   # ----- Find nearest known locations -----------------------------------------
 
-  wrcc_data_locations <-
+  airsis_data_locations <-
     MazamaLocationUtils::table_getNearestLocation(
       locationTbl,
-      wrcc_location_data$longitude,
-      wrcc_location_data$latitude,
+      airsis_location_data$longitude,
+      airsis_location_data$latitude,
       distanceThreshold = distanceThreshold
     )
 
   # NOTE:  Assume that all the work has been done to update the incoming
-  # NOTE:  locationTbl so that all locations in wrcc_data are "known".
+  # NOTE:  locationTbl so that all locations in airsis_data are "known".
   # NOTE:
   # NOTE:  Any that are not will be removed with a warning message.
 
-  if ( anyNA(wrcc_data_locations$locationID) ) {
+  if ( anyNA(airsis_data_locations$locationID) ) {
 
     err_msg <- sprintf(
       "%d locations are still unknown and will be removed",
-      sum(is.na(wrcc_data_locations$locationID))
+      sum(is.na(airsis_data_locations$locationID))
     )
     if ( logger.isInitialized() ) logger.warn(err_msg)
     warning(err_msg)
 
     # Retain only truly "known" locations
-    mask <- !is.na(wrcc_data_locations$locationID)
-    wrcc_data_locations <- wrcc_data_locations[mask,]
+    mask <- !is.na(airsis_data_locations$locationID)
+    airsis_data_locations <- airsis_data_locations[mask,]
 
   }
 
@@ -122,19 +122,19 @@ wrcc_createMetaAndData <- function(
 
   bindColumns <- c(
     "clusterID",
-    "wrcc_type",
-    "wrcc_serialNumber",
-    "wrcc_monitorName",
-    "wrcc_monitorType"
+    "airsis_type",
+    "airsis_serialNumber",
+    "airsis_monitorName",
+    "airsis_monitorType"
   )
 
   meta <-
 
-    wrcc_data_locations %>%
+    airsis_data_locations %>%
 
     # Add device metadata
     dplyr::bind_cols(
-      dplyr::select(wrcc_location_data, dplyr::all_of(bindColumns))
+      dplyr::select(airsis_location_data, dplyr::all_of(bindColumns))
     ) %>%
 
     # Unique device ID = AQSID as we have nothing more specific
@@ -149,12 +149,12 @@ wrcc_createMetaAndData <- function(
 
     # Other required metadata
     dplyr::mutate(
-      deviceType = .data$wrcc_monitorType,
+      deviceType = .data$airsis_monitorType,
       deviceDescription = as.character(NA),
       deviceExtra = as.character(NA),
       pollutant = "PM2.5",
       units = "UG/M3",
-      dataIngestSource = "WRCC",
+      dataIngestSource = "AIRSIS",
       dataIngestURL = "https://wrcc.dri.edu/cgi-bin/wea_list2.pl",
       dataIngestUnitID = unitID,
       dataIngestExtra = as.character(NA),
@@ -183,17 +183,17 @@ wrcc_createMetaAndData <- function(
   # Create a tibble with a regular time axis
   hourlyTbl <- dplyr::tibble(
     datetime = seq(
-      min(wrcc_data$datetime, na.rm = TRUE),
-      max(wrcc_data$datetime, na.rm = TRUE),
+      min(airsis_data$datetime, na.rm = TRUE),
+      max(airsis_data$datetime, na.rm = TRUE),
       by = "hours")
   )
 
   # ----- Create 'data' --------------------------------------------------------
 
   # Create a dataframe for reshaping
-  wrcc_data_enhanced <-
+  airsis_data_enhanced <-
 
-    wrcc_data %>%
+    airsis_data %>%
 
     # Add deviceDeploymentID
     dplyr::left_join(
@@ -211,7 +211,7 @@ wrcc_createMetaAndData <- function(
 
   # Reshape
   melted <- reshape2::melt(
-    wrcc_data_enhanced,
+    airsis_data_enhanced,
     id.vars = c("datetime", "deviceDeploymentID"),
     measure.vars = "ConcRT"
   )
@@ -242,6 +242,6 @@ wrcc_createMetaAndData <- function(
 if ( FALSE ) {
 
 
-  # See wrcc_updateKnownLocations
+  # See airsis_updateKnownLocations
 
 }

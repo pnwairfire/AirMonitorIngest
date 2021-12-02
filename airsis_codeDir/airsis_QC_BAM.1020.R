@@ -10,7 +10,7 @@
 #' @param valid_flow range of valid Flow values
 #' @param valid_AT range of valid AT values
 #' @param valid_RHi range of valid RHi values
-#' @param valid_pm25 range of valid ConcHr values
+#' @param valid_pm25 range of valid pm25 values
 #' @param flagAndKeep flag, rather than remove, bad data during the QC process
 #'
 #' @description Perform various QC measures on AIRSIS data originally in
@@ -39,18 +39,19 @@ airsis_QC_BAM.1020 <- function(
 
   # > head(tbl)
   # # A tibble: 6 × 8
-  #   datetime            longitude latitude  flow    AT   RHi  pm25 voltage
-  #   <dttm>                  <dbl>    <dbl> <dbl> <dbl> <dbl> <dbl>   <dbl>
-  # 1 2013-05-22 21:00:00     -120.     37.7 0      15.4    40   995      NA
-  # 2 2013-05-22 22:00:00     -120.     37.7 0      19.5    30   995      NA
-  # 3 2013-05-22 23:00:00     -120.     37.7 0.834  19.5    13     1      NA
-  # 4 2013-05-23 00:00:00     -120.     37.7 0.834  19.5     9     4      NA
-  # 5 2013-05-23 01:00:00     -120.     37.7 0.834  18.9     8     6      NA
-  # 6 2013-05-23 02:00:00     -120.     37.7 0.834  17.6     8     3      NA
+  #   locationName    datetime            longitude latitude  flow    AT   RHi  pm25
+  #   <chr>           <dttm>                  <dbl>    <dbl> <dbl> <dbl> <dbl> <dbl>
+  # 1 NPS YOS1001 Bam 2013-05-22 20:00:00     -120.     37.7 0      15.4    40   995
+  # 2 NPS YOS1001 Bam 2013-05-22 21:00:00     -120.     37.7 0      19.5    30   995
+  # 3 NPS YOS1001 Bam 2013-05-22 22:00:00     -120.     37.7 0.834  19.5    13     1
+  # 4 NPS YOS1001 Bam 2013-05-22 23:00:00     -120.     37.7 0.834  19.5     9     4
+  # 5 NPS YOS1001 Bam 2013-05-23 00:00:00     -120.     37.7 0.834  18.9     8     6
+  # 6 NPS YOS1001 Bam 2013-05-23 01:00:00     -120.     37.7 0.834  17.6     8     3
 
-  # ----- Setup for flagAndKeep argument utility ------------------------------
+  # ----- Setup for flagAndKeep argument ---------------------------------------
 
   if ( flagAndKeep ) {
+
     # verb for logging messages
     verb <- "Flagging"
 
@@ -66,7 +67,7 @@ airsis_QC_BAM.1020 <- function(
     tblFlagged$QCFlag_badFlow <- FALSE
     tblFlagged$QCFlag_badAT <- FALSE
     tblFlagged$QCFlag_badRHi <- FALSE
-    tblFlagged$QCFlag_badConcHr <- FALSE
+    tblFlagged$QCFlag_badpm25 <- FALSE
 
   } else {
 
@@ -79,24 +80,23 @@ airsis_QC_BAM.1020 <- function(
 
   # Latitude and longitude must be in range and non-zero
   goodLonMask <-
-    !is.na(tbl$Longitude) &
-    (tbl$Longitude >= valid_longitude[1]) &
-    (tbl$Longitude <= valid_longitude[2]) &
-    (tbl$Longitude != 0)
+    !is.na(tbl$longitude) &
+    (tbl$longitude >= valid_longitude[1]) &
+    (tbl$longitude <= valid_longitude[2]) &
+    (tbl$longitude != 0)
 
   goodLatMask <-
-    !is.na(tbl$Latitude) &
-    (tbl$Latitude >= valid_latitude[1]) &
-    (tbl$Latitude <= valid_latitude[2]) &
-    (tbl$Latitude != 0)
-
+    !is.na(tbl$latitude) &
+    (tbl$latitude >= valid_latitude[1]) &
+    (tbl$latitude <= valid_latitude[2]) &
+    (tbl$latitude != 0)
 
   badRows <- !(goodLonMask & goodLatMask)
   badRowCount <- sum(badRows)
 
   if ( badRowCount > 0 ) {
     logger.trace("%s %d rows with invalid location information", verb, badRowCount)
-    badLocations <- paste('(', tbl$Longitude[badRows], ',', tbl$Latitude[badRows], ')' , sep = '')
+    badLocations <- paste('(', tbl$longitude[badRows], ',', tbl$latitude[badRows], ')' , sep = '')
     logger.trace("Bad locations: %s", unique(badLocations))
     if ( flagAndKeep ) {
       # apply flags
@@ -120,7 +120,6 @@ airsis_QC_BAM.1020 <- function(
 
   # ----- QC -------------------------------------------------------------------
 
-
   ### Leland Tarnay QC from 2017
   ###
   ### dat.2012arbbamraw$concHR <- ifelse(dat.2012arbbamraw$Qtot.m3.<.834*.95,NA,
@@ -132,7 +131,7 @@ airsis_QC_BAM.1020 <- function(
   ###                                    ifelse(dat.2012arbbamraw$Delta.C.>25,NA,
   ###                                    dat.2012arbbamraw$Conc.mg.*1000)))))))
 
-  # NOTE:  Override ConcHr high value with 5000 as per conversation with Mike Broughton
+  # NOTE:  Override pm25 high value with 5000 as per conversation with Mike Broughton
 
   # TODO:  Consider logic to throw out pm25 data if temperature changes by more
   # TODO:  than 2 degC in adjacent hrs.
@@ -141,7 +140,7 @@ airsis_QC_BAM.1020 <- function(
   goodFlow <- !is.na(tbl$flow) & tbl$flow >= valid_flow[1] & tbl$flow <= valid_flow[2]
   goodAT <- !is.na(tbl$AT) & tbl$AT >= valid_AT[1] & tbl$AT <= valid_AT[2]
   goodRHi <- !is.na(tbl$RHi) & tbl$RHi >= valid_RHi[1] & tbl$RHi <= valid_RHi[2]
-  goodConcHr <- !is.na(tbl$pm25) & tbl$pm25 >= valid_pm25[1] & tbl$pm25 <= valid_pm25[2]
+  goodpm25  <- !is.na(tbl$pm25) & tbl$pm25 >= valid_pm25[1] & tbl$pm25 <= valid_pm25[2]
   gooddatetime <- !is.na(tbl$datetime) & tbl$datetime < lubridate::now(tzone = "UTC") # saw a future date once
 
   logger.trace("Flow has %s missing or out of range values", sum(!goodFlow))
@@ -150,12 +149,12 @@ airsis_QC_BAM.1020 <- function(
   if (sum(!goodAT) > 0) logger.trace("Bad AT values:  %s", paste0(sort(unique(tbl$AT[!goodAT]),na.last = TRUE), collapse = ", "))
   logger.trace("RHi has %s missing or out of range values", sum(!goodRHi))
   if (sum(!goodRHi) > 0) logger.trace("Bad RHi values:  %s", paste0(sort(unique(tbl$RHi[!goodRHi]),na.last = TRUE), collapse = ", "))
-  logger.trace("Conc has %s missing or out of range values", sum(!goodConcHr))
-  if (sum(!goodConcHr) > 0) logger.trace("Bad Conc values:  %s", paste0(sort(unique(tbl$pm25[!goodConcHr]),na.last = TRUE), collapse = ", "))
+  logger.trace("pm25 has %s missing or out of range values", sum(!goodpm25))
+  if (sum(!goodpm25) > 0) logger.trace("Bad pm25 values:  %s", paste0(sort(unique(tbl$pm25[!goodpm25]),na.last = TRUE), collapse = ", "))
   logger.trace("datetime has %s missing or out of range values", sum(!gooddatetime))
   if (sum(!gooddatetime) > 0) logger.trace("Bad datetime values:  %s", paste0(sort(unique(tbl$datetime[!gooddatetime]),na.last = TRUE), collapse = ", "))
 
-  goodMask <- goodFlow & goodAT & goodRHi & goodConcHr & gooddatetime
+  goodMask <- goodFlow & goodAT & goodRHi & goodpm25 & gooddatetime
   badQCCount <- sum(!goodMask)
 
   if ( badQCCount > 0 ) {
@@ -165,16 +164,16 @@ airsis_QC_BAM.1020 <- function(
       tblFlagged$QCFlag_badFlow[tbl$rowID[!goodFlow]] <- TRUE
       tblFlagged$QCFlag_badAT[tbl$rowID[!goodAT]] <- TRUE
       tblFlagged$QCFlag_badRHi[tbl$rowID[!goodRHi]] <- TRUE
-      tblFlagged$QCFlag_badConcHr[tbl$rowID[!goodConcHr]] <- TRUE
+      tblFlagged$QCFlag_badpm25[tbl$rowID[!goodpm25]] <- TRUE
       tblFlagged$QCFlag_badDateAndTime[tbl$rowID[!gooddatetime]] <- TRUE
       tblFlagged$QCFlag_anyBad <- (tblFlagged$QCFlag_anyBad | tblFlagged$QCFlag_badFlow | tblFlagged$QCFlag_badAT |
-                                    tblFlagged$QCFlag_badRHi | tblFlagged$QCFlag_badConcHr | tblFlagged$QCFlag_badDateAndTime)
+                                    tblFlagged$QCFlag_badRHi | tblFlagged$QCFlag_badpm25 | tblFlagged$QCFlag_badDateAndTime)
       # apply reason codes
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]],"badFlow")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]],"badAT")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]],"badRHi")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodConcHr]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodConcHr]],"badConcHr")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]],"badDateAndTime")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]], "badFlow")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]], "badAT")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]], "badRHi")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]], "badpm25")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]], "badDateAndTime")
     }
   }
 
@@ -187,7 +186,7 @@ airsis_QC_BAM.1020 <- function(
     stop(msg, call. = FALSE)
   }
 
-  # ----- More QC -------------------------------------------------------------
+  # ----- More QC --------------------------------------------------------------
 
   # NOTE:  Additional QC would go here
 
@@ -207,5 +206,22 @@ airsis_QC_BAM.1020 <- function(
   }
 
   return(tbl)
+
+}
+
+# ===== DEBUG ==================================================================
+
+if ( FALSE ) {
+
+
+  valid_longitude = c(-180, 180)
+  valid_latitude = c(-90, 90)
+  valid_flow = c(.834*.95, .834*1.05)
+  valid_AT = c(-Inf, 45)
+  valid_RHi = c(-Inf, 45)
+  valid_pm25 = c(-Inf, 5000)
+  flagAndKeep = FALSE
+
+
 
 }
