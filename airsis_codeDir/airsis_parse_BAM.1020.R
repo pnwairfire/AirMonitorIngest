@@ -89,18 +89,25 @@ airsis_parse_BAM.1020 <- function(
 
   # Core columns we keep
   columnNames <- c(
+    "locationName",
     "datetime", "longitude", "latitude",
     "flow", "AT", "RHi", "pm25", "voltage"
   )
 
-  # Times -- "1/1/2010 12:00:00 AM"
+  # NOTE:  Assume that the TimeStamp is the time at which the just completed
+  # NOTE:  hourly average is reported. So the average for the 08:00 hour will
+  # NOTE:  complete at 09:00 but not be reported until, say, 09:14:49.
+  # NOTE:  This is why we have to subtract one hour to get the correct
+  # NOTE:  beginning-of-the-hour datetime value.
+
+  # Times -- "5/22/2013 9:14:49 PM"
   datetime <-
     lubridate::mdy_hms(tbl$TimeStamp, tz = "UTC") %>%
-    lubridate::floor_date(datetime, unit = "hour")
+    lubridate::floor_date(datetime, unit = "hour") - lubridate::dhours(1)
 
   pm25 <- tbl[["Conc..\u00b5g.m3."]]
 
-  # NOTE:  Can't use the pm25 column nameinside of dplyr becuase of:
+  # NOTE:  Can't use the pm25 column name inside of dplyr becuase of:
   # NOTE:    "Error: \uxxxx sequences not supported inside backticks"
 
   tbl <-
@@ -111,6 +118,7 @@ airsis_parse_BAM.1020 <- function(
     # Core variables
     dplyr::mutate(
       gpsRecord = !is.na(.data$Longitude),
+      locationName = .data$Alias,
       datetime = !!datetime,
       longitude = .data$Longitude,
       latitude = .data$Latitude,
@@ -127,60 +135,44 @@ airsis_parse_BAM.1020 <- function(
     dplyr::filter(.data$gpsRecord == FALSE) %>%
 
     # Only keep core harmonized data
-    dplyr::select(dplyr::all_of(columnNames))
+    dplyr::select(dplyr::all_of(columnNames)) %>%
+
+    # Remove duplicate times using later-is-better logic
+    dplyr::arrange(dplyr::desc(.data$datetime)) %>%
+    dplyr::distinct(.data$datetime, .keep_all = TRUE) %>%
+    dplyr::arrange(.data$datetime)
+
+  # ----- Return ---------------------------------------------------------------
+
+  return(tbl)
+
+}
+
+# ===== DEBUGGING ==============================================================
+
+if ( FALSE ) {
+
+  library(MazamaCoreUtils)
+
+  startdate = MazamaCoreUtils::parseDatetime("2013-05-20", timezone = "UTC")
+  enddate = MazamaCoreUtils::parseDatetime("2013-05-30", timezone = "UTC")
+  timezone = "UTC"
+  provider = "APCD"
+  unitID = "1012"
+
+  # Read in AIRSIS .csv data
+  fileString <- airsis_downloadData(
+    startdate,
+    enddate,
+    timezone,
+    provider,
+    unitID
+  )
+
+  dataFormat <- airsis_identifyDataFormat(fileString)
+
+  tbl <- airsis_parse_BAM.1020(fileString)
 
 
-
-  # TODO:  deal with duplicated datetime
-
-  # TODO:  Conert flow to standard units
-
-  # # ----- Various fixes --------------------------------------------------------
-  #
-  # # Check to see if any records remain
-  # if ( nrow(tbl) == 0 ) {
-  #   logger.error("No data remaining after parsing cleanup")
-  #   stop("No data remaining after parsing cleanup", call. = FALSE)
-  # }
-  #
-  # # NOTE:  Latitude, Longitude and Sys..Volts are measured at 6am and 6pm
-  # # NOTE:  as separate GPS entries in the tibble. They need to be carried
-  # # NOTE:  forward so they appear in all rows.
-  #
-  # gpsMask <- !is.na(tbl$Longitude)
-  #
-  # if (monitorType == "EBAM") {
-  #   if ( monitorSubtype == "MULTI2_B") {
-  #     voltLabel <- "Oceaneering.Unit.Voltage"
-  #   } else {
-  #     voltLabel <- "Sys..Volts"
-  #   }
-  # } else if (monitorType == "ESAM") {
-  #   if ( monitorSubtype == "MULTI" ) {
-  #     voltLabel <- "Oceaneering.Unit.Voltage"
-  #   } else {
-  #     voltLabel <- "System.Volts"
-  #   }
-  # } else {
-  #   # NOTE: BAM1020s don't have voltage data
-  #   voltLabel <- NULL
-  # }
-  #
-  # # use "quosures" to let us use a variable as a column name
-  # voltColumn <- rlang::enquo(voltLabel)
-  #
-  # # Propagate data forwards, then backwards to fill in missing values
-  # tbl <- tbl %>%
-  #   tidyr::fill(.data$Longitude, .data$Latitude, !!voltColumn) %>%
-  #   tidyr::fill(.data$Longitude, .data$Latitude, !!voltColumn, .direction = "up")
-  #
-  # logger.trace("Removing %d 'GPS' records from raw data", sum(gpsMask))
-  # tbl <- tbl[!gpsMask,]
-  #
-  # # ----- Return ---------------------------------------------------------------
-  #
-  # logger.trace('Retaining %d rows of raw %s measurements', nrow(tbl), monitorType)
-  #
-  # return(tbl)
 
 }
