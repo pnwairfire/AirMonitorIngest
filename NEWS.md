@@ -1,3 +1,11 @@
+# AirMonitorIngest 0.3.3
+
+Adding `airsis_~()` functions:
+
+* `airsis_downloadData()`
+* `airsis_parseData()`
+* `airsis_codeDir/airsis_identifyDataFormat()`
+
 # AirMonitorIngest 0.3.2
 
 * Now depending on **AirMonitor** 0.0.6.
@@ -8,7 +16,7 @@
 
 # AirMonitorIngest 0.3.0
 
-Version 0.3 focuses on data ingest from WRCC using the WRCC API.
+Version 0.3 focuses on data ingest from WRCC and AIRSIS.
 
 Initial functions include:
 
