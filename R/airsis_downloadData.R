@@ -13,6 +13,11 @@
 #' @description Download data for a particular station for the desired time period.
 #' Data are returned as a single character string containing the AIRIS output.
 #'
+#' @note Airsis data comes in many different formats with new ones added every
+#' year. To accommodate this, all parsing, QC and other functions for converting
+#' raw AIRSIS data into \emph{monitor} objects is found in the
+#' \code{airsis_codeDir/} directory that is part of the GitHub repository.
+#'
 #' @return String containing AIRSIS output.
 #'
 

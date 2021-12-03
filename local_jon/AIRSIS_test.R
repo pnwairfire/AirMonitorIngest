@@ -1,11 +1,23 @@
 # AIRSIS test
 
 library(MazamaCoreUtils)
+logger.setLevel(DEBUG)
+
 library(AirMonitorIngest)
+
+# Load R functions
+R_files <- list.files("airsis_codeDir", pattern = ".+\\.R", full.names = TRUE)
+
+for (file in R_files) {
+  source(file.path(getwd(), file))
+}
 
 distanceThreshold <- 1000
 
 # ----- BAM.1020 ---------------------------------------------------------------
+
+provider <- "APCD"
+unitID <- "1012"
 
 airsis_data <-
 
@@ -17,13 +29,7 @@ airsis_data <-
     unitID = "1012"
   ) %>%
 
-  airsis_parseData(
-    codeDir = "airsis_codeDir"
-  ) %>%
-
-  airsis_QC_BAM.1020(
-    flagAndKeep = FALSE
-  ) %>%
+  airsis_parseAndQCData() %>%
 
   addClustering(
     clusterDiameter = distanceThreshold,
@@ -31,4 +37,11 @@ airsis_data <-
     latVar = "latitude",
     maxClusters = 50,
     flagAndKeep = FALSE
+  ) %>%
+
+  # Add device metadata
+  dplyr::mutate(
+    airsis_provider = tolower(!!provider),
+    airsis_unitID = !!unitID
   )
+

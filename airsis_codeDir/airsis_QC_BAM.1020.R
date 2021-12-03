@@ -37,16 +37,17 @@ airsis_QC_BAM.1020 <- function(
 
   MazamaCoreUtils::stopIfNull(tbl)
 
-  # > head(tbl)
-  # # A tibble: 6 × 8
-  #   locationName    datetime            longitude latitude  flow    AT   RHi  pm25
-  #   <chr>           <dttm>                  <dbl>    <dbl> <dbl> <dbl> <dbl> <dbl>
-  # 1 NPS YOS1001 Bam 2013-05-22 20:00:00     -120.     37.7 0      15.4    40   995
-  # 2 NPS YOS1001 Bam 2013-05-22 21:00:00     -120.     37.7 0      19.5    30   995
-  # 3 NPS YOS1001 Bam 2013-05-22 22:00:00     -120.     37.7 0.834  19.5    13     1
-  # 4 NPS YOS1001 Bam 2013-05-22 23:00:00     -120.     37.7 0.834  19.5     9     4
-  # 5 NPS YOS1001 Bam 2013-05-23 00:00:00     -120.     37.7 0.834  18.9     8     6
-  # 6 NPS YOS1001 Bam 2013-05-23 01:00:00     -120.     37.7 0.834  17.6     8     3
+  # > dplyr::glimpse(tbl, width = 75)
+  # Rows: 193
+  # Columns: 8
+  # $ datetime   <dttm> 2013-05-22 20:00:00, 2013-05-22 21:00:00, 2013-05-22
+  # $ longitude  <dbl> -119.7840, -119.7840, -119.7840, -119.7840, -119.7840,
+  # $ latitude   <dbl> 37.67461, 37.67461, 37.67461, 37.67461, 37.67461, 37.6
+  # $ flow       <dbl> 0.000, 0.000, 0.834, 0.834, 0.834, 0.834, 0.834, 0.834
+  # $ AT         <dbl> 15.4, 19.5, 19.5, 19.5, 18.9, 17.6, 15.9, 12.8, 10.7,
+  # $ RHi        <dbl> 40, 30, 13, 9, 8, 8, 9, 12, 13, 15, 17, 19, 20, 22, 23
+  # $ pm25       <dbl> 995, 995, 1, 4, 6, 3, 4, 2, -2, 1, -1, 0, 4, 3, 2, 3,
+  # $ wrcc_Alias <chr> "NPS YOS1001 Bam", "NPS YOS1001 Bam", "NPS YOS1001 Bam
 
   # ----- Setup for flagAndKeep argument ---------------------------------------
 
@@ -63,11 +64,10 @@ airsis_QC_BAM.1020 <- function(
     tblFlagged$QCFlag_reasonCode <- as.character(NA)
     tblFlagged$QCFlag_badLon <- FALSE
     tblFlagged$QCFlag_badLat <- FALSE
-    tblFlagged$QCFlag_badType <- FALSE
     tblFlagged$QCFlag_badFlow <- FALSE
     tblFlagged$QCFlag_badAT <- FALSE
     tblFlagged$QCFlag_badRHi <- FALSE
-    tblFlagged$QCFlag_badpm25 <- FALSE
+    tblFlagged$QCFlag_badPM25 <- FALSE
 
   } else {
 
@@ -164,15 +164,15 @@ airsis_QC_BAM.1020 <- function(
       tblFlagged$QCFlag_badFlow[tbl$rowID[!goodFlow]] <- TRUE
       tblFlagged$QCFlag_badAT[tbl$rowID[!goodAT]] <- TRUE
       tblFlagged$QCFlag_badRHi[tbl$rowID[!goodRHi]] <- TRUE
-      tblFlagged$QCFlag_badpm25[tbl$rowID[!goodpm25]] <- TRUE
+      tblFlagged$QCFlag_badPM25[tbl$rowID[!goodpm25]] <- TRUE
       tblFlagged$QCFlag_badDateAndTime[tbl$rowID[!gooddatetime]] <- TRUE
       tblFlagged$QCFlag_anyBad <- (tblFlagged$QCFlag_anyBad | tblFlagged$QCFlag_badFlow | tblFlagged$QCFlag_badAT |
-                                    tblFlagged$QCFlag_badRHi | tblFlagged$QCFlag_badpm25 | tblFlagged$QCFlag_badDateAndTime)
+                                    tblFlagged$QCFlag_badRHi | tblFlagged$QCFlag_badPM25 | tblFlagged$QCFlag_badDateAndTime)
       # apply reason codes
       tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodFlow]], "badFlow")
       tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodAT]], "badAT")
       tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodRHi]], "badRHi")
-      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]], "badpm25")
+      tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!goodpm25]], "badPM25")
       tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]] <- paste(tblFlagged$QCFlag_reasonCode[tbl$rowID[!gooddatetime]], "badDateAndTime")
     }
   }

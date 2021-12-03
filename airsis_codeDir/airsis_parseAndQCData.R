@@ -1,52 +1,30 @@
 #' @export
 #' @importFrom MazamaCoreUtils logger.trace logger.debug logger.warn logger.error
 #'
-#' @title Parse AIRSIS data string
+#' @title Parse and QC raw AIRSIS data
 #'
 #' @param fileString Character string containing AIRSIS data.
-#' @param codeDir Directory where AIRSIS data parsing scripts are found.
 #'
 #' @description Raw character data from AIRSIS are parsed into a tibble.
 #' The incoming \code{fileString} can be read in directly from AIRSIS using
 #' \code{airsis_downloadData()} or from a local file using
 #' \code{readr::read_file()}.
 #'
-#' @details AIRSIS provides monitor data in an extremely raw fashion and does
-#' minimal harmonizing of data. Every year, several new, slightly different data
-#' formats become available. For this reason, all AIRSIS parsing code is
-#' kept outside this package and must exist in \code{codeDir}. This allows for
-#' quick addition of support for new formats without having to rebuild the
-#' package and any systems dependent upon this package.
-#'
-#' @return Dataframe of AIRSIS raw monitor data.
+#' @return Tibble of parsed and QC'ed monitor data.
 
-airsis_parseData <- function(
-  fileString = NULL,
-  codeDir = NULL
+airsis_parseAndQCData <- function(
+  fileString = NULL
 ) {
 
-  logger.debug(" ----- airsis_parseData() ----- ")
+  logger.debug(" ----- airsis_parseAndQCData() ----- ")
 
   # ----- Validate parameters --------------------------------------------------
 
   MazamaCoreUtils::stopIfNull(fileString)
-  MazamaCoreUtils::stopIfNull(codeDir)
-
-  if ( !dir.exists(codeDir) )
-    stop("cannot find 'codeDir': %s", codeDir)
 
   # ----- Identify data format -------------------------------------------------
 
   identify_function <- "airsis_identifyDataFormat"
-  identify_script <- file.path(codeDir, sprintf("%s.R", identify_function))
-
-  if ( !file.exists(identify_script) ) {
-    msg <- sprintf("cannot find %s", identify_script)
-    logger.error(msg)
-    stop(msg)
-  }
-
-  source(identify_script)
 
   if ( !exists(identify_function) ) {
     msg <- sprintf("function '%s()' is not defined in %s", identify_function, identify_script)
@@ -59,16 +37,9 @@ airsis_parseData <- function(
 
   # ----- Parse monitor data ---------------------------------------------------
 
+  logger.trace("Parsing data as: %s", dataFormat)
+
   parse_function <- sprintf("airsis_parse_%s", dataFormat)
-  parse_script <- file.path(codeDir, sprintf("%s.R", parse_function))
-
-  if ( !file.exists(parse_script) ) {
-    msg <- sprintf("cannot find %s", parse_script)
-    logger.error(msg)
-    stop(msg)
-  }
-
-  source(parse_script)
 
   if ( !exists(parse_function) ) {
     msg <- sprintf("function '%s()' is not defined in %s", parse_function, parse_script)
@@ -76,21 +47,11 @@ airsis_parseData <- function(
     stop(msg)
   }
 
-
   tbl <- get(parse_function)(fileString)
 
   # ----- QC monitor data ------------------------------------------------------
 
   qc_function <- sprintf("airsis_QC_%s", dataFormat)
-  qc_script <- file.path(codeDir, sprintf("%s.R", qc_function))
-
-  if ( !file.exists(qc_script) ) {
-    msg <- sprintf("cannot find %s", qc_script)
-    logger.error(msg)
-    stop(msg)
-  }
-
-  source(qc_script)
 
   if ( !exists(qc_function) ) {
     msg <- sprintf("function '%s()' is not defined in %s", qc_function, qc_script)
@@ -98,8 +59,11 @@ airsis_parseData <- function(
     stop(msg)
   }
 
-
   tbl <- get(qc_function)(tbl)
+
+  # ----- Add metadata ---------------------------------------------------------
+
+  tbl$airsis_dataFormat = dataFormat
 
   # ----- Return ---------------------------------------------------------------
 

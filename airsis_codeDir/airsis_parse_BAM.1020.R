@@ -85,9 +85,9 @@ airsis_parse_BAM.1020 <- function(
 
   # Core columns we keep
   columnNames <- c(
-    "locationName",
     "datetime", "longitude", "latitude",
-    "flow", "AT", "RHi", "pm25"
+    "flow", "AT", "RHi", "pm25",
+    "airsis_Alias"
   )
 
   # NOTE:  Assume that the TimeStamp is the time at which the just completed
@@ -99,7 +99,10 @@ airsis_parse_BAM.1020 <- function(
   # Times -- "5/22/2013 9:14:49 PM"
   datetime <-
     lubridate::mdy_hms(tbl$TimeStamp, tz = "UTC") %>%
-    lubridate::floor_date(datetime, unit = "hour") - lubridate::dhours(1)
+    lubridate::floor_date(unit = "hour") - lubridate::dhours(1)
+
+  processedTime <-
+    lubridate::mdy_hms(tbl$PDate, tz = "UTC")
 
   pm25 <- tbl[["Conc..\u00b5g.m3."]]
 
@@ -114,14 +117,15 @@ airsis_parse_BAM.1020 <- function(
     # Core variables
     dplyr::mutate(
       gpsRecord = !is.na(.data$Longitude),
-      locationName = .data$Alias,
       datetime = !!datetime,
       longitude = .data$Longitude,
       latitude = .data$Latitude,
       flow = .data$Qtot..m3.,
       AT = .data$Ambient.Temp..C.,
       RHi = .data$RH....,
-      pm25 = !!pm25
+      pm25 = !!pm25,
+      processedTime = !!processedTime,
+      airsis_Alias = .data$Alias
     ) %>%
 
     # Copy information from and then remove GPS records
@@ -129,13 +133,13 @@ airsis_parse_BAM.1020 <- function(
     tidyr::fill(.data$longitude, .data$latitude, .direction = "up") %>%
     dplyr::filter(.data$gpsRecord == FALSE) %>%
 
-    # Only keep core harmonized data
-    dplyr::select(dplyr::all_of(columnNames)) %>%
-
     # Remove duplicate times using later-is-better logic
-    dplyr::arrange(dplyr::desc(.data$datetime)) %>%
+    dplyr::arrange(dplyr::desc(.data$processedTime)) %>%
     dplyr::distinct(.data$datetime, .keep_all = TRUE) %>%
-    dplyr::arrange(.data$datetime)
+    dplyr::arrange(.data$datetime) %>%
+
+    # Only keep core harmonized data
+    dplyr::select(dplyr::all_of(columnNames))
 
   # ----- Return ---------------------------------------------------------------
 
@@ -148,6 +152,9 @@ airsis_parse_BAM.1020 <- function(
 if ( FALSE ) {
 
   library(MazamaCoreUtils)
+  logger.setLevel(TRACE)
+
+  library(AirMonitorIngest)
 
   startdate = MazamaCoreUtils::parseDatetime("2013-05-20", timezone = "UTC")
   enddate = MazamaCoreUtils::parseDatetime("2013-05-30", timezone = "UTC")
