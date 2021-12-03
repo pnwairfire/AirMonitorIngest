@@ -130,28 +130,32 @@ airsis_updateKnownLocations <- function(
 
     # > dplyr::glimpse(new_locationTbl)
     # Rows: 1
-    # Columns: 21
-    # $ locationID   <chr> "906b5197e3a070e4"
-    # $ locationName <chr> "NPS YOS1001 Bam"
-    # $ longitude    <dbl> -119.784
-    # $ latitude     <dbl> 37.67461
-    # $ elevation    <dbl> NA
-    # $ countryCode  <chr> "US"
-    # $ stateCode    <chr> "CA"
-    # $ countyName   <chr> NA
-    # $ timezone     <chr> "America/Los_Angeles"
-    # $ houseNumber  <chr> NA
-    # $ street       <chr> NA
-    # $ city         <chr> NA
-    # $ zip          <chr> NA
-    # $ datetime     <dttm> 2013-05-22 22:00:00
-    # $ flow         <dbl> 0.834
-    # $ AT           <dbl> 19.5
-    # $ RHi          <dbl> 13
-    # $ pm25         <dbl> 1
-    # $ clusterLon   <dbl> -119.784
-    # $ clusterLat   <dbl> 37.67459
-    # $ clusterID    <int> 1
+    # Columns: 25
+    # $ locationID        <chr> "906b5197e3a070e4"
+    # $ locationName      <chr> "us.ca_906b51"
+    # $ longitude         <dbl> -119.784
+    # $ latitude          <dbl> 37.67461
+    # $ elevation         <dbl> NA
+    # $ countryCode       <chr> "US"
+    # $ stateCode         <chr> "CA"
+    # $ countyName        <chr> NA
+    # $ timezone          <chr> "America/Los_Angeles"
+    # $ houseNumber       <chr> NA
+    # $ street            <chr> NA
+    # $ city              <chr> NA
+    # $ zip               <chr> NA
+    # $ datetime          <dttm> 2013-05-22 22:00:00
+    # $ flow              <dbl> 0.834
+    # $ AT                <dbl> 19.5
+    # $ RHi               <dbl> 13
+    # $ pm25              <dbl> 1
+    # $ airsis_Alias      <chr> "NPS YOS1001 Bam"
+    # $ airsis_dataFormat <chr> "BAM.1020"
+    # $ clusterLon        <dbl> -119.784
+    # $ clusterLat        <dbl> 37.67459
+    # $ clusterID         <int> 1
+    # $ airsis_provider   <chr> "apcd"
+    # $ airsis_unitID     <dbl> 1069
 
     unwantedColumns <- setdiff(names(new_locationTbl), names(airsis_locationTbl))
 

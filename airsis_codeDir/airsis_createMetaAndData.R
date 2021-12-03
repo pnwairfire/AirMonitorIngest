@@ -17,7 +17,6 @@
 #' @param distanceThreshold Separation distance in meters between "known locations".
 #' @param airsis_data Tibble of AIRSIS monitor data after QC and clustering have
 #' been applied.
-#' @param unitID AIRSIS station identifier (will be upcased).
 #'
 #' @return List with two tibbles.
 #'
@@ -29,8 +28,7 @@
 airsis_createMetaAndData <- function(
   locationTbl = NULL,
   distanceThreshold = NULL,
-  airsis_data = NULL,
-  unitID = NULL
+  airsis_data = NULL
 ) {
 
   logger.debug(" ----- airsis_createMeta() ----- ")
@@ -40,30 +38,36 @@ airsis_createMetaAndData <- function(
   MazamaCoreUtils::stopIfNull(locationTbl)
   MazamaCoreUtils::stopIfNull(distanceThreshold)
   MazamaCoreUtils::stopIfNull(airsis_data)
-  MazamaCoreUtils::stopIfNull(unitID)
 
   # ----- Simplify airsis_data -------------------------------------------------
 
   # > dplyr::glimpse(airsis_data, width = 75)
   # Rows: 190
-  # Columns: 11
-  # $ locationName <chr> "NPS YOS1001 Bam", "NPS YOS1001 Bam", "NPS YOS1001 B
-  # $ datetime     <dttm> 2013-05-22 22:00:00, 2013-05-22 23:00:00, 2013-05-2
-  # $ longitude    <dbl> -119.7840, -119.7840, -119.7840, -119.7840, -119.784
-  # $ latitude     <dbl> 37.67461, 37.67461, 37.67461, 37.67461, 37.67461, 37
-  # $ flow         <dbl> 0.834, 0.834, 0.834, 0.834, 0.834, 0.834, 0.834, 0.8
-  # $ AT           <dbl> 19.5, 19.5, 18.9, 17.6, 15.9, 12.8, 10.7, 9.7, 8.2,
-  # $ RHi          <dbl> 13, 9, 8, 8, 9, 12, 13, 15, 17, 19, 20, 22, 23, 24,
-  # $ pm25         <dbl> 1, 4, 6, 3, 4, 2, -2, 1, -1, 0, 4, 3, 2, 3, 2, 3, -2
-  # $ clusterLon   <dbl> -119.784, -119.784, -119.784, -119.784, -119.784, -1
-  # $ clusterLat   <dbl> 37.67459, 37.67459, 37.67459, 37.67459, 37.67459, 37
-  # $ clusterID    <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+  # Columns: 14
+  # $ datetime          <dttm> 2013-05-22 22:00:00, 2013-05-22 23:00:00, 2013
+  # $ longitude         <dbl> -119.7840, -119.7840, -119.7840, -119.7840, -11
+  # $ latitude          <dbl> 37.67461, 37.67461, 37.67461, 37.67461, 37.6746
+  # $ flow              <dbl> 0.834, 0.834, 0.834, 0.834, 0.834, 0.834, 0.834
+  # $ AT                <dbl> 19.5, 19.5, 18.9, 17.6, 15.9, 12.8, 10.7, 9.7,
+  # $ RHi               <dbl> 13, 9, 8, 8, 9, 12, 13, 15, 17, 19, 20, 22, 23,
+  # $ pm25              <dbl> 1, 4, 6, 3, 4, 2, -2, 1, -1, 0, 4, 3, 2, 3, 2,
+  # $ airsis_Alias      <chr> "NPS YOS1001 Bam", "NPS YOS1001 Bam", "NPS YOS1
+  # $ airsis_dataFormat <chr> "BAM.1020", "BAM.1020", "BAM.1020", "BAM.1020",
+  # $ clusterLon        <dbl> -119.784, -119.784, -119.784, -119.784, -119.78
+  # $ clusterLat        <dbl> 37.67459, 37.67459, 37.67459, 37.67459, 37.6745
+  # $ clusterID         <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  # $ airsis_provider   <chr> "apcd", "apcd", "apcd", "apcd", "apcd", "apcd",
+  # $ airsis_unitID     <dbl> 1069, 1069, 1069, 1069, 1069, 1069, 1069, 1069,
 
   # Only keep lon, lat and device metadata columns
   usefulColumns <- c(
     "longitude",
     "latitude",
-    "clusterID"
+    "clusterID",
+    "airsis_Alias",
+    "airsis_dataFormat",
+    "airsis_provider",
+    "airsis_unitID"
   )
 
   airsis_location_data <-
@@ -124,10 +128,10 @@ airsis_createMetaAndData <- function(
 
   bindColumns <- c(
     "clusterID",
-    "airsis_type",
-    "airsis_serialNumber",
-    "airsis_monitorName",
-    "airsis_monitorType"
+    "airsis_Alias",
+    "airsis_dataFormat",
+    "airsis_provider",
+    "airsis_unitID"
   )
 
   meta <-
@@ -141,7 +145,7 @@ airsis_createMetaAndData <- function(
 
     # Unique device ID = AQSID as we have nothing more specific
     dplyr::mutate(
-      deviceID = paste0("wrcc.", unitID)
+      deviceID = sprintf("%s.%s", .data$airsis_provider, .data$airsis_unitID)
     ) %>%
 
     # Unique "device deployment" ID
@@ -151,23 +155,35 @@ airsis_createMetaAndData <- function(
 
     # Other required metadata
     dplyr::mutate(
-      deviceType = .data$airsis_monitorType,
+      deviceType = .data$airsis_dataFormat,
       deviceDescription = as.character(NA),
       deviceExtra = as.character(NA),
       pollutant = "PM2.5",
       units = "UG/M3",
       dataIngestSource = "AIRSIS",
-      dataIngestURL = "https://wrcc.dri.edu/cgi-bin/wea_list2.pl",
-      dataIngestUnitID = unitID,
+      dataIngestURL = sprintf("http://%s.airsis.com/vision/common/CSVExport.aspx", .data$airsis_provider),
+      dataIngestUnitID = .data$airsis_unitID,
       dataIngestExtra = as.character(NA),
       dataIngestDescription = as.character(NA)
     )
+
+  # NOTE:  Default location names are created from the locationID. When this has
+  # NOTE:  *not* been updated in the "known locations" file, we should use the Alias.
+  # NOTE:  Here's what it might look like:
+  # NOTE:    $ locationID            <chr> "906b5197e3a070e4"
+  # NOTE:    $ locationName          <chr> "us.ca_906b51"
+
+  no_assigned_name_mask <-
+    stringr::str_sub(meta$locationName, 7, 12) == stringr::str_sub(meta$locationID, 1, 6)
+
+  if ( sum(no_assigned_name_mask) > 0 )
+    meta$locationName[no_assigned_name_mask] <- meta$airsis_Alias[no_assigned_name_mask]
 
   # ----- Reorder 'meta' columns -----------------------------------------------
 
   coreNames <- AirMonitor::coreMetadataNames
   missingCoreNames <- setdiff(coreNames, names(meta))
-  wrccNames <- setdiff(names(meta), coreNames)
+  airsisNames <- setdiff(names(meta), coreNames)
 
   for ( name in missingCoreNames ) {
     meta[[name]] <- as.character(NA)
@@ -175,7 +191,7 @@ airsis_createMetaAndData <- function(
 
   meta <-
     meta %>%
-    dplyr::select(dplyr::all_of(c(coreNames, wrccNames)))
+    dplyr::select(dplyr::all_of(c(coreNames, airsisNames)))
 
   # ----- Create hourly axis ---------------------------------------------------
 
@@ -204,7 +220,7 @@ airsis_createMetaAndData <- function(
     ) %>%
 
     # Pull out columns for reshaping
-    dplyr::select(dplyr::all_of(c("datetime", "ConcRT", "deviceDeploymentID"))) %>%
+    dplyr::select(dplyr::all_of(c("datetime", "pm25", "deviceDeploymentID"))) %>%
 
     # Use "later is better" logic to get one value per hour
     dplyr::arrange(dplyr::desc(.data$datetime)) %>%
@@ -215,7 +231,7 @@ airsis_createMetaAndData <- function(
   melted <- reshape2::melt(
     airsis_data_enhanced,
     id.vars = c("datetime", "deviceDeploymentID"),
-    measure.vars = "ConcRT"
+    measure.vars = "pm25"
   )
 
   data <- reshape2::dcast(melted, datetime ~ deviceDeploymentID, stats::median)
@@ -256,7 +272,7 @@ if ( FALSE ) {
 
   library(MazamaLocationUtils)
   setLocationDataDir("~/Data/known_locations")
-  wrcc_locationTbl <- table_initialize()
+  airsis_locationTbl <- table_initialize()
   airnow_locationTbl <- table_load("airnow_PM2.5_sites")
 
   library(AirMonitorIngest)
