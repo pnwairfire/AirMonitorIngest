@@ -111,7 +111,7 @@ addClustering <- function(
   # NOTE:  Run the plots a few times and you will see that kmeans clustering sometimes
   # NOTE:  gets it wrong.
 
-  logger.trace("Testing up to %s clusters", maxClusters)
+  ###logger.trace("Testing up to %s clusters", maxClusters)
 
   # NOTE:  We need to use cluster::clara when we get above ~2K points.
   # NOTE:  For this reason we need to use clusinfo[,'max_diss'] instead
@@ -122,10 +122,10 @@ addClustering <- function(
   # Perform clustering
   for ( clusterCount in 1:maxClusters ) {
     if ( nrow(tbl) < 2000 ) {
-      logger.trace("\ttesting %d clusters using cluster::pam", clusterCount)
+      ###logger.trace("\ttesting %d clusters using cluster::pam", clusterCount)
       clusterObj <- cluster::pam(tbl[,c(lonVar,latVar)],clusterCount)
     } else {
-      logger.trace("\ttesting %d clusters using cluster::clara", clusterCount)
+      ###logger.trace("\ttesting %d clusters using cluster::clara", clusterCount)
       clusterObj <- cluster::clara(tbl[,c(lonVar,latVar)],clusterCount, samples = 50)
     }
     clusterLats <- clusterObj$medoids[,latVar]

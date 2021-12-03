@@ -12,11 +12,12 @@ wrcc_createMetaAndData(
 )
 }
 \arguments{
-\item{locationTbl}{Table of "known locations" produced with \pkg{MazamaLocationUtils}.}
+\item{locationTbl}{Tibble of "known locations" produced with \pkg{MazamaLocationUtils}.}
 
 \item{distanceThreshold}{Separation distance in meters between "known locations".}
 
-\item{wrcc_data}{Table of monitor data obtained with \code{epa_api_getData()}.}
+\item{wrcc_data}{Tibble of WRCC monitor data after QC and clustering have
+been applied.}
 
 \item{unitID}{WRCC station identifier (will be upcased).}
 }
@@ -25,8 +26,8 @@ List with two tibbles.
 }
 \description{
 Create a \code{meta} dataframe with WRCC monitor metadata and a \code{data}
-dataframe with PM2.5 time sseries appropriate
-for use with the \pkg{MazamaTimeSeries} package.
+dataframe with PM2.5 time series appropriate for use with the
+\pkg{MazamaTimeSeries} package.
 
 The data model has monitor metadata stored in a tibble named \code{meta}.
 with a \code{deviceDeploymentID} unique identifier that is matched by column

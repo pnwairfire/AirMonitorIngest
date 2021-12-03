@@ -44,23 +44,26 @@ airsis_createMetaAndData <- function(
 
   # ----- Simplify airsis_data -------------------------------------------------
 
-  #   > print(names(airsis_data), width = 75)
-  #  [1] "DateTime"       "GPSLat"         "GPSLon"         "Type"
-  #  [5] "SerialNumber"   "ConcRT"         "Conc_l_m"       "AvAirFlw"
-  #  [9] "AvAirTemp"      "RelHumidity"    "BaromPress"     "SensorIntAT"
-  # [13] "SensorIntRH"    "WindSpeed"      "WindDir"        "BatteryVoltage"
-  # [17] "Alarm"          "monitorName"    "monitorType"    "datetime"
-  # [21] "clusterLon"     "clusterLat"     "clusterID"
+  # > dplyr::glimpse(airsis_data, width = 75)
+  # Rows: 190
+  # Columns: 11
+  # $ locationName <chr> "NPS YOS1001 Bam", "NPS YOS1001 Bam", "NPS YOS1001 B
+  # $ datetime     <dttm> 2013-05-22 22:00:00, 2013-05-22 23:00:00, 2013-05-2
+  # $ longitude    <dbl> -119.7840, -119.7840, -119.7840, -119.7840, -119.784
+  # $ latitude     <dbl> 37.67461, 37.67461, 37.67461, 37.67461, 37.67461, 37
+  # $ flow         <dbl> 0.834, 0.834, 0.834, 0.834, 0.834, 0.834, 0.834, 0.8
+  # $ AT           <dbl> 19.5, 19.5, 18.9, 17.6, 15.9, 12.8, 10.7, 9.7, 8.2,
+  # $ RHi          <dbl> 13, 9, 8, 8, 9, 12, 13, 15, 17, 19, 20, 22, 23, 24,
+  # $ pm25         <dbl> 1, 4, 6, 3, 4, 2, -2, 1, -1, 0, 4, 3, 2, 3, 2, 3, -2
+  # $ clusterLon   <dbl> -119.784, -119.784, -119.784, -119.784, -119.784, -1
+  # $ clusterLat   <dbl> 37.67459, 37.67459, 37.67459, 37.67459, 37.67459, 37
+  # $ clusterID    <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
   # Only keep lon, lat and device metadata columns
   usefulColumns <- c(
     "longitude",
     "latitude",
-    "clusterID",
-    "airsis_type",
-    "airsis_serialNumber",
-    "airsis_monitorName",
-    "airsis_monitorType"
+    "clusterID"
   )
 
   airsis_location_data <-
@@ -68,22 +71,6 @@ airsis_createMetaAndData <- function(
     airsis_data %>%
 
     dplyr::distinct(.data$clusterID, .keep_all = TRUE) %>%
-    dplyr::rename(
-      longitude = .data$clusterLon,
-      latitude = .data$clusterLat,
-      airsis_type = .data$Type,
-      airsis_serialNumber = .data$SerialNumber,
-      airsis_monitorName = .data$monitorName,
-      airsis_monitorType = .data$monitorType
-    ) %>%
-
-    # Remove records with missing or zero lon/lat
-    dplyr::filter(
-      is.finite(.data$longitude),
-      is.finite(.data$latitude),
-      .data$longitude != 0,
-      .data$latitude != 0
-    ) %>%
 
     dplyr::select(dplyr::all_of(usefulColumns))
 
@@ -119,6 +106,21 @@ airsis_createMetaAndData <- function(
   }
 
   # ----- Create 'meta' --------------------------------------------------------
+
+  # > print(AirMonitor::coreMetadataNames, width = 75)
+  #  [1] "deviceDeploymentID"    "deviceID"
+  #  [3] "deviceType"            "deviceDescription"
+  #  [5] "deviceExtra"           "pollutant"
+  #  [7] "units"                 "dataIngestSource"
+  #  [9] "dataIngestURL"         "dataIngestUnitID"
+  # [11] "dataIngestExtra"       "dataIngestDescription"
+  # [13] "locationID"            "locationName"
+  # [15] "longitude"             "latitude"
+  # [17] "elevation"             "countryCode"
+  # [19] "stateCode"             "countyName"
+  # [21] "timezone"              "houseNumber"
+  # [23] "street"                "city"
+  # [25] "zip"                   "AQSID"
 
   bindColumns <- c(
     "clusterID",
@@ -242,6 +244,57 @@ airsis_createMetaAndData <- function(
 if ( FALSE ) {
 
 
-  # See airsis_updateKnownLocations
+  library(MazamaCoreUtils)
+  logger.setLevel(TRACE)
+
+  library(MazamaSpatialUtils)
+  MazamaSpatialUtils::setSpatialDataDir("~/Data/Spatial")
+  MazamaSpatialUtils::loadSpatialData("EEZCountries.rda")
+  MazamaSpatialUtils::loadSpatialData("OSMTimezones.rda")
+  MazamaSpatialUtils::loadSpatialData("NaturalEarthAdm1.rda")
+  MazamaSpatialUtils::loadSpatialData("USCensusCounties.rda")
+
+  library(MazamaLocationUtils)
+  setLocationDataDir("~/Data/known_locations")
+  wrcc_locationTbl <- table_initialize()
+  airnow_locationTbl <- table_load("airnow_PM2.5_sites")
+
+  library(AirMonitorIngest)
+
+  distanceThreshold <- 1000
+
+  airsis_data <-
+
+    airsis_downloadData(
+      startdate = MazamaCoreUtils::parseDatetime("2013-05-20", timezone = "UTC"),
+      enddate = MazamaCoreUtils::parseDatetime("2013-05-30", timezone = "UTC"),
+      timezone = "UTC",
+      provider = "APCD",
+      unitID = "1012"
+    ) %>%
+
+    airsis_parseData(
+      codeDir = "airsis_codeDir"
+    ) %>%
+
+    airsis_QC_BAM.1020(
+      flagAndKeep = FALSE
+    ) %>%
+
+    addClustering(
+      clusterDiameter = distanceThreshold,
+      lonVar = "longitude",
+      latVar = "latitude",
+      maxClusters = 50,
+      flagAndKeep = FALSE
+    )
+
+
+  locationTbl <- airsis_updateKnownLocations(
+    airsis_locationTbl = airsis_locationTbl,
+    airnow_locationTbl = airnow_locationTbl,
+    distanceThreshold = distanceThreshold,
+    airsis_data = airsis_data
+  )
 
 }

@@ -3,7 +3,7 @@
 #'
 #' @title Parse AIRSIS data string
 #'
-#' @param fileString Character string containing WRCC data.
+#' @param fileString Character string containing AIRSIS data.
 #' @param codeDir Directory where AIRSIS data parsing scripts are found.
 #'
 #' @description Raw character data from AIRSIS are parsed into a tibble.
@@ -78,6 +78,28 @@ airsis_parseData <- function(
 
 
   tbl <- get(parse_function)(fileString)
+
+  # ----- QC monitor data ------------------------------------------------------
+
+  qc_function <- sprintf("airsis_QC_%s", dataFormat)
+  qc_script <- file.path(codeDir, sprintf("%s.R", qc_function))
+
+  if ( !file.exists(qc_script) ) {
+    msg <- sprintf("cannot find %s", qc_script)
+    logger.error(msg)
+    stop(msg)
+  }
+
+  source(qc_script)
+
+  if ( !exists(qc_function) ) {
+    msg <- sprintf("function '%s()' is not defined in %s", qc_function, qc_script)
+    logger.error(msg)
+    stop(msg)
+  }
+
+
+  tbl <- get(qc_function)(tbl)
 
   # ----- Return ---------------------------------------------------------------
 

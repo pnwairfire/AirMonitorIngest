@@ -7,7 +7,7 @@
 airsis_parseData(fileString = NULL, codeDir = NULL)
 }
 \arguments{
-\item{fileString}{Character string containing WRCC data.}
+\item{fileString}{Character string containing AIRSIS data.}
 
 \item{codeDir}{Directory where AIRSIS data parsing scripts are found.}
 }
