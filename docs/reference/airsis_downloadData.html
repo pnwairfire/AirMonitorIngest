@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Browse EPA AQS web pages — epa_aqs_openWebPages • AirMonitorIngest</title>
+<title>Download AIRSIS data — airsis_downloadData • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,18 +39,9 @@
 
 
 
-<meta property="og:title" content="Browse EPA AQS web pages — epa_aqs_openWebPages" />
-<meta property="og:description" content="Open the relevant EPA AQS web pages in the default web browser. These pages
-need to be regularly consulted when working with AQS data and it is helpful
-to open them quickly.
-
-https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors
-https://www.epa.gov/criteria-air-pollutants/naaqs-table
-https://www.epa.gov/aqs/aqs-code-list
-https://aqs.epa.gov/aqsweb/airdata/FileFormats.html
-https://aqs.epa.gov/aqsweb/airdata/download_files.html
-
-" />
+<meta property="og:title" content="Download AIRSIS data — airsis_downloadData" />
+<meta property="og:description" content="Download data for a particular station for the desired time period.
+Data are returned as a single character string containing the AIRIS output." />
 
 
 
@@ -121,28 +112,63 @@ https://aqs.epa.gov/aqsweb/airdata/download_files.html
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Browse EPA AQS web pages</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/epa_aqs_openWebPages.R'><code>R/epa_aqs_openWebPages.R</code></a></small>
-    <div class="hidden name"><code>epa_aqs_openWebPages.Rd</code></div>
+    <h1>Download AIRSIS data</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/airsis_downloadData.R'><code>R/airsis_downloadData.R</code></a></small>
+    <div class="hidden name"><code>airsis_downloadData.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Open the relevant EPA AQS web pages in the default web browser. These pages
-need to be regularly consulted when working with AQS data and it is helpful
-to open them quickly.</p>
-<ul>
-<li><p><a href='https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors'>https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors</a></p></li>
-<li><p><a href='https://www.epa.gov/criteria-air-pollutants/naaqs-table'>https://www.epa.gov/criteria-air-pollutants/naaqs-table</a></p></li>
-<li><p><a href='https://www.epa.gov/aqs/aqs-code-list'>https://www.epa.gov/aqs/aqs-code-list</a></p></li>
-<li><p><a href='https://aqs.epa.gov/aqsweb/airdata/FileFormats.html'>https://aqs.epa.gov/aqsweb/airdata/FileFormats.html</a></p></li>
-<li><p><a href='https://aqs.epa.gov/aqsweb/airdata/download_files.html'>https://aqs.epa.gov/aqsweb/airdata/download_files.html</a></p></li>
-</ul>
-
+    <p>Download data for a particular station for the desired time period.
+Data are returned as a single character string containing the AIRIS output.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>epa_aqs_openWebPages</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>airsis_downloadData</span><span class='op'>(</span>
+  startdate <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/strptime.html'>strftime</a></span><span class='op'>(</span><span class='fu'>lubridate</span><span class='fu'>::</span><span class='fu'><a href='https://lubridate.tidyverse.org/reference/now.html'>now</a></span><span class='op'>(</span>tzone <span class='op'>=</span> <span class='st'>"UTC"</span><span class='op'>)</span>, <span class='st'>"%Y0101"</span>, tz <span class='op'>=</span> <span class='st'>"UTC"</span><span class='op'>)</span>,
+  enddate <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/strptime.html'>strftime</a></span><span class='op'>(</span><span class='fu'>lubridate</span><span class='fu'>::</span><span class='fu'><a href='https://lubridate.tidyverse.org/reference/now.html'>now</a></span><span class='op'>(</span>tzone <span class='op'>=</span> <span class='st'>"UTC"</span><span class='op'>)</span>, <span class='st'>"%Y%m%d"</span>, tz <span class='op'>=</span> <span class='st'>"UTC"</span><span class='op'>)</span>,
+  timezone <span class='op'>=</span> <span class='st'>"UTC"</span>,
+  provider <span class='op'>=</span> <span class='cn'>NULL</span>,
+  unitID <span class='op'>=</span> <span class='cn'>NULL</span>,
+  baseUrl <span class='op'>=</span> <span class='st'>"http://xxx.airsis.com/vision/common/CSVExport.aspx"</span>
+<span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>startdate</th>
+      <td><p>Desired start date (ISO 8601).</p></td>
+    </tr>
+    <tr>
+      <th>enddate</th>
+      <td><p>Desired end date (ISO 8601).</p></td>
+    </tr>
+    <tr>
+      <th>timezone</th>
+      <td><p>Olson timezone used to interpret dates (required).</p></td>
+    </tr>
+    <tr>
+      <th>provider</th>
+      <td><p>Identifier used to modify baseURL <code>[APCD|USFS|...]</code></p></td>
+    </tr>
+    <tr>
+      <th>unitID</th>
+      <td><p>AIRSIS station identifier (will be upcased).</p></td>
+    </tr>
+    <tr>
+      <th>baseUrl</th>
+      <td><p>Base URL for data queries.</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>String containing AIRSIS output.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+
+    <p>Airsis data comes in many different formats with new ones added every
+year. To accommodate this, all parsing, QC and other functions for converting
+raw AIRSIS data into <em>monitor</em> objects is found in the
+<code>airsis_codeDir/</code> directory that is part of the GitHub repository.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

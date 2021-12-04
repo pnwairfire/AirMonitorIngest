@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Browse EPA AQS web pages — epa_aqs_openWebPages • AirMonitorIngest</title>
+<title>Get AIRSIS unit IDs from the daily summary page — airsis_getCurrentUnitIDs • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,18 +39,9 @@
 
 
 
-<meta property="og:title" content="Browse EPA AQS web pages — epa_aqs_openWebPages" />
-<meta property="og:description" content="Open the relevant EPA AQS web pages in the default web browser. These pages
-need to be regularly consulted when working with AQS data and it is helpful
-to open them quickly.
-
-https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors
-https://www.epa.gov/criteria-air-pollutants/naaqs-table
-https://www.epa.gov/aqs/aqs-code-list
-https://aqs.epa.gov/aqsweb/airdata/FileFormats.html
-https://aqs.epa.gov/aqsweb/airdata/download_files.html
-
-" />
+<meta property="og:title" content="Get AIRSIS unit IDs from the daily summary page — airsis_getCurrentUnitIDs" />
+<meta property="og:description" content="Parse the AIRSIS Current Status page for a particular provider
+to extract unit IDs for those monitors that are currently reporting." />
 
 
 
@@ -121,28 +112,30 @@ https://aqs.epa.gov/aqsweb/airdata/download_files.html
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Browse EPA AQS web pages</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/epa_aqs_openWebPages.R'><code>R/epa_aqs_openWebPages.R</code></a></small>
-    <div class="hidden name"><code>epa_aqs_openWebPages.Rd</code></div>
+    <h1>Get AIRSIS unit IDs from the daily summary page</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/airsis_getCurrentUnitIDs.R'><code>R/airsis_getCurrentUnitIDs.R</code></a></small>
+    <div class="hidden name"><code>airsis_getCurrentUnitIDs.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Open the relevant EPA AQS web pages in the default web browser. These pages
-need to be regularly consulted when working with AQS data and it is helpful
-to open them quickly.</p>
-<ul>
-<li><p><a href='https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors'>https://www.epa.gov/outdoor-air-quality-data/interactive-map-air-quality-monitors</a></p></li>
-<li><p><a href='https://www.epa.gov/criteria-air-pollutants/naaqs-table'>https://www.epa.gov/criteria-air-pollutants/naaqs-table</a></p></li>
-<li><p><a href='https://www.epa.gov/aqs/aqs-code-list'>https://www.epa.gov/aqs/aqs-code-list</a></p></li>
-<li><p><a href='https://aqs.epa.gov/aqsweb/airdata/FileFormats.html'>https://aqs.epa.gov/aqsweb/airdata/FileFormats.html</a></p></li>
-<li><p><a href='https://aqs.epa.gov/aqsweb/airdata/download_files.html'>https://aqs.epa.gov/aqsweb/airdata/download_files.html</a></p></li>
-</ul>
-
+    <p>Parse the AIRSIS Current Status page for a particular provider
+to extract unit IDs for those monitors that are currently reporting.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>epa_aqs_openWebPages</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>airsis_getCurrentUnitIDs</span><span class='op'>(</span>url <span class='op'>=</span> <span class='st'>"~/Downloads/apcd_stattable.aspx.html"</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>url</th>
+      <td><p>URL with daily summary links. (NOTE: only file paths are supported.)</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Vector of AIRSIS unit IDs.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

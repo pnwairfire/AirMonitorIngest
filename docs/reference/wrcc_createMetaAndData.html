@@ -41,8 +41,8 @@
 
 <meta property="og:title" content="Create 'meta' dnad 'data' dataframes from WRCC data — wrcc_createMetaAndData" />
 <meta property="og:description" content="Create a meta dataframe with WRCC monitor metadata and a data
-dataframe with PM2.5 time sseries appropriate
-for use with the MazamaTimeSeries package.
+dataframe with PM2.5 time series appropriate for use with the
+MazamaTimeSeries package.
 The data model has monitor metadata stored in a tibble named meta.
 with a deviceDeploymentID unique identifier that is matched by column
 names in an associated data file." />
@@ -77,7 +77,7 @@ names in an associated data file." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.3</span>
       </span>
     </div>
 
@@ -123,8 +123,8 @@ names in an associated data file." />
 
     <div class="ref-description">
     <p>Create a <code>meta</code> dataframe with WRCC monitor metadata and a <code>data</code>
-dataframe with PM2.5 time sseries appropriate
-for use with the <span class="pkg">MazamaTimeSeries</span> package.</p>
+dataframe with PM2.5 time series appropriate for use with the
+<span class="pkg">MazamaTimeSeries</span> package.</p>
 <p>The data model has monitor metadata stored in a tibble named <code>meta</code>.
 with a <code>deviceDeploymentID</code> unique identifier that is matched by column
 names in an associated <code>data</code> file.</p>
@@ -142,7 +142,7 @@ names in an associated <code>data</code> file.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>locationTbl</th>
-      <td><p>Table of "known locations" produced with <span class="pkg">MazamaLocationUtils</span>.</p></td>
+      <td><p>Tibble of "known locations" produced with <span class="pkg">MazamaLocationUtils</span>.</p></td>
     </tr>
     <tr>
       <th>distanceThreshold</th>
@@ -150,7 +150,8 @@ names in an associated <code>data</code> file.</p>
     </tr>
     <tr>
       <th>wrcc_data</th>
-      <td><p>Table of monitor data obtained with <code>epa_api_getData()</code>.</p></td>
+      <td><p>Tibble of WRCC monitor data after QC and clustering have
+been applied.</p></td>
     </tr>
     <tr>
       <th>unitID</th>

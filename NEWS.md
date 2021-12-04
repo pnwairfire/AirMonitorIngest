@@ -2,10 +2,10 @@
 
 Adding `airsis_~()` functions:
 
+* `airsis_getCurrentUnitIDs()`
 * `airsis_downloadData()`
-* `airsis_parseData()`
+* `airsis_parseAndQCData()`
 * `airsis_codeDir/airsis_identifyDataFormat()`
-* `airsis_codeDir/airsis_updateKnownLocations()`
 * `airsis_codeDir/parse_BAM.1020()`
 * `airsis_codeDir/airsis_QC_BAM.1020()`
 * `airsis_codeDir/airsis_updateKnownLocations()`
