@@ -223,8 +223,21 @@ wrcc_createMetaAndData <- function(
 
   # ----- Clean up -------------------------------------------------------------
 
-  # Remove clusterID
-  meta$clusterID <- NULL
+  # NOTE:  As seen in AIRSIS arb2.1045 for November/December 2021, it is possible
+  # NOTE:  to have two nearby clusters that end up with the same locationID.
+  # NOTE:  This is apparently due to a mismatch between the details of:
+  # NOTE:    AirMonitorIngest::addClustering(clusterDiameter)
+  # NOTE:    MazamaLocationUtils::table_getNearestLocation(distanceThreshold)
+  # NOTE:
+  # NOTE:  Part of the cleanup while still working with a single unitID is to
+  # NOTE:  ensure that 'meta' only has distinc entries
+
+  meta <-
+    meta %>%
+    # Remove clusterID
+    dplyr::select(-dplyr::all_of("clusterID")) %>%
+    # Remove duplicates
+    dplyr::distinct()
 
   # ----- Return ---------------------------------------------------------------
 

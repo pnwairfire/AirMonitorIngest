@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.3.5
+
+* Fixed bug with duplicated `meta$deviceDeploymentID` when two clusters were
+< 1000 meters apart.
+
 # AirMonitorIngest 0.3.3
 
 Adding `airsis_~()` functions:

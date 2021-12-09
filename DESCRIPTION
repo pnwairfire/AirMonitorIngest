@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.3.3
+Version: 0.3.5
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
