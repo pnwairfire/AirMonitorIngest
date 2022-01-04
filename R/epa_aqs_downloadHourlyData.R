@@ -86,7 +86,8 @@ epa_aqs_downloadHourlyData <- function(
   MazamaCoreUtils::stopIfNull(year)
   MazamaCoreUtils::stopIfNull(baseUrl)
   MazamaCoreUtils::stopIfNull(downloadDir)
-  MazamaCoreUtils::setIfNull(quiet, TRUE)
+
+  quiet <- MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # * Parameter code -----
   validParameterCodes <- c(

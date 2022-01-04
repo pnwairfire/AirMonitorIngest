@@ -50,8 +50,8 @@ airnow_getSites <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  MazamaCoreUtils::setIfNull(url, "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat")
-  MazamaCoreUtils::setIfNull(quiet, TRUE)
+  url <- MazamaCoreUtils::setIfNull(url, "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat")
+  quiet <- MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # ----- Download data --------------------------------------------------------
 

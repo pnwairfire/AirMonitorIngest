@@ -43,7 +43,7 @@ airnow_getDataSubset <- function(
   parameterName <- match.arg(parameterName, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
 
-  MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
+  baseUrl <- MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
   if ( !timezone %in% base::OlsonNames() )
     stop(sprintf("'timezone = %s' is not found in OlsonNames()", timezone))

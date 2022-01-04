@@ -1,3 +1,9 @@
+# AirMonitorIngest 0.3.6
+
+* Renamed `wrcc_getDailyUnitIDs()` to `wrcc_getCurrrentUnitIDs()` and added 
+explicit date information.
+* Fixed use of `MazamaCoreUtils::setIfNull()`.
+
 # AirMonitorIngest 0.3.5
 
 * Fixed bug with duplicated `meta$deviceDeploymentID` when two clusters were

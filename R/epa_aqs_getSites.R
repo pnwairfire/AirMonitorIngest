@@ -43,7 +43,8 @@ epa_aqs_getSites <- function(
 
   MazamaCoreUtils::stopIfNull(url)
   MazamaCoreUtils::stopIfNull(downloadDir)
-  MazamaCoreUtils::setIfNull(quiet, TRUE)
+
+  quiet <- MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # ----- Download data --------------------------------------------------------
 
