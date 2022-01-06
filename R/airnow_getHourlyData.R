@@ -189,6 +189,9 @@ airnow_getHourlyData <- function(
   if ( verbose )
     message(sprintf("Downloading %s ...", url))
 
+  if ( MazamaCoreUtils::logger.isInitialized() )
+    logger.trace("Downloading %s ...", url)
+
   # ----- Download/parse data file ---------------------------------------------
 
   col_names <- c(
