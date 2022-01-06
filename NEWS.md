@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.3.7
+
+* Added `airnow_getHourlyData()`.
+
 # AirMonitorIngest 0.3.6
 
 * Renamed `wrcc_getDailyUnitIDs()` to `wrcc_getCurrrentUnitIDs()` and added 

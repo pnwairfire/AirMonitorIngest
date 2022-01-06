@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Download and parse EPA AQS monitor metadata — epa_aqs_getMonitors • AirMonitorIngest</title>
+<title>Download and aggregate multiple hourly data files from AirNow — airnow_getHourlyData • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,40 @@
 
 
 
-<meta property="og:title" content="Download and parse EPA AQS monitor metadata — epa_aqs_getMonitors" />
-<meta property="og:description" content="Download monitor metadata from the US EPA and save it to a directory. Then
-uncompress and parse the data into a tibble." />
+<meta property="og:title" content="Download and aggregate multiple hourly data files from AirNow — airnow_getHourlyData" />
+<meta property="og:description" content="This function downloads, parses and combines hourly data files
+from baseUrl.
+Parameters included in AirNow data include at least the following list:
+
+BARPR
+BC
+CO
+NO
+NO2
+NO2Y
+NO2X
+NOX
+NOOY
+OC
+OZONE
+PM10
+PM2.5
+PRECIP
+RHUM
+SO2
+SRAD
+TEMP
+UV-AETH
+WD
+WS
+
+
+Passing a vector of one ore more of the above names as the parameters
+argument will cause the resulting tibble to be filtered to contain only
+records for those parameters.
+Datetimes can be anything that is understood by
+MazamaCoreUtils::parseDatetime(). For non-POSIXct values, the
+recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&quot;." />
 
 
 
@@ -112,59 +143,113 @@ uncompress and parse the data into a tibble." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Download and parse EPA AQS monitor metadata</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/epa_aqs_getMonitors.R'><code>R/epa_aqs_getMonitors.R</code></a></small>
-    <div class="hidden name"><code>epa_aqs_getMonitors.Rd</code></div>
+    <h1>Download and aggregate multiple hourly data files from AirNow</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/airnow_getHourlyData.R'><code>R/airnow_getHourlyData.R</code></a></small>
+    <div class="hidden name"><code>airnow_getHourlyData.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Download monitor metadata from the US EPA and save it to a directory. Then
-uncompress and parse the data into a tibble.</p>
+    <p>This function downloads, parses and combines hourly data files
+from <code>baseUrl</code>.</p>
+<p>Parameters included in AirNow data include at least the following list:</p>
+<ol>
+<li><p>BARPR</p></li>
+<li><p>BC</p></li>
+<li><p>CO</p></li>
+<li><p>NO</p></li>
+<li><p>NO2</p></li>
+<li><p>NO2Y</p></li>
+<li><p>NO2X</p></li>
+<li><p>NOX</p></li>
+<li><p>NOOY</p></li>
+<li><p>OC</p></li>
+<li><p>OZONE</p></li>
+<li><p>PM10</p></li>
+<li><p>PM2.5</p></li>
+<li><p>PRECIP</p></li>
+<li><p>RHUM</p></li>
+<li><p>SO2</p></li>
+<li><p>SRAD</p></li>
+<li><p>TEMP</p></li>
+<li><p>UV-AETH</p></li>
+<li><p>WD</p></li>
+<li><p>WS</p></li>
+</ol>
+
+<p>Passing a vector of one ore more of the above names as the <code>parameters</code>
+argument will cause the resulting tibble to be filtered to contain only
+records for those parameters.</p>
+<p>Datetimes can be anything that is understood by
+<code><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/parseDatetime.html'>MazamaCoreUtils::parseDatetime()</a></code>. For non-POSIXct values, the
+recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".</p>
     </div>
 
-    <pre class="usage"><span class='fu'>epa_aqs_getMonitors</span><span class='op'>(</span>
-  url <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip"</span>,
-  downloadDir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
+    <pre class="usage"><span class='fu'>airnow_getHourlyData</span><span class='op'>(</span>
+  parameterName <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"PM2.5"</span><span class='op'>)</span>,
+  starttime <span class='op'>=</span> <span class='cn'>NULL</span>,
+  endtime <span class='op'>=</span> <span class='cn'>NULL</span>,
+  timezone <span class='op'>=</span> <span class='st'>"UTC"</span>,
+  baseUrl <span class='op'>=</span> <span class='st'>"https://files.airnowtech.org/airnow"</span>,
+  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>url</th>
-      <td><p>URL for the <code>aqs_monitors.zip</code> file.</p></td>
+      <th>parameterName</th>
+      <td><p>One or more EPA AQS criteria parameter names.</p></td>
     </tr>
     <tr>
-      <th>downloadDir</th>
-      <td><p>Directory where .zip file will be saved.</p></td>
+      <th>starttime</th>
+      <td><p>Desired start datetime (ISO 8601).</p></td>
     </tr>
     <tr>
-      <th>quiet</th>
-      <td><p>Logical passed on to <code><a href='https://rdrr.io/r/utils/download.file.html'>utils::download.file()</a></code>.</p></td>
+      <th>endtime</th>
+      <td><p>Desired end datetime (ISO 8601).</p></td>
+    </tr>
+    <tr>
+      <th>timezone</th>
+      <td><p>Olson timezone used to interpret dates (required).</p></td>
+    </tr>
+    <tr>
+      <th>baseUrl</th>
+      <td><p>Base URL for archived hourly data.</p></td>
+    </tr>
+    <tr>
+      <th>verbose</th>
+      <td><p>Logical flag controlling detailed progress statements.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Tibble of EPA site metadata.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <p>Tibble of AirNow hourly data.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p><a href='https://aqs.epa.gov/aqsweb/airdata/download_files.html#Meta'>Site and Monitor Descriptions</a></p>
+    <p>Hourly data are available from AirNow starting on 2014-01-01.</p>
+<p>Data from locations whose timezones have a fractional offset from UTC
+are removed as the <em>mts_monitor</em> data model only supports data reported
+on hour boundaries. As of 2019-06-26, fractional offsets only applies to US
+Department of State monitors in Myanmar, Sri Lanka, India and Nepal.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='co'># Fail gracefully if any resources are not available</span>
+<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='op'>{</span>
+
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/pnwairfire/AirMonitorIngest'>AirMonitorIngest</a></span><span class='op'>)</span>
 
-<span class='co'># Create a directory specifically for EPA data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/files2.html'>dir.create</a></span><span class='op'>(</span><span class='st'>"~/Data/EPA"</span>, recursive <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>tbl</span> <span class='op'>&lt;-</span>
+  <span class='fu'>airnow_getHourlyData</span><span class='op'>(</span>
+    parameterName <span class='op'>=</span> <span class='st'>"PM2.5"</span>,
+    starttime <span class='op'>=</span> <span class='fl'>2021101200</span>,
+    endtime <span class='op'>=</span> <span class='fl'>2021101204</span>,
+    timezone <span class='op'>=</span> <span class='st'>"America/Los_Angeles"</span>,
+    verbose <span class='op'>=</span> <span class='cn'>TRUE</span>
+   <span class='op'>)</span>
 
-<span class='co'># Set logging level so messages and errors will appear in the console</span>
-<span class='fu'>MazamaCoreUtils</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/initializeLogging.html'>initializeLogging</a></span><span class='op'>(</span>logDir <span class='op'>=</span> <span class='st'>"~/Data/EPA/"</span><span class='op'>)</span>
-<span class='fu'>logger.setLevel</span><span class='op'>(</span><span class='va'>TRACE</span><span class='op'>)</span>
-
-<span class='co'># Download and parse site metadata</span>
-<span class='va'>AQS_monitors</span> <span class='op'>&lt;-</span> <span class='fu'>epa_aqs_getMonitors</span><span class='op'>(</span>downloadDir <span class='op'>=</span> <span class='st'>"~/Data/EPA"</span>, quiet <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='op'>}</span>, silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>
