@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.3.8
+
+* Added `airnow_getDataCustom()`.
+
 # AirMonitorIngest 0.3.7
 
 * Added `airnow_getHourlyData()`.

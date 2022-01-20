@@ -2,7 +2,7 @@
 #' @importFrom utils read.table
 #' @importFrom rlang .data
 #'
-#' @title Download and parse hourly data from the AirNow data API
+#' @title Download and parse large amounts of data from the AirNow data API
 #'
 #' @param parameterName One or more EPA AQS criteria parameter names.
 #' @param starttime Desired start datetime (ISO 8601).
