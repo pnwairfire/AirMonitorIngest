@@ -1,3 +1,7 @@
+# AirMonitorIngest 0.3.9
+
+* Added `wrcc_getUnitIDs()`. Removed `wrcc_getCurrentUnitIDs()`.
+
 # AirMonitorIngest 0.3.8
 
 * Added `airnow_getDataCustom()`.
