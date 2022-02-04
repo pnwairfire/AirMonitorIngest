@@ -111,7 +111,10 @@ wrcc_updateKnownLocations <- function(
 
       # Bind new records onto the WRCC known locations table
       wrcc_locationTbl <-
-        dplyr::bind_rows(wrcc_locationTbl, from_airnowTbl)
+        # Put airnow records first as they may have more metadata
+        dplyr::bind_rows(from_airnowTbl, wrcc_locationTbl) %>%
+        # Be sure to remove duplicates
+        dplyr::distinct(.data$locationID, .keep_all = TRUE)
 
     }
 

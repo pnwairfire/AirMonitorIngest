@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.3.10
+
+* Ensure distinct records when updating known locations tables in
+`airsis_updateKnownLocations()` and `wrcc_updateKnownLocations()`.
+
 # AirMonitorIngest 0.3.9
 
 * Added `wrcc_getUnitIDs()`. Removed `wrcc_getCurrentUnitIDs()`.
