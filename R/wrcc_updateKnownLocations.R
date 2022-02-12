@@ -68,14 +68,21 @@ wrcc_updateKnownLocations <- function(
       measure = "geodesic"
     )
 
-  # Split known/unknown
-  wrcc_known <-
-    wrcc_data_locations %>%
-    dplyr::filter(!is.na(.data$locationID))
+  # # Split known/unknown
+  # wrcc_known <-
+  #   wrcc_data_locations %>%
+  #   dplyr::filter(!is.na(.data$locationID))
+
+  # NOTE:  Nothing needs to be done with wrcc_known as these records are already
+  # NOTE:  part of the incoming wrcc_locationTbl
 
   wrcc_unknown <-
     wrcc_data_locations %>%
     dplyr::filter(is.na(.data$locationID))
+
+  # Return immediately if there are no unknown locations
+  if ( nrow(wrcc_unknown) == 0 )
+    return(wrcc_locationTbl)
 
   # ----- Find AirNow locations ------------------------------------------------
 
@@ -176,15 +183,11 @@ wrcc_updateKnownLocations <- function(
     unwantedColumns <- setdiff(names(new_locationTbl), names(wrcc_locationTbl))
 
     new_locationTbl <-
-
       new_locationTbl %>%
-
       # Add spatial metadata
       dplyr::mutate(
         locationName = .data$monitorName
       ) %>%
-
-
       # Remove unwanted columns
       dplyr::select(-dplyr::all_of(unwantedColumns))
 
