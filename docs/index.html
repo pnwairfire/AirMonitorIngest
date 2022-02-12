@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.11</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@ hourly data are stored in a separate 'data' dataframe.</code></pre>
 <h2 class="hasAnchor">
 <a href="#background" class="anchor"></a>Background</h2>
 <p>The USFS AirFire group is focused on air quality measurements associated with wildfire smoke and maintains both historical and real-time databases of PM2.5 monitoring data obtained from stationary monitors. This data is used in operational displays and for retrospective analysis. Data ingest and management of air quality “stationary time series” are both important ongoing activities.</p>
-<p>The <strong>AirMonitorIngest</strong> package isolates the work of meticulously cleaning, validating and harmonizing data from various sources into a uniform standard. In our experience, every new data source or data format requires dedicated code to bring it into a standardized system. Because new data sources appear every few months, putting all of the data ingest code into a single package allows downstream packages that work on harmonized data to be much more stable.</p>
+<p>The <strong>AirMonitorIngest</strong> package is used to create data archives for the <strong><a href="https://github.com/MazamaScience/AirMonitor">AirMonitor</a></strong> package and isolates the work of meticulously cleaning, validating and harmonizing data from various sources. In our experience, every new data source or data format requires dedicated code to bring it into a standardized system. Because new data sources appear every few months, putting all of the data ingest code into a separate package allows downstream packages that work with harmonized data to be much more stable.</p>
 </div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
@@ -103,19 +103,16 @@ hourly data are stored in a separate 'data' dataframe.</code></pre>
 <li>
 <code>&lt;source&gt;_openWebPages()</code> – Opens web pages relevant to the source data.</li>
 <li>
-<code>&lt;source&gt;_get()</code> – Gets tables of non-data information.</li>
+<code>&lt;source&gt;_get~()</code> – Gets tables of non-data information.</li>
 <li>
-<code>&lt;source&gt;_downloadHourlyData()</code> – Download of data only.</li>
+<code>&lt;source&gt;_downloadData()</code> – Download ASCII data.</li>
 <li>
-<code>&lt;source&gt;_parseHourlyData()</code> – Parsing only.</li>
+<code>&lt;source&gt;_parseData()</code> – Parse ASCII data.</li>
 <li>
-<code>&lt;source&gt;__createData()</code> – Create the <code>data</code> dataframe.</li>
+<code>&lt;source&gt;_createData()</code> – Create the <code>data</code> dataframe.</li>
 <li>
 <code>&lt;source&gt;_createMeta()</code> – Create the <code>meta</code> dataframe.</li>
-<li>
-<code>&lt;source&gt;_createLocalArchive()</code> – Loop over years/monitors to create a local data archive.</li>
 </ul>
-<p>For version 0.1.0, the <source> is limited to <code>epa_aqs</code>.</source></p>
 <hr>
 <p>This project is supported by the <a href="https://www.airfire.org">USFS AirFire</a> group.</p>
 </div>

@@ -42,9 +42,18 @@ airsis_updateKnownLocations <- function(
   MazamaCoreUtils::stopIfNull(distanceThreshold)
   MazamaCoreUtils::stopIfNull(airsis_data)
 
+  # No way of choosing among records with the same locationID so just keep the first
+  airsis_locationTbl <-
+    airsis_locationTbl %>%
+    dplyr::distinct(.data$locationID, .keep_all = TRUE)
+
+  airnow_locationTbl <-
+    airnow_locationTbl %>%
+    dplyr::distinct(.data$locationID, .keep_all = TRUE)
+
   # ----- Find AIRSIS locations --------------------------------------------------
 
-  logger.trace("Looking for AIRSIS locations")
+  logger.trace("Looking for AIRSIS locations ...")
 
   # Find individual locations (after clustering)
   airsis_data_locations <-
@@ -73,32 +82,44 @@ airsis_updateKnownLocations <- function(
     airsis_data_locations %>%
     dplyr::filter(is.na(.data$locationID))
 
+  logger.trace("Found %d known locations in airsis_locationTbl", nrow(airsis_known))
+
+  # Return immediately if there are no unknown locations
+  if ( nrow(airsis_unknown) == 0 )
+    return(airsis_locationTbl)
+
   # ----- Find AirNow locations ------------------------------------------------
 
   if ( nrow(airsis_unknown) > 0 ) {
 
-    logger.trace("Looking for AirNow locations")
+    logger.trace("%d locations are still unknown", nrow(airsis_unknown))
+
+    logger.trace("Looking for AirNow locations ...")
 
     # Add locationID
-    airsis_data_locations$locationID <-
+    airsis_unknown$locationID <-
       MazamaLocationUtils::table_getLocationID(
         locationTbl = airnow_locationTbl,
-        longitude = airsis_data_locations$longitude,
-        latitude = airsis_data_locations$latitude,
+        longitude = airsis_unknown$longitude,
+        latitude = airsis_unknown$latitude,
         distanceThreshold = distanceThreshold,
         measure = "geodesic"
       )
 
     # Split known/unknown
     airsis_airnow_known <-
-      airsis_data_locations %>%
+      airsis_unknown %>%
       dplyr::filter(!is.na(.data$locationID))
 
-    airsis_unknown <-
-      airsis_data_locations %>%
+    airsis_airnow_unknown <-
+      airsis_unknown %>%
       dplyr::filter(is.na(.data$locationID))
 
     if ( nrow(airsis_airnow_known) > 0 ) {
+
+      logger.trace("Found %d known locations in airnow_locationTbl", nrow(airsis_airnow_known))
+
+      logger.trace("Adding %d records from AirNow ...", nrow(airsis_airnow_known))
 
       # Add records for the AirNow known locations
       from_airnowTbl <-
@@ -118,13 +139,15 @@ airsis_updateKnownLocations <- function(
 
   # ----- Create new "known_locations" records ---------------------------------
 
-  if ( nrow(airsis_unknown) > 0 ) {
+  if ( nrow(airsis_airnow_unknown) > 0 ) {
 
-    logger.trace("Creating %d new locations", nrow(airsis_unknown))
+    logger.trace("%d locations are still unknown", nrow(airsis_airnow_unknown))
+
+    logger.trace("Creating %d new locations", nrow(airsis_airnow_unknown))
 
     new_locationTbl <-
       MazamaLocationUtils::table_initializeExisting(
-        airsis_unknown,
+        airsis_airnow_unknown,
         countryCodes = c("CA", "US", "MX", "PR", "VI", "GU"),
         distanceThreshold = distanceThreshold,
         measure = "geodesic",
@@ -163,9 +186,7 @@ airsis_updateKnownLocations <- function(
     unwantedColumns <- setdiff(names(new_locationTbl), names(airsis_locationTbl))
 
     new_locationTbl <-
-
       new_locationTbl %>%
-
       # Remove unwanted columns
       dplyr::select(-dplyr::all_of(unwantedColumns))
 

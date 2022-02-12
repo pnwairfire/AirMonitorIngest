@@ -42,9 +42,18 @@ wrcc_updateKnownLocations <- function(
   MazamaCoreUtils::stopIfNull(distanceThreshold)
   MazamaCoreUtils::stopIfNull(wrcc_data)
 
+  # No way of choosing among records with the same locationID so just keep the first
+  wrcc_locationTbl <-
+    wrcc_locationTbl %>%
+    dplyr::distinct(.data$locationID, .keep_all = TRUE)
+
+  airnow_locationTbl <-
+    airnow_locationTbl %>%
+    dplyr::distinct(.data$locationID, .keep_all = TRUE)
+
   # ----- Find WRCC locations --------------------------------------------------
 
-  logger.trace("Looking for WRCC locations")
+  logger.trace("Looking for WRCC locations ...")
 
   # Find individual locations (after clustering)
   wrcc_data_locations <-
@@ -68,17 +77,16 @@ wrcc_updateKnownLocations <- function(
       measure = "geodesic"
     )
 
-  # # Split known/unknown
-  # wrcc_known <-
-  #   wrcc_data_locations %>%
-  #   dplyr::filter(!is.na(.data$locationID))
-
-  # NOTE:  Nothing needs to be done with wrcc_known as these records are already
-  # NOTE:  part of the incoming wrcc_locationTbl
+  # Split known/unknown
+  wrcc_known <-
+    wrcc_data_locations %>%
+    dplyr::filter(!is.na(.data$locationID))
 
   wrcc_unknown <-
     wrcc_data_locations %>%
     dplyr::filter(is.na(.data$locationID))
+
+  logger.trace("Found %d known locations in wrcc_locationTbl", nrow(wrcc_known))
 
   # Return immediately if there are no unknown locations
   if ( nrow(wrcc_unknown) == 0 )
@@ -88,28 +96,34 @@ wrcc_updateKnownLocations <- function(
 
   if ( nrow(wrcc_unknown) > 0 ) {
 
-    logger.trace("Looking for AirNow locations")
+    logger.trace("%d locations are still unknown", nrow(wrcc_unknown))
+
+    logger.trace("Looking for AirNow locations ...")
 
     # Add locationID
-    wrcc_data_locations$locationID <-
+    wrcc_unknown$locationID <-
       MazamaLocationUtils::table_getLocationID(
         locationTbl = airnow_locationTbl,
-        longitude = wrcc_data_locations$longitude,
-        latitude = wrcc_data_locations$latitude,
+        longitude = wrcc_unknown$longitude,
+        latitude = wrcc_unknown$latitude,
         distanceThreshold = distanceThreshold,
         measure = "geodesic"
       )
 
     # Split known/unknown
     wrcc_airnow_known <-
-      wrcc_data_locations %>%
+      wrcc_unknown %>%
       dplyr::filter(!is.na(.data$locationID))
 
-    wrcc_unknown <-
-      wrcc_data_locations %>%
+    wrcc_airnow_unknown <-
+      wrcc_unknown %>%
       dplyr::filter(is.na(.data$locationID))
 
     if ( nrow(wrcc_airnow_known) > 0 ) {
+
+      logger.trace("Found %d known locations in airnow_locationTbl", nrow(wrcc_airnow_known))
+
+      logger.trace("Adding %d records from AirNow ...", nrow(wrcc_airnow_known))
 
       # Add records for the AirNow known locations
       from_airnowTbl <-
@@ -129,13 +143,15 @@ wrcc_updateKnownLocations <- function(
 
   # ----- Create new "known_locations" records ---------------------------------
 
-  if ( nrow(wrcc_unknown) > 0 ) {
+  if ( nrow(wrcc_airnow_unknown) > 0 ) {
 
-    logger.trace("Creating %d new locations", nrow(wrcc_unknown))
+    logger.trace("%d locations are still unknown", nrow(wrcc_airnow_unknown))
+
+    logger.trace("Creating %d new locations", nrow(wrcc_airnow_unknown))
 
     new_locationTbl <-
       MazamaLocationUtils::table_initializeExisting(
-        wrcc_unknown,
+        wrcc_airnow_unknown,
         countryCodes = c("CA", "US", "MX", "PR", "VI", "GU"),
         distanceThreshold = distanceThreshold,
         measure = "geodesic",
@@ -190,6 +206,8 @@ wrcc_updateKnownLocations <- function(
       ) %>%
       # Remove unwanted columns
       dplyr::select(-dplyr::all_of(unwantedColumns))
+
+    logger.trace("Adding %d new rows ...", nrow(new_locationTbl))
 
     # Bind new records onto the WRCC known locations table
     wrcc_locationTbl <-

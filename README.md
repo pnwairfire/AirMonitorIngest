@@ -18,12 +18,14 @@ monitoring data obtained from stationary monitors. This data is used in
 operational displays and for retrospective analysis. Data ingest and management 
 of air quality “stationary time series” are both important ongoing activities.
 
-The **AirMonitorIngest** package isolates the work of meticulously cleaning,
-validating and harmonizing data from various sources into a uniform standard. In
+The **AirMonitorIngest** package is used to create data archives for the
+**[AirMonitor](https://github.com/MazamaScience/AirMonitor)** 
+package and isolates the work of meticulously cleaning,
+validating and harmonizing data from various sources. In
 our experience, every new data source or data format requires dedicated code to
 bring it into a standardized system. Because new data sources appear every few
-months, putting all of the data ingest code into a single package allows 
-downstream packages that work on harmonized data to be much more stable.
+months, putting all of the data ingest code into a separate package allows 
+downstream packages that work with harmonized data to be much more stable.
 
 ## Installation
 
@@ -42,14 +44,11 @@ obtain, parse and harmonize the data. The basic suite of functions associated
 with any source of data will include:
 
 * `<source>_openWebPages()` -- Opens web pages relevant to the source data.
-* `<source>_get()` -- Gets tables of non-data information.
-* `<source>_downloadHourlyData()` -- Download of data only.
-* `<source>_parseHourlyData()` -- Parsing only.
-* `<source>__createData()` -- Create the `data` dataframe.
+* `<source>_get~()` -- Gets tables of non-data information.
+* `<source>_downloadData()` -- Download ASCII data.
+* `<source>_parseData()` -- Parse ASCII data.
+* `<source>_createData()` -- Create the `data` dataframe.
 * `<source>_createMeta()` -- Create the `meta` dataframe.
-* `<source>_createLocalArchive()` -- Loop over years/monitors to create a local data archive.
-
-For version 0.1.0, the <source> is limited to `epa_aqs`.
 
 ------------------------------------------------------------------------
 
