@@ -1,0 +1,64 @@
+---
+title: "Introduction to AirMonitorIngest"
+author: "Mazama Science"
+date: "2020-03-01"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to AirMonitorIngest}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 5)
+```
+
+## Installation
+
+Start by installing **AirMonitor** from CRAN with:
+
+`install.packages('AirMonitor')`
+
+Install the pre-release version of **AirMonitorIngest** from GitHub with:
+
+`devtools::install_github('pnwairfire/AirMonitorIngest')`
+
+## Available data
+
+The USFS AirFire group regularly processes monitoring data in support of their
+various operational tools. Pre-processed, harmonized and QC'ed data files can
+be loaded with the following functions from the **AirMonitor** package:
+
+* `~_load()` -- load data based on a start- and end-time
+* `~loadAnnual()` -- load a year's worth of data
+* `~loadDaily()` -- load the most recent 45 days of data (updated once per day)
+* `~loadLatest()` -- load the most recent 10 days of data (updated every hour)
+
+Data archives go back over 10 years depending on the source of data.
+
+## Data Ingest
+
+The data loaded by the the functions above comes from one of three source: 
+AirNow, AIRSIS or WRCC. For "engineering-level" data from AIRSIS and WRCC, the
+data processing pipeline involves the following steps which are broken out as
+separate functions:
+
+* `~_downloadData()` -- download ASCII data
+* `~_identifyMonitorType()` -- identify the specific format based on header lines
+* `~_parseData()` -- parse ASCII data into a tibble
+* `~_qualitiyControl()` -- apply monitorType specific QC 
+* `~_createMetaAndData()` -- restructure data into a _mts_monitor_ object
+* `~_updateKnownLocations()` -- update the "known locations" table for WRCC monitors
+
+One additional functions is used internally:
+
+* `addClustering()` -- handle jitter in GPS positions by creating clusters
+
+Understanding how to work with these functions will be important if one wants 
+to work with the full engineering data including variables like 'flow rate' or
+'voltage'.
+
+----
+
+Best of luck analyzing your local air quality data!
+

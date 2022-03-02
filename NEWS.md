@@ -1,6 +1,14 @@
+# AirMonitorIngest 0.3.12
+
+* Add first vignettes and an article for Amber Ortega.
+
+# AirMonitorIngest 0.3.11
+
+* Final fix for `~_updateKnownLocations()`
+
 # AirMonitorIngest 0.3.10
 
-* Ensure distinct records when updating known locations tables in
+* Ensure distinct records when updating known location tables in
 `airsis_updateKnownLocations()` and `wrcc_updateKnownLocations()`.
 
 # AirMonitorIngest 0.3.9

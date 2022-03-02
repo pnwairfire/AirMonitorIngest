@@ -1,0 +1,33 @@
+---
+title: "Working with WRCC Data"
+author: "Jonathan Callahan"
+date: "3/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This article describes how to download and work with raw data from WRCC.
+Begin by loading the **dplyr** and **AirMonitorIngest** libraries:
+
+```{r libraries, echo = TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(AirMonitorIngest)
+```
+
+## Raw data
+
+The `wrcc_downloadData()` function sends a request to WRCC, asking for raw, 
+ASCII data for a single monitor over some time period. 
+
+```
+fileString <- wrcc_downloadData(20210701, 20210930, unitID = 'sm16')
+
+fileString %>%
+  readr::read_lines() %>%
+  head(8)
+```
+
+
