@@ -46,6 +46,7 @@ CSV files are removed after data are read into a tibble.
 \examples{
 \dontrun{
 library(AirMonitorIngest)
+library(MazamaCoreUtils)
 
 # Create a directory specifically for EPA data
 dir.create("~/Data/EPA", recursive = TRUE)

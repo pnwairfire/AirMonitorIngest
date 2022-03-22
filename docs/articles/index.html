@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Download and parse tables of EPA AQS codes — epa_aqs_getCodes • AirMonitorIngest</title>
+<title>Articles • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,7 @@
 
 
 
-<meta property="og:title" content="Download and parse tables of EPA AQS codes — epa_aqs_getCodes" />
-<meta property="og:description" content="Download and parse code tables from the US EPA.
-See https://www.epa.gov/aqs/aqs-code-list for a list of tables. the
-tableName can be determined by hovering over each link. For example,
-the tableName for the &quot;General &amp;gt; Parameters&quot; table is &quot;parameters&quot;." />
+<meta property="og:title" content="Articles" />
 
 
 
@@ -62,7 +58,7 @@ the tableName for the &quot;General &amp;gt; Parameters&quot; table is &quot;par
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-article-index">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -132,70 +128,22 @@ the tableName for the &quot;General &amp;gt; Parameters&quot; table is &quot;par
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Download and parse tables of EPA AQS codes</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/epa_aqs_getCodes.R'><code>R/epa_aqs_getCodes.R</code></a></small>
-    <div class="hidden name"><code>epa_aqs_getCodes.Rd</code></div>
+      <h1>Articles</h1>
     </div>
 
-    <div class="ref-description">
-    <p>Download and parse code tables from the US EPA.</p>
-<p>See https://www.epa.gov/aqs/aqs-code-list for a list of tables. the
-<code>tableName</code> can be determined by hovering over each link. For example,
-the <code>tableName</code> for the "General &gt; Parameters" table is "parameters".</p>
+    <div class="section ">
+      <h3>All vignettes</h3>
+      <p class="section-desc"></p>
+
+      <dl>
+        <dt><a href="AirMonitorIngest.html">Introduction to AirMonitorIngest</a></dt>
+        <dd></dt>
+        <dt><a href="Developer_Style_Guide.html">Developer Style Guide</a></dt>
+        <dd></dt>
+        <dt><a href="articles/Working_with_WRCC_data.html">Working with WRCC Data</a></dt>
+        <dd></dt>
+      </dl>
     </div>
-
-    <pre class="usage"><span class='fu'>epa_aqs_getCodes</span><span class='op'>(</span>
-  tableName <span class='op'>=</span> <span class='cn'>NULL</span>,
-  baseUrl <span class='op'>=</span> <span class='st'>"https://aqs.epa.gov/aqsweb/documents/codetables/"</span>
-<span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>tableName</th>
-      <td><p>Character name associated with the code table.</p></td>
-    </tr>
-    <tr>
-      <th>baseUrl</th>
-      <td><p>Character base URL for EPA AQS code tables.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>Tibble of EPA AQS codes.</p>
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
-
-    <p>Column types are determined automatically by <code><a href='https://readr.tidyverse.org/reference/read_delim.html'>readr::read_csv()</a></code>
-based on the first 1000 rows of input. In addition, any column matching
-<code>" Code$"</code> will be converted to 'character' type (typically from
-'numeric'). It is up to the user to review column types
-(with <code><a href='https://pillar.r-lib.org/reference/glimpse.html'>dplyr::glimpse()</a></code>) and reassign where desired.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    <p><a href='https://www.epa.gov/aqs/aqs-code-list'>AQS Codes and Descriptions</a></p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/pnwairfire/AirMonitorIngest'>AirMonitorIngest</a></span><span class='op'>)</span>
-
-<span class='co'># Create a directory specifically for EPA data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/files2.html'>dir.create</a></span><span class='op'>(</span><span class='st'>"~/Data/EPA"</span>, recursive <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-
-<span class='co'># Set logging level so messages and errors will appear in the console</span>
-<span class='fu'>MazamaCoreUtils</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/initializeLogging.html'>initializeLogging</a></span><span class='op'>(</span>logDir <span class='op'>=</span> <span class='st'>"~/Data/EPA/"</span><span class='op'>)</span>
-<span class='fu'>logger.setLevel</span><span class='op'>(</span><span class='va'>TRACE</span><span class='op'>)</span>
-
-<span class='co'># Get a table of parameter codes</span>
-<span class='va'>parameter_codes</span> <span class='op'>&lt;-</span> <span class='fu'>epa_aqs_getCodes</span><span class='op'>(</span>tableName <span class='op'>=</span> <span class='st'>"parameters"</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
-  </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <nav id="toc" data-toggle="toc" class="sticky-top">
-      <h2 data-toc-skip>Contents</h2>
-    </nav>
   </div>
 </div>
 

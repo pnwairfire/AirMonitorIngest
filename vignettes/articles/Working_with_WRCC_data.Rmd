@@ -5,16 +5,19 @@ date: "3/1/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 This article describes how to download and work with raw data from WRCC.
-Begin by loading the **dplyr** and **AirMonitorIngest** libraries:
+Begin by loading the **MazamaCoreUtils** and **AirMonitorIngest** libraries:
 
 ```{r libraries, echo = TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-library(dplyr)
+library(MazamaCoreUtils)
 library(AirMonitorIngest)
+
+# Generate logging statements using MazamaCoreUtils logging functionality
+logger.setLevel(TRACE)
 ```
 
 ## Raw data
@@ -22,12 +25,80 @@ library(AirMonitorIngest)
 The `wrcc_downloadData()` function sends a request to WRCC, asking for raw, 
 ASCII data for a single monitor over some time period. 
 
-```
+```{r wrcc_downloadData}
 fileString <- wrcc_downloadData(20210701, 20210930, unitID = 'sm16')
-
-fileString %>%
-  readr::read_lines() %>%
-  head(8)
 ```
 
+This `fileString` is just the tab-delimited data file and will look something
+like this:
 
+<pre>
+ Smoke #16 
+:       GMT	 Deg 	 Deg 	     	ser #	ug/m3	 Unk 	 l/m 	Deg C	  %  	 Unk 	deg C	  %  	 m/s 	 Deg 	volts	     
+: Date/Time	  GPS  	  GPS  	Type   	Serial 	Conc   	 Misc  	 Ave.  	 Av Air	  Rel  	 Misc  	Sensor 	Sensor 	  Wind 	 Wind  	Battery	Alarm  
+:YYMMDDhhmm	  Lat. 	  Lon. 	       	Number 	Hly Av 	  #1   	Air Flw	  Temp 	Humidty	  #2   	Int AT 	Int RH 	  Speed	 Direc 	Voltage	       
+2107242200	39.714348	-105.123962	9	871600	11	-9999	2	31.4	32	83177	-9999	29	1	180	14	0
+2107242300	39.714348	-105.123962	9	871600	18	-9999	2	32.5	30	83158	-9999	26	0.9	180	14	0
+2107250000	39.71447	-105.124001	9	871600	26	-9999	2	31	32	83138	-9999	26	1.4	180	14	0
+...
+</pre>
+
+The `wrcc_parseData()` function identifies the specific data format received and
+properly parses the `fileString` into a tibble that is ready for examination.
+
+```{r wrcc_parseData, results = "hold"}
+tbl <- wrcc_parseData(fileString)
+
+dplyr::glimpse(tbl)
+```
+
+At this point, you can create a time axis and plot the PM2.5 values. (Note that
+the DateTime uses 2-digit years so we need to prepend `"20"` before parsing.)
+
+```{r time_series}
+time <- 
+  paste0("20", tbl$DateTime) %>%
+  MazamaCoreUtils::parseDatetime(timezone = "UTC")
+
+plot(time, tbl$ConcRT, ylab = "PM2.5")
+```
+
+## Quality Control
+
+QC algorithms are used to determine whether the reported PM2.5 values can be 
+trusted.  The `wrcc_EBAMQualityControl()` and `wrcc_ESAMQualityControl()` functions
+remove records whenever any parameters, _e.g._ flow rate, are out of their valid range.
+
+When passed a tibble of raw data from WRCC, the `wrcc_qualityControl()` function 
+will choose the proper QC algorithm and validate values using manufacturer
+recommended thresholds. If logging is enabled, output will be printed describing
+the QC process.
+
+```{r QC}
+tbl_qc <- wrcc_qualityControl(tbl)
+```
+
+Note that the number of rows is now reduced compared to the raw data.
+
+```{r dim, results = "hold"}
+dim(tbl)
+dim(tbl_qc)
+```
+
+We can see which records were removed by plotting the raw data in red and
+then overplotting the QC'ed data values in black.
+
+```{r invalidated_values, results = "hold"}
+plot(time, tbl$ConcRT, pch = 16, col = "red", ylab = "PM2.5")
+
+# Need a new time axis for tbl_qc
+time_qc <- 
+  paste0("20", tbl_qc$DateTime) %>%
+  MazamaCoreUtils::parseDatetime(timezone = "UTC")
+
+points(time_qc, tbl_qc$ConcRT, pch = 16, col = "black")
+```
+
+----
+
+Hopefully, this is enough to get you started working with WRCC raw data.

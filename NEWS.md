@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.3.13
+
+* Corrected column headers in `wrcc_identifyMonitorType()`.
+* Completed "Working with WRCC data" article.
+
 # AirMonitorIngest 0.3.12
 
 * Add first vignettes and an article for Amber Ortega.

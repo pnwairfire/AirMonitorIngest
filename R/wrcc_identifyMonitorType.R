@@ -92,8 +92,8 @@ wrcc_identifyMonitorType <- function(
   type3_header[2] <- ": Date/Time\t  GPS  \t  GPS  \tType   \tSerial \tConc   \tConc   \t Ave.  \t Av Air\t  Rel  \t Misc  \tSensor \tSensor \t  Wind \t Wind  \tBattery\tAlarm"
   type3_header[3] <- ":YYMMDDhhmm\t  Lat. \t  Lon. \t       \tNumber \t RT    \tHly Av \tAir Flw\t  Temp \tHumidty\t  #2   \tInt AT \tInt RH \t  Speed\t Direc \tVoltage\t"
   type3_rawNames <- c(
-    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'Conc_l_m',
-    'AvAirFlw', 'AvAirTemp', 'RelHumidity', 'BaromPress', 'SensorIntAT', 'SensorIntRH',
+    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'ConcHlyAv',
+    'AvAirFlw', 'AvAirTemp', 'RelHumidity', 'Misc2', 'SensorIntAT', 'SensorIntRH',
     'WindSpeed', 'WindDir', 'BatteryVoltage', 'Alarm'
   )
   type3_names <- type3_rawNames
@@ -105,8 +105,8 @@ wrcc_identifyMonitorType <- function(
   type4_header[2] <- ": Date/Time\t  GPS  \t  GPS  \tType   \tSerial \tConc   \t Misc  \t Ave.  \t Av Air\t  Rel  \t Misc  \tSensor \tSensor \t  Wind \t Wind  \tBattery\tAlarm"
   type4_header[3] <- ":YYMMDDhhmm\t  Lat. \t  Lon. \t       \tNumber \tHly Av \t  #1   \tAir Flw\t  Temp \tHumidty\t  #2   \tInt AT \tInt RH \t  Speed\t Direc \tVoltage\t"
   type4_rawNames <- c(
-    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'Conc_l_m',
-    'AvAirFlw', 'AvAirTemp', 'RelHumidity', 'BaromPress', 'SensorIntAT', 'SensorIntRH',
+    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'Misc1',
+    'AvAirFlw', 'AvAirTemp', 'RelHumidity', 'Misc2', 'SensorIntAT', 'SensorIntRH',
     'WindSpeed', 'WindDir', 'BatteryVoltage', 'Alarm'
   )
   type4_names <- type4_rawNames
@@ -118,7 +118,7 @@ wrcc_identifyMonitorType <- function(
   type5_header[2] <- ": Date/Time\t  GPS  \t  GPS  \tType   \tSerial \tConc   \t Misc  \t Ave.  \t Av Air\t  Rel  \t Barom \tSensor \tSensor \t  Wind \t Wind  \tBattery\tAlarm"
   type5_header[3] <- ":YYMMDDhhmm\t  Lat. \t  Lon. \t       \tNumber \tHly Av \t  #1   \tAir Flw\t  Temp \tHumidty\t Press \tInt AT \tInt RH \t  Speed\t Direc \tVoltage\t"
   type5_rawNames <- c(
-    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'Conc_l_m',
+    'DateTime', 'GPSLat', 'GPSLon', 'Type', 'SerialNumber', 'ConcRT', 'Misc1',
     'AvAirFlw', 'AvAirTemp', 'RelHumidity', 'BaromPress', 'SensorIntAT', 'SensorIntRH',
     'WindSpeed', 'WindDir', 'BatteryVoltage', 'Alarm'
   )
