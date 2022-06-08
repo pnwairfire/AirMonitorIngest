@@ -15,7 +15,7 @@ airnow_updateUnknownLocations(
 
 \item{distanceThreshold}{Separation distance in meters between "known locations".}
 
-\item{airnow_data}{Table of monitor data obtained with \code{epa_api_getData()}.}
+\item{airnow_data}{Table of monitor data obtained with \code{airnow_getData()}.}
 }
 \value{
 Tibble of device-deployment metadata.
@@ -24,7 +24,7 @@ Tibble of device-deployment metadata.
 Create a \code{meta} dataframe with AirNow monitor metadata appropriate
 for use with the \pkg{MazamaTimeSeries} package.
 
-The data model is that monitor metadata are stored in a tibble named \code{meta}.
+The data model has monitor metadata stored in a tibble named \code{meta}.
 with a \code{deviceDeploymentID} unique identifier that is matched by column
 names in an associated \code{data} file.
 }

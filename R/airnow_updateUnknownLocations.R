@@ -8,13 +8,13 @@
 #' Create a \code{meta} dataframe with AirNow monitor metadata appropriate
 #' for use with the \pkg{MazamaTimeSeries} package.
 #'
-#' The data model is that monitor metadata are stored in a tibble named \code{meta}.
+#' The data model has monitor metadata stored in a tibble named \code{meta}.
 #' with a \code{deviceDeploymentID} unique identifier that is matched by column
 #' names in an associated \code{data} file.
 #'
 #' @param locationTbl Table of "known locations" produced with \pkg{MazamaLocationUtils}.
 #' @param distanceThreshold Separation distance in meters between "known locations".
-#' @param airnow_data Table of monitor data obtained with \code{epa_api_getData()}.
+#' @param airnow_data Table of monitor data obtained with \code{airnow_getData()}.
 #'
 #' @return Tibble of device-deployment metadata.
 #'
@@ -103,34 +103,43 @@ airnow_updateUnknownLocations <- function(
   #   $ AQSID                     <chr> "840MMCA82040", "840MMCA82036", "MMFS10
   #   $ fullAQSID                 <chr> "840MMCA82040", "840MMCA82036", "840MMF
 
+
   # NOTE:  And this is what we want to have:
 
-  #   > dplyr::glimpse(locationTbl, width=75)
-  #   Rows: 1,617
-  #   Columns: 23
-  #   $ locationID            <chr> "57bc483da6023722", "86726ac7458c6f20", "9e
-  #   $ locationName          <chr> "Haverhill", "Hinds Cc", "Saint-Simon", "Ma
-  #   $ longitude             <dbl> -71.10280, -90.22593, -73.46860, -77.40027,
-  #   $ latitude              <dbl> 42.77080, 32.34690, 45.44310, 37.55652, 47.
-  #   $ elevation             <dbl> 0.0, 0.0, 40.3, 58.6, 79.3, 0.0, 0.0, 80.8,
-  #   $ countryCode           <chr> "US", "US", "CA", "US", "US", "CA", "US", "
-  #   $ stateCode             <chr> "MA", "MS", "QC", "VA", "WA", "BC", "OR", "
-  #   $ countyName            <chr> "Essex", "Hinds", NA, "Henrico", "Chelan",
-  #   $ timezone              <chr> "America/New_York", "America/Chicago", "Ame
-  #   $ houseNumber           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-  #   $ street                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-  #   $ city                  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-  #   $ zip                   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-  #   $ AQSID                 <chr> "250095005", "280490021", "000052201", "510
-  #   $ airnow_parameterName  <chr> "PM2.5", "PM2.5", "PM2.5", "PM2.5", "PM2.5"
-  #   $ airnow_siteCode       <chr> "5005", "0021", "2201", "0014", "0011", "55
-  #   $ airnow_status         <chr> "Active", "Active", "Active", "Active", "Ac
-  #   $ airnow_agencyID       <chr> "MA1", "MS1", "QC1", "VA1", "WA1", "BC1", "
-  #   $ airnow_agencyName     <chr> "Massachusetts Dept. of Environmental Prote
-  #   $ airnow_EPARegion      <chr> "R1", "R4", "CA", "R3", "R10", "CA", "R10",
-  #   $ airnow_GMTOffsetHours <dbl> -5, -6, -5, -5, -8, -8, -8, -8, -5, -8, -8,
-  #   $ airnow_FIPSMSACode    <chr> "14460", "27140", NA, "40060", NA, NA, "389
-  #   $ airnow_MSAName        <chr> " Boston-Cambridge-Quincy, MA-NH ", " Jacks
+  # > dplyr::glimpse(locationTbl, width = 75)
+  # Rows: 2,137
+  # Columns: 31
+  # $ locationID            <chr> "ff93e44a39b72bc9", "f6b4431a3529dad4", "10
+  # $ AQSID                 <chr> "480290055", "311090022", "080350004", "840
+  # $ locationName          <chr> "CPS Pecan Valley C678", "LLCHD BAM", "Chat
+  # $ longitude             <dbl> -98.43110, -96.67573, -105.07000, -98.37889
+  # $ latitude              <dbl> 29.40720, 40.81256, 39.53390, 40.91833, 29.
+  # $ elevation             <dbl> 189.10, 374.19, 1571.10, 573.10, 9.20, 1339
+  # $ countryCode           <chr> "US", "US", "US", "US", "US", "US", "CA", "
+  # $ stateCode             <chr> "TX", "NE", "CO", "NE", "TX", "UT", "AB", "
+  # $ countyName            <chr> "Bexar", "Lancaster", "Douglas", "Hall", "H
+  # $ timezone              <chr> "America/Chicago", "America/Chicago", "Amer
+  # $ houseNumber           <chr> "973", "3159", NA, "208", "7372", "2501", N
+  # $ street                <chr> "H Street", "N Street", "Chatfield Internal
+  # $ city                  <chr> "San Antonio", "Lincoln", NA, "Grand Island
+  # $ zip                   <chr> "78220", "68510", "80125", "68803", "77087"
+  # $ airnow_parameterName  <chr> "PM2.5", "PM2.5", "PM2.5", "PM2.5", "PM2.5"
+  # $ airnow_siteCode       <chr> "0055", "0022", "0004", "0790", "0416", "10
+  # $ airnow_status         <chr> "Inactive", "Active", "Active", "Active", "
+  # $ airnow_agencyID       <chr> "TX1", "NE4", "CO1", "NE1", "TX1", "UT1", "
+  # $ airnow_agencyName     <chr> "Texas Commission on Environmental Quality"
+  # $ airnow_EPARegion      <chr> "R6", "R7", "R8", "R7", "R6", "R8", "CA", "
+  # $ airnow_GMTOffsetHours <dbl> -6, -6, -7, -6, -6, -7, -7, -6, -8, -5, -6,
+  # $ airnow_FIPSMSACode    <chr> "41700", "30700", "19740", "24260", "26420"
+  # $ airnow_MSAName        <chr> "San Antonio, TX", "Lincoln, NE", "Denver-A
+  # $ address               <chr> "973 H Street, San Antonio, TX 78220, Unite
+  # $ airnow_stationID      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_fullAQSID      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_monitorType    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_CBSA_ID        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_CBSA_Name      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_stateAQSCode   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_countyAQSCode  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
 
   # NOTE:  This step is not easy with dplyr
 
@@ -154,7 +163,14 @@ airnow_updateUnknownLocations <- function(
       airnow_EPARegion = as.character(NA),
       airnow_GMTOffsetHours = as.numeric(NA),
       airnow_FIPSMSACode = as.character(NA),
-      airnow_MSAName = as.character(NA)
+      airnow_MSAName = as.character(NA),
+      airnow_stationID = as.character(NA),
+      airnow_fullAQSID = .data$fullAQSID,
+      airnow_monitorType = as.character(NA),
+      airnow_CBSA_ID = as.character(NA),
+      airnow_CBSA_Name = as.character(NA),
+      airnow_stateAQSCode = as.character(NA),
+      airnow_countyAQSCode = as.character(NA)
     ) %>%
 
     # Remove unwanted columns
@@ -171,7 +187,6 @@ airnow_updateUnknownLocations <- function(
 # ===== DEBUGGING ==============================================================
 
 if ( FALSE ) {
-
 
 
 

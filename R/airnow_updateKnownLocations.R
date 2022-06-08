@@ -61,7 +61,10 @@ airnow_updateKnownLocations <- function(
     # Filter for our specified parameter
     dplyr::filter(.data$parameterName == !!parameterName) %>%
 
-    # Remove records with missing lons or lats
+    # Filter for "Active" sites
+    dplyr::filter(.data$status == "Active") %>%
+
+    # Remove records with missing longitude or latitude
     dplyr::filter(
       is.finite(.data$longitude),
       is.finite(.data$latitude),
@@ -72,23 +75,75 @@ airnow_updateKnownLocations <- function(
     # Filter for North America
     dplyr::filter(.data$GMTOffsetHours < 0) %>%
     dplyr::filter(.data$latitude > 15.0) %>%
+    dplyr::filter(.data$longitude < -50.0) %>%
 
     # Add locationID
     dplyr::mutate(
       locationID = MazamaLocationUtils::location_createID(.data$longitude, .data$latitude)
-    ) %>%
-
-    # Drop the "empty" fields
-    dplyr::select(-dplyr::starts_with("empty")) %>%
+    )
 
   # Remove already known locations
-    dplyr::filter(!.data$locationID %in% locationTbl$locationID)
+  if ( !is.null(locationTbl) ) {
+    airnow_sites <-
+      airnow_sites %>%
+      dplyr::filter(!.data$locationID %in% locationTbl$locationID)
+  }
+
+  # > dplyr::glimpse(airnow_sites, width = 75)
+  # Rows: 1,583
+  # Columns: 23
+  # $ stationID         <chr> "CC0010102", "CC0010301", "CC0010401", "CC00105
+  # $ AQSID             <chr> "000010102", "000010301", "000010401", "0000105
+  # $ fullAQSID         <chr> "124CC0010102", "124CC0010301", "124CC0010401",
+  # $ parameterName     <chr> "PM2.5", "PM2.5", "PM2.5", "PM2.5", "PM2.5", "P
+  # $ monitorType       <chr> "Permanent", "Permanent", "Permanent", "Permane
+  # $ siteCode          <chr> "0102", "0301", "0401", "0501", "0602", "0901",
+  # $ siteName          <chr> "St. John's", "Cornerbrook", "Mount Pearl", "Gr
+  # $ status            <chr> "Active", "Active", "Active", "Active", "Active
+  # $ agencyID          <chr> "NL1", "NL1", "NL1", "NL1", "NL1", "NL1", "NL1"
+  # $ agencyName        <chr> "Newfoundland & Labrador DEC", "Newfoundland &
+  # $ EPARegion         <chr> "CA", "CA", "CA", "CA", "CA", "CA", "CA", "CA",
+  # $ latitude          <dbl> 47.56038, 48.94940, 47.50513, 48.92696, 48.9522
+  # $ longitude         <dbl> -52.71150, -58.05560, -52.79480, -55.65970, -57
+  # $ elevation         <dbl> 9.8, NA, NA, NA, NA, 0.9, NA, NA, 19.8, 33.9, 1
+  # $ GMTOffsetHours    <dbl> -3.5, -4.0, -3.5, -3.5, -3.5, -3.5, -4.0, -4.0,
+  # $ countryFIPS       <chr> "CA", "CA", "CA", "CA", "CA", "CA", "CA", "CA",
+  # $ CBSA_ID           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ CBSA_Name         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ stateAQSCode      <chr> "00", "00", "00", "00", "00", "00", "00", "00",
+  # $ stateAbbreviation <chr> "CC", "CC", "CC", "CC", "CC", "CC", "CC", "CC",
+  # $ countyAQSCode     <chr> "001", "001", "001", "001", "001", "001", "001"
+  # $ countyName        <chr> "NEWFOUNDLAND", "NEWFOUNDLAND", "NEWFOUNDLAND",
+  # $ locationID        <chr> "61aa22b8558f3212", "cec69fd52886ae58", "c8ac67
 
   # ===== NEW SITES FOUND ======================================================
 
   if ( nrow(airnow_sites) > 0 ) {
 
     logger.trace("Adding %d new locations", nrow(airnow_sites))
+
+    # ----- Warn of duplicates -------------------------------------------------
+
+    # NOTE:  It is possible to have duplicated locationIDs in the airnow_sites
+    # NOTE:  tbl at this point. This may be due to errors in the lat/lon values
+    # NOTE:  at this site or multiple active monitors at a single location.
+    # NOTE:
+    # NOTE:  This breaks the idea that this is "spatial-only" information but we
+    # NOTE:  keep these extra records around so we can look up information by
+    # NOTE:  AQSID.
+
+    duplicate_locationIDs <-
+      airnow_sites$locationID[duplicated(airnow_sites$locationID)]
+
+    if ( length(duplicate_locationIDs) > 0 ) {
+      for ( locationID in duplicate_locationIDs ) {
+        AQSIDs <-
+          airnow_sites %>%
+          dplyr::filter(.data$locationID == !!locationID) %>%
+          dplyr::pull(.data$AQSID)
+        logger.warn("Duplicate active AQSIDs at locationID %s: %s", locationID, paste0(AQSIDs, collapse = ", "))
+      }
+    }
 
     # ----- Harmonize variables ------------------------------------------------
 
@@ -108,25 +163,12 @@ airnow_updateKnownLocations <- function(
         longitude = .data$airnow_longitude,
         latitude = .data$airnow_latitude,
         elevation = .data$airnow_elevation,
-        countryCode = .data$airnow_countryCode,
-        stateCode = .data$airnow_stateCode,
+        countryCode = .data$airnow_countryFIPS,     # SEE BELOW:  Convert airnow_countryFIPS to countryCode
+        stateCode = .data$airnow_stateAbbreviation, # SEE BELOW:  Convert airnow_stateAbbreviation to stateCode
         countyName = .data$airnow_countyName
       ) %>%
 
-      # Add "known location" columns derived from AirNow columns where possible
-      dplyr::mutate(
-        timezone = as.character(NA),
-        houseNumber = as.character(NA),
-        street = as.character(NA),
-        city = as.character(NA),
-        zip = as.character(NA)
-      ) %>%
-
-      # Remove columns we don't want
-      dplyr::select(
-        -.data$airnow_FIPSStateCode,
-        -.data$airnow_GNISCountyCode
-      )
+      MazamaLocationUtils::table_addCoreMetadata()
 
     # ----- Reorganize columns -------------------------------------------------
 
@@ -154,11 +196,6 @@ airnow_updateKnownLocations <- function(
     newSites_locationTbl$countyName <-
       stringr::str_to_title(newSites_locationTbl$countyName)
 
-    # * Invalidate elevation = 0.0 -----
-
-    mask <- newSites_locationTbl$elevation == 0
-    newSites_locationTbl$elevation[mask] <- as.numeric(NA)
-
     # * Add timezones -----
 
     newSites_locationTbl$timezone <-
@@ -173,22 +210,29 @@ airnow_updateKnownLocations <- function(
     # * Replace countryCodes -----
 
     # NOTE:  Puerto Rico seems to be the only mis-assigned country code
-    mask <- newSites_locationTbl$timezone == "America/Puerto Rico"
+    mask <- newSites_locationTbl$timezone == "America/Puerto_Rico"
     newSites_locationTbl$countryCode[mask] <- "PR"
 
     # * Replace stateCodes -----
 
-    # NOTE:  AQS 'State Code' values are a mess because they are naively derived
-    # NOTE:  from 9-digit AQS code positions and are incorrect for 12-digit AQS codes.
+    # NOTE:  The use of airnow_stateAbbreviation as the stateCode is only
+    # NOTE:  correct when the now corrected countryCode == "US".
+    # NOTE:  At least once, "MM" was seen as a US "stateAbbreviation"
 
-    newSites_locationTbl$stateCode <-
+    mask <-
+      ( newSites_locationTbl$countryCode != "US" ) |
+      ( newSites_locationTbl$countryCode != "US" & newSites_locationTbl$stateCode == "MM" ) |
+      ( is.na(newSites_locationTbl$stateCode) )
+
+    newSites_locationTbl$stateCode[mask] <-
       MazamaSpatialUtils::getStateCode(
-        newSites_locationTbl$longitude,
-        newSites_locationTbl$latitude,
-        # NOTE:  EPA has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
+        newSites_locationTbl$longitude[mask],
+        newSites_locationTbl$latitude[mask],
+        # NOTE:  AirNow has monitors from US, Canada, Mexico, Puerto Rico, Virgin Islands and Guam
         countryCodes = c("US", "CA", "MX", "PR", "VI", "GU"),
         useBuffering = TRUE
       )
+
 
     # * Replace countyNames -----
 
@@ -198,7 +242,17 @@ airnow_updateKnownLocations <- function(
     mask <- newSites_locationTbl$countryCode != "US"
     newSites_locationTbl$countyName[mask] <- as.character(NA)
 
+    # * Replace locationNames -----
+
+    # NOTE:  "N/A" was seen a few times
+
+    mask <- newSites_locationTbl$locationName == "N/A"
+    newSites_locationTbl$locationName[mask] <- as.character(NA)
+
+    # * Combine with locationTbl -----
+
     locationTbl <- dplyr::bind_rows(locationTbl, newSites_locationTbl)
+
 
   }
 
@@ -229,6 +283,11 @@ if ( FALSE ) {
   library(AirMonitorIngest)
   setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
 
+  download.file(
+    url = "https://airfire-data-exports.s3-us-west-2.amazonaws.com/monitoring/v2/known-locations/airnow_PM2.5_sites.rda",
+    destfile = "~/Data/known_locations/airnow_PM2.5_sites.rda"
+  )
+
   MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
   collectionName <- "airnow_PM2.5_sites"
@@ -236,7 +295,6 @@ if ( FALSE ) {
   parameterName <- "PM2.5"
 
   locationTbl <- MazamaLocationUtils::table_load(collectionName)
-
 
   locationTbl <- airnow_updateKnownLocations(
     locationTbl = locationTbl,

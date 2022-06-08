@@ -1,3 +1,13 @@
+# AirMonitorIngest 0.4.0
+
+Version 0.4 uses a new sites metadata file from AirNow, 
+Monitoring_Site_Locations_v2.data, which has a different
+set of fields. This data can be merged with the old file but requires some 
+changes in downstream data processing scripts.
+
+* Changes to `airnow_getSites()`, `airnow_updateKnownLocations()` and
+`airnow_updateUnknownLocations()` to accommodate the new metadata.
+
 # AirMonitorIngest 0.3.13
 
 * Corrected column headers in `wrcc_identifyMonitorType()`.

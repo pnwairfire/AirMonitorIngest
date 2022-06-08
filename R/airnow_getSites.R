@@ -13,15 +13,7 @@
 #' returns it as a tibble.
 #'
 #' A description of the data format is publicly available at the
-#' \href{https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf}{Monitoring Site Fact Sheet}.
-#'
-#' @note As of October, 2021, the description above is incorrect. See the source
-#' code for this function for a correct set of field names.
-#'
-#' @note As of October, 2021, the \code{monitoring_site_locations.dat} file has
-#' an encoding of "CP437" (aka "Non-ISO extended-ASCII" or "IBMPC 437") and will
-#' be converted to "UTF-8" so that French and Spanish language place names are
-#' properly encoded in the returned dataframe.
+#' \href{https://docs.airnowapi.org/docs/MonitoringSiteV2FactSheet.pdf}{Monitoring Site FV2 act Sheet}.
 #'
 #' @return Tibble of AirNow site metadata.
 #'
@@ -41,7 +33,7 @@
 #' }
 
 airnow_getSites <- function(
-  url = "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat",
+  url = "https://files.airnowtech.org/airnow/today/Monitoring_Site_Locations_V2.dat",
   quiet = TRUE
 ) {
 
@@ -50,54 +42,23 @@ airnow_getSites <- function(
 
   # ----- Validate Parameters --------------------------------------------------
 
-  url <- MazamaCoreUtils::setIfNull(url, "https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat")
+  url <- MazamaCoreUtils::setIfNull(url, "https://files.airnowtech.org/airnow/today/Monitoring_Site_Locations_V2.dat")
   quiet <- MazamaCoreUtils::setIfNull(quiet, TRUE)
 
   # ----- Download data --------------------------------------------------------
 
-  # NOTE:  Information on the structure of this file come from the Monitoring
-  # NOTE:  Site Factsheet (June, 2019).
-  # NOTE:    https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf
-  # NOTE:
-  # NOTE:  THIS INFORMATION IS INCORRECT!
-  # NOTE:
-  # NOTE:  The column names below are correct.
-
-  # AQSID|parameter name|site code|site name|status|
-  # agency id|agency name|EPA region|latitude|longitude|
-  # elevation|GMT offset|country code|MSA code|MSA name|
-  # state code|state name|county code|county name
-  #
-  # 060410001|O3|0001|San Rafael|Active|
-  # CA2|San Francisco Bay Area AQMD|R9|37.972200|-122.518900|
-  # 0.900|- 8.00|US|||
-  # 41860| San Francisco-Oakland-Fremont, CA |06|CA|06041|
-  # MARIN||
-
+  # Convert to inital lower case for internal consistency
   col_names <- c(
-    "AQSID", "parameterName", "siteCode", "siteName", "status",
-    "agencyID", "agencyName", "EPARegion", "latitude", "longitude",
-    "elevation", "GMTOffsetHours", "countryCode", "empty1", "empty2",
-    "FIPSMSACode", "MSAName", "FIPSStateCode", "stateCode", "GNISCountyCode",
-    "countyName", "empty3", "empty4"
-    )
+    "stationID", "AQSID", "fullAQSID", "parameterName", "monitorType",
+    "siteCode", "siteName", "status", "agencyID", "agencyName", "EPARegion",
+    "latitude", "longitude", "elevation", "GMTOffsetHours",
+    "countryFIPS", "CBSA_ID", "CBSA_Name", "stateAQSCode", "stateAbbreviation",
+    "countyAQSCode", "countyName"
+  )
 
-  col_types <- paste0("ccccc", "cccdd", "ddccc", "ccccc", "ccc")
+  col_types <- paste0("ccccc", "cccccc", "dddd", "ccccc", "cc")
 
-  # NOTE:  This file is not properly encoded.
-  # NOTE:  Using the default encoding, we see this:
-
-  # > dplyr::filter(tbl, AQSID == "800150581", parameterName == "PM2.5") %>%
-  #   + dplyr::pull(siteName)
-  # [1] "Nezahualc\xa2yotl"
-
-  # NOTE:  Using encoding = "CP437" we see this:
-  # > dplyr::filter(tbl, AQSID == "800150581", parameterName == "PM2.5") %>%
-  #   + dplyr::pull(siteName)
-  # [1] "Nezahualcóyotl"
-
-  # Fix the encoding
-  locale <- readr::locale(encoding = "CP437")
+  locale <- readr::locale(encoding = "UTF-8")
 
   # Read in text as a dataframe
   tbl <- readr::read_delim(
