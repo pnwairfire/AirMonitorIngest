@@ -71,6 +71,40 @@ airnow_createMeta <- function(
       distanceThreshold = distanceThreshold
     )
 
+  # > dplyr::glimpse(airnow_data_locations, width = 75)
+  # Rows: 1,214
+  # Columns: 30
+  # $ locationID            <chr> "a0ae2c387b6e3ec4", "1c8ace316889064c", "b8
+  # $ locationName          <chr> "NCore", "A Street", "Kitimat Haul Road", "
+  # $ longitude             <dbl> -147.7273, -147.6933, -128.7027, -128.6714,
+  # $ latitude              <dbl> 64.84580, 64.84593, 54.02919, 54.05389, 53.
+  # $ elevation             <dbl> 132.1, NA, 2.1, NA, NA, 83.0, 600.2, NA, 9.
+  # $ countryCode           <chr> "US", "US", "CA", "CA", "CA", "US", "US", "
+  # $ stateCode             <chr> "AK", "AK", "BC", "BC", "BC", "OR", "CA", "
+  # $ countyName            <chr> "Fairbanks North Star", "Fairbanks North St
+  # $ timezone              <chr> "America/Anchorage", "America/Anchorage", "
+  # $ houseNumber           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ street                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ city                  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ zip                   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ AQSID                 <chr> "020900034", "020900040", "000103902", "000
+  # $ fullAQSID             <chr> "840020900034", "840020900040", "1240001039
+  # $ airnow_stationID      <chr> "020900034", "840020900040", "000103902", "
+  # $ airnow_parameterName  <chr> "PM2.5", "PM2.5", "PM2.5", "PM2.5", "PM2.5"
+  # $ airnow_monitorType    <chr> "Permanent", "Permanent", "Permanent", "Per
+  # $ airnow_siteCode       <chr> "0034", "0040", "3902", "3901", "3905", "10
+  # $ airnow_status         <chr> "Active", "Active", "Active", "Active", "Ac
+  # $ airnow_agencyID       <chr> "AK1", "AK1", "BC1", "BC1", "BC1", "TRX", "
+  # $ airnow_agencyName     <chr> "State of Alaska DEC", "State of Alaska DEC
+  # $ airnow_EPARegion      <chr> "R10", "R10", "CA", "CA", "CA", "R8", "R9",
+  # $ airnow_GMTOffsetHours <dbl> -9, -9, -8, -8, -8, -8, -8, -8, -8, -8, -8,
+  # $ airnow_CBSA_ID        <chr> "21820", "21820", NA, NA, NA, NA, NA, NA, "
+  # $ airnow_CBSA_Name      <chr> " Fairbanks, AK ", " Fairbanks, AK ", NA, N
+  # $ airnow_stateAQSCode   <chr> "02", "02", "00", "00", "00", "41", "06", "
+  # $ airnow_countyAQSCode  <chr> "090", "090", "010", "010", "010", "011", "
+  # $ airnow_FIPSMSACode    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+  # $ airnow_MSAName        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+
   # NOTE:  Assume that all the work has been done to update the incoming
   # NOTE:  locationTbl so that all locations in airnow_data are "known".
   # NOTE:
@@ -120,6 +154,7 @@ airnow_createMeta <- function(
       deviceType = as.character(NA),
       deviceDescription = as.character(NA),
       deviceExtra = as.character(NA),
+      deploymentType = .data$airnow_monitorType,
       pollutant = .data$airnow_parameterName,
       units = !!units,
       dataIngestSource = "AirNow",
