@@ -130,18 +130,18 @@ airnow_updateKnownLocations <- function(
     # NOTE:
     # NOTE:  This breaks the idea that this is "spatial-only" information but we
     # NOTE:  keep these extra records around so we can look up information by
-    # NOTE:  AQSID.
+    # NOTE:  fullAQSID.
 
     duplicate_locationIDs <-
       airnow_sites$locationID[duplicated(airnow_sites$locationID)]
 
     if ( length(duplicate_locationIDs) > 0 ) {
       for ( locationID in duplicate_locationIDs ) {
-        AQSIDs <-
+        fullAQSIDs <-
           airnow_sites %>%
           dplyr::filter(.data$locationID == !!locationID) %>%
-          dplyr::pull(.data$AQSID)
-        logger.warn("Duplicate active AQSIDs at locationID %s: %s", locationID, paste0(AQSIDs, collapse = ", "))
+          dplyr::pull(.data$fullAQSID)
+        logger.warn("Duplicate active fullAQSIDs at locationID %s: %s", locationID, paste0(fullAQSIDs, collapse = ", "))
       }
     }
 
@@ -158,6 +158,7 @@ airnow_updateKnownLocations <- function(
       # Rename columns where the data exists
       dplyr::rename(
         AQSID = .data$airnow_AQSID,
+        fullAQSID = .data$airnow_fullAQSID,
         locationID = .data$airnow_locationID,
         locationName = .data$airnow_siteName,
         longitude = .data$airnow_longitude,
@@ -177,9 +178,10 @@ airnow_updateKnownLocations <- function(
       names(newSites_locationTbl) %>%
       stringr::str_subset("airnow_.*")
 
-    # NOTE:  Include the "AQSID" column for AirNow data
+    # NOTE:  Include the "AQSID" columns for AirNow data
     newColumns <- c(
       "AQSID",
+      "fullAQSID",
       MazamaLocationUtils::coreMetadataNames,
       airnow_columns
     )

@@ -111,6 +111,7 @@ airnow_updateUnknownLocations <- function(
   # Columns: 31
   # $ locationID            <chr> "ff93e44a39b72bc9", "f6b4431a3529dad4", "10
   # $ AQSID                 <chr> "480290055", "311090022", "080350004", "840
+  # $ fullAQSID             <chr> "840480290055", "840311090022", "8400803500
   # $ locationName          <chr> "CPS Pecan Valley C678", "LLCHD BAM", "Chat
   # $ longitude             <dbl> -98.43110, -96.67573, -105.07000, -98.37889
   # $ latitude              <dbl> 29.40720, 40.81256, 39.53390, 40.91833, 29.
@@ -134,7 +135,6 @@ airnow_updateUnknownLocations <- function(
   # $ airnow_MSAName        <chr> "San Antonio, TX", "Lincoln, NE", "Denver-A
   # $ address               <chr> "973 H Street, San Antonio, TX 78220, Unite
   # $ airnow_stationID      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-  # $ airnow_fullAQSID      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
   # $ airnow_monitorType    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
   # $ airnow_CBSA_ID        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
   # $ airnow_CBSA_Name      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
@@ -165,7 +165,6 @@ airnow_updateUnknownLocations <- function(
       airnow_FIPSMSACode = as.character(NA),
       airnow_MSAName = as.character(NA),
       airnow_stationID = as.character(NA),
-      airnow_fullAQSID = .data$fullAQSID,
       airnow_monitorType = as.character(NA),
       airnow_CBSA_ID = as.character(NA),
       airnow_CBSA_Name = as.character(NA),

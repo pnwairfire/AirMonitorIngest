@@ -31,8 +31,8 @@ Tibble of AirNow hourly data.
 }
 \description{
 This function uses the AirNow data webservice to retrieve
-subsets of data that do not exceed a maximum data size which causes
-errors.
+subsets of data that do not exceed a maximum data size. This prevents error
+returns from the AirNow data API.
 
 Datetimes can be anything that is understood by
 \code{MazamaCoreUtils::parseDatetime()}. For non-POSIXct values, the

@@ -32,6 +32,11 @@ Tibble of AirNow hourly data.
 \description{
 This function downloads, parses and combines hourly data files
 from \code{baseUrl}.
+}
+\note{
+Data returned by this function does not include data from "temporary"
+monitors and does not include a field for \code{fullAQSID}. For these reasons,
+this function is deprecated in favor of \code{\link{airnow_getData}}.
 
 Parameters included in AirNow data include at least the following list:
 
@@ -66,8 +71,7 @@ records for those parameters.
 Datetimes can be anything that is understood by
 \code{MazamaCoreUtils::parseDatetime()}. For non-POSIXct values, the
 recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".
-}
-\note{
+
 Hourly data are available from AirNow starting on 2014-01-01.
 
 Data from locations whose timezones have a fractional offset from UTC

@@ -17,7 +17,7 @@ BugReports: https://github.com/pnwairfire/AirMonitorIngest/issues
 Depends:
     R (>= 3.5.0)
 Imports:
-    AirMonitor (>= 0.0.6),
+    AirMonitor (>= 0.3.0),
     cluster,
     dplyr,
     httr,

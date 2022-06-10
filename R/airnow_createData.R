@@ -77,7 +77,7 @@ airnow_createData <- function(
     # NOTE:  distinct value per monitor-hour.
 
     dplyr::filter(!is.na(.data$parameterRawConcentration)) %>%
-    dplyr::distinct(.data$utcTime, .data$AQSID, .keep_all = TRUE) %>%
+    dplyr::distinct(.data$utcTime, .data$fullAQSID, .keep_all = TRUE) %>%
     dplyr::arrange(.data$utcTime) %>%
 
     dplyr::rename(
@@ -90,7 +90,7 @@ airnow_createData <- function(
         .data$latitude,
         distanceThreshold = distanceThreshold
       ),
-      deviceID = .data$AQSID
+      deviceID = .data$fullAQSID
     ) %>%
     dplyr::mutate(
       deviceDeploymentID = paste0(.data$locationID, "_", .data$deviceID)

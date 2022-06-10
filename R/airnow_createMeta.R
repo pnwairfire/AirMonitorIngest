@@ -49,9 +49,9 @@ airnow_createMeta <- function(
 
     airnow_data %>%
 
-    # Saw some AQSID with two records per hour, one with and one without parameterAQI
+    # Saw some fullAQSIDs with two records per hour, one with and one without parameterAQI
     dplyr::arrange(.data$parameterAQI) %>%
-    dplyr::distinct(.data$AQSID, .keep_all = TRUE) %>%
+    dplyr::distinct(.data$fullAQSID, .keep_all = TRUE) %>%
 
     # Remove records with missing or zero lon/lat
     dplyr::filter(
@@ -90,11 +90,12 @@ airnow_createMeta <- function(
     airnow_data_locations <- airnow_data_locations[mask,]
 
     # NOTE:  At this point, there may be duplicate locationIDs associated with
-    # NOTE:  different AQSIDs in airnow_data. Make sure we are using the latest
-    # NOTE:  AQSIDs from airnow_data.
+    # NOTE:  different fullAQSIDs in airnow_data. Make sure we are using the latest
+    # NOTE:  fullAQSIDs from airnow_data.
 
-    # Add AQSID
+    # Add AQSID and fullAQSID
     airnow_data_locations$AQSID <- airnow_data$AQSID[mask]
+    airnow_data_locations$fullAQSID <- airnow_data$fullAQSID[mask]
 
   }
 
@@ -104,9 +105,9 @@ airnow_createMeta <- function(
 
     airnow_data_locations %>%
 
-    # Unique device ID = AQSID as we have nothing more specific
+    # Unique device ID = fullAQSID as we have nothing more specific
     dplyr::mutate(
-      deviceID = .data$AQSID
+      deviceID = .data$fullAQSID
     ) %>%
 
     # Unique "device deployment" ID

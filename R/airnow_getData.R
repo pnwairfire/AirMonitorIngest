@@ -189,7 +189,7 @@ if ( FALSE ) {
   MazamaLocationUtils::table_leaflet(
     tbl,
     maptype = "terrain",
-    extraVars = c("siteName", "agencyName", "AQSID"),
+    extraVars = c("siteName", "agencyName", "AQSID", "fullAQSID"),
     weight = 1
   )
 

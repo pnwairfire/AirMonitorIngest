@@ -15,6 +15,10 @@
 #' @description This function downloads, parses and combines hourly data files
 #' from \code{baseUrl}.
 #'
+#' @note Data returned by this function does not include data from "temporary"
+#' monitors and does not include a field for \code{fullAQSID}. For these reasons,
+#' this function is deprecated in favor of \code{\link{airnow_getData}}.
+#'
 #' Parameters included in AirNow data include at least the following list:
 #'
 #' \enumerate{
