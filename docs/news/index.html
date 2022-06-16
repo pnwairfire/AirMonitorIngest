@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
       </span>
     </div>
 
@@ -90,7 +90,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -132,11 +132,35 @@
       <small>Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="airmonitoringest-041" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.1">
+<a href="#airmonitoringest-041" class="anchor"></a>AirMonitorIngest 0.4.1</h1>
+<ul>
+<li>Guarantee that <code>clusterLon</code> and <code>clusterLat</code>
+returned from <code><a href="../reference/addClustering.html">addClustering()</a></code> are pure numerics without any
+<code>names</code>.</li>
+</ul>
+</div>
+    <div id="airmonitoringest-040" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.0">
+<a href="#airmonitoringest-040" class="anchor"></a>AirMonitorIngest 0.4.0</h1>
+<p>Version 0.4 uses a new sites metadata file from AirNow,
+Monitoring_Site_Locations_v2.data, which has a different set of fields.
+This data can be merged with the old file but requires some changes in
+downstream data processing scripts.</p>
+<ul>
+<li>Changes to <code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code>,
+<code><a href="../reference/airnow_updateKnownLocations.html">airnow_updateKnownLocations()</a></code> and
+<code><a href="../reference/airnow_updateUnknownLocations.html">airnow_updateUnknownLocations()</a></code> to accommodate the new
+metadata.</li>
+</ul>
+</div>
     <div id="airmonitoringest-0313" class="section level1">
 <h1 class="page-header" data-toc-text="0.3.13">
 <a href="#airmonitoringest-0313" class="anchor"></a>AirMonitorIngest 0.3.13</h1>
 <ul>
-<li>Corrected column headers in <code><a href="../reference/wrcc_identifyMonitorType.html">wrcc_identifyMonitorType()</a></code>.</li>
+<li>Corrected column headers in
+<code><a href="../reference/wrcc_identifyMonitorType.html">wrcc_identifyMonitorType()</a></code>.</li>
 <li>Completed “Working with WRCC data” article.</li>
 </ul>
 </div>
@@ -159,14 +183,17 @@
 <h1 class="page-header" data-toc-text="0.3.10">
 <a href="#airmonitoringest-0310" class="anchor"></a>AirMonitorIngest 0.3.10</h1>
 <ul>
-<li>Ensure distinct records when updating known location tables in <code>airsis_updateKnownLocations()</code> and <code><a href="../reference/wrcc_updateKnownLocations.html">wrcc_updateKnownLocations()</a></code>.</li>
+<li>Ensure distinct records when updating known location tables in
+<code>airsis_updateKnownLocations()</code> and
+<code><a href="../reference/wrcc_updateKnownLocations.html">wrcc_updateKnownLocations()</a></code>.</li>
 </ul>
 </div>
     <div id="airmonitoringest-039" class="section level1">
 <h1 class="page-header" data-toc-text="0.3.9">
 <a href="#airmonitoringest-039" class="anchor"></a>AirMonitorIngest 0.3.9</h1>
 <ul>
-<li>Added <code><a href="../reference/wrcc_getUnitIDs.html">wrcc_getUnitIDs()</a></code>. Removed <code>wrcc_getCurrentUnitIDs()</code>.</li>
+<li>Added <code><a href="../reference/wrcc_getUnitIDs.html">wrcc_getUnitIDs()</a></code>. Removed
+<code>wrcc_getCurrentUnitIDs()</code>.</li>
 </ul>
 </div>
     <div id="airmonitoringest-038" class="section level1">
@@ -187,7 +214,9 @@
 <h1 class="page-header" data-toc-text="0.3.6">
 <a href="#airmonitoringest-036" class="anchor"></a>AirMonitorIngest 0.3.6</h1>
 <ul>
-<li>Renamed <code>wrcc_getDailyUnitIDs()</code> to <code>wrcc_getCurrrentUnitIDs()</code> and added explicit date information.</li>
+<li>Renamed <code>wrcc_getDailyUnitIDs()</code> to
+<code>wrcc_getCurrrentUnitIDs()</code> and added explicit date
+information.</li>
 <li>Fixed use of <code><a href="https://rdrr.io/pkg/MazamaCoreUtils/man/setIfNull.html">MazamaCoreUtils::setIfNull()</a></code>.</li>
 </ul>
 </div>
@@ -195,7 +224,8 @@
 <h1 class="page-header" data-toc-text="0.3.5">
 <a href="#airmonitoringest-035" class="anchor"></a>AirMonitorIngest 0.3.5</h1>
 <ul>
-<li>Fixed bug with duplicated <code>meta$deviceDeploymentID</code> when two clusters were &lt; 1000 meters apart.</li>
+<li>Fixed bug with duplicated <code>meta$deviceDeploymentID</code> when
+two clusters were &lt; 1000 meters apart.</li>
 </ul>
 </div>
     <div id="airmonitoringest-033" class="section level1">
@@ -248,7 +278,8 @@
 <a href="#airmonitoringest-027" class="anchor"></a>AirMonitorIngest 0.2.7</h1>
 <p>Updates for <strong>AirMonitor</strong> 0.0.4.</p>
 <ul>
-<li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code> that occurs only when new locations appear in the incoming raw data.</li>
+<li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code> that occurs only
+when new locations appear in the incoming raw data.</li>
 <li>Now exporting <code><a href="../reference/%&gt;%.html">%&gt;%</a></code>.</li>
 </ul>
 </div>
@@ -257,22 +288,27 @@
 <a href="#airmonitoringest-026" class="anchor"></a>AirMonitorIngest 0.2.6</h1>
 <ul>
 <li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code>.</li>
-<li>Fixed a bug in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that kept records with no data.</li>
-<li>Removed expectation in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that all monitors in <code>meta</code> will be represted in the incoming data.</li>
+<li>Fixed a bug in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that kept records
+with no data.</li>
+<li>Removed expectation in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that all
+monitors in <code>meta</code> will be represted in the incoming
+data.</li>
 </ul>
 </div>
     <div id="airmonitoringest-025" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.5">
 <a href="#airmonitoringest-025" class="anchor"></a>AirMonitorIngest 0.2.5</h1>
 <ul>
-<li>Removed <code>~APIKey()</code> functionality. Now importing this from <code>MazamaCoreUtils</code> 0.4.10.</li>
+<li>Removed <code>~APIKey()</code> functionality. Now importing this
+from <code>MazamaCoreUtils</code> 0.4.10.</li>
 </ul>
 </div>
     <div id="airmonitoringest-024" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.4">
 <a href="#airmonitoringest-024" class="anchor"></a>AirMonitorIngest 0.2.4</h1>
 <ul>
-<li>Harmonized argument names and order in <code>epa_aqs_~()</code> and <code>airnow_~()</code> function signatures.</li>
+<li>Harmonized argument names and order in <code>epa_aqs_~()</code> and
+<code>airnow_~()</code> function signatures.</li>
 </ul>
 </div>
     <div id="airmonitoringest-023" class="section level1">
@@ -291,22 +327,28 @@
 <h1 class="page-header" data-toc-text="0.2.2">
 <a href="#airmonitoringest-022" class="anchor"></a>AirMonitorIngest 0.2.2</h1>
 <ul>
-<li>Renamed <code>airnow_api_~()</code> functions to just <code>airnow_~()</code>.</li>
-<li>Renamed <code>pollutant</code> to <code>parameterName</code> in <code>airnow_getData~()</code> for harmony with <code>epa_aqs_~()</code> functions.</li>
+<li>Renamed <code>airnow_api_~()</code> functions to just
+<code>airnow_~()</code>.</li>
+<li>Renamed <code>pollutant</code> to <code>parameterName</code> in
+<code>airnow_getData~()</code> for harmony with <code>epa_aqs_~()</code>
+functions.</li>
 </ul>
 </div>
     <div id="airmonitoringest-021" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.1">
 <a href="#airmonitoringest-021" class="anchor"></a>AirMonitorIngest 0.2.1</h1>
 <ul>
-<li>Updated <code>airnow_api_getDataSubset()</code> to request more variables.</li>
-<li>Removed <code>includeSiteMeta</code> argument from <code>airnow_api_getData~()</code>. Now we always get it.</li>
+<li>Updated <code>airnow_api_getDataSubset()</code> to request more
+variables.</li>
+<li>Removed <code>includeSiteMeta</code> argument from
+<code>airnow_api_getData~()</code>. Now we always get it.</li>
 </ul>
 </div>
     <div id="airmonitoringest-020" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.0">
 <a href="#airmonitoringest-020" class="anchor"></a>AirMonitorIngest 0.2.0</h1>
-<p>Version 0.2 focuses on data ingest from AirNow using the AirNow API.</p>
+<p>Version 0.2 focuses on data ingest from AirNow using the AirNow
+API.</p>
 <p>Initial functions include:</p>
 <ul>
 <li><code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code></li>
@@ -338,7 +380,8 @@
     <div id="airmonitoringest-010" class="section level1">
 <h1 class="page-header" data-toc-text="0.1.0">
 <a href="#airmonitoringest-010" class="anchor"></a>AirMonitorIngest 0.1.0</h1>
-<p>Version 0.1 focuses on data ingest functions for EPA AQS data. Functions fall into the following categories:</p>
+<p>Version 0.1 focuses on data ingest functions for EPA AQS data.
+Functions fall into the following categories:</p>
 <p><strong>Learn more about EPA AQS data</strong></p>
 <ul>
 <li><code><a href="../reference/epa_aqs_openWebPages.html">epa_aqs_openWebPages()</a></code></li>

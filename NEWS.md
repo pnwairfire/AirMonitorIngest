@@ -1,3 +1,8 @@
+# AirMonitorIngest 0.4.1
+
+* Guarantee that `clusterLon` and `clusterLat` returned from `addClustering()`
+are pure numerics without any `names`.
+
 # AirMonitorIngest 0.4.0
 
 Version 0.4 uses a new sites metadata file from AirNow, 

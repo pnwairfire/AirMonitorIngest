@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
       </span>
     </div>
 
@@ -50,7 +50,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -85,7 +85,7 @@
 
       
 
-      </header><script src="AirMonitorIngest_files/header-attrs-2.10/header-attrs.js"></script><div class="row">
+      </header><script src="AirMonitorIngest_files/header-attrs-2.14/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Introduction to AirMonitorIngest</h1>
@@ -105,49 +105,67 @@
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>Start by installing <strong>AirMonitor</strong> from CRAN with:</p>
 <p><code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages('AirMonitor')</a></code></p>
-<p>Install the pre-release version of <strong>AirMonitorIngest</strong> from GitHub with:</p>
+<p>Install the pre-release version of <strong>AirMonitorIngest</strong>
+from GitHub with:</p>
 <p><code><a href="https://devtools.r-lib.org/reference/remote-reexports.html">devtools::install_github('pnwairfire/AirMonitorIngest')</a></code></p>
 </div>
 <div id="available-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#available-data" class="anchor"></a>Available data</h2>
-<p>The USFS AirFire group regularly processes monitoring data in support of their various operational tools. Pre-processed, harmonized and QC’ed data files can be loaded with the following functions from the <strong>AirMonitor</strong> package:</p>
+<p>The USFS AirFire group regularly processes monitoring data in support
+of their various operational tools. Pre-processed, harmonized and QC’ed
+data files can be loaded with the following functions from the
+<strong>AirMonitor</strong> package:</p>
 <ul>
 <li>
-<code>~_load()</code> – load data based on a start- and end-time</li>
+<code>~_load()</code> – load data based on a start- and
+end-time</li>
 <li>
 <code>~loadAnnual()</code> – load a year’s worth of data</li>
 <li>
-<code>~loadDaily()</code> – load the most recent 45 days of data (updated once per day)</li>
+<code>~loadDaily()</code> – load the most recent 45 days of data
+(updated once per day)</li>
 <li>
-<code>~loadLatest()</code> – load the most recent 10 days of data (updated every hour)</li>
+<code>~loadLatest()</code> – load the most recent 10 days of data
+(updated every hour)</li>
 </ul>
-<p>Data archives go back over 10 years depending on the source of data.</p>
+<p>Data archives go back over 10 years depending on the source of
+data.</p>
 </div>
 <div id="data-ingest" class="section level2">
 <h2 class="hasAnchor">
 <a href="#data-ingest" class="anchor"></a>Data Ingest</h2>
-<p>The data loaded by the the functions above comes from one of three source: AirNow, AIRSIS or WRCC. For “engineering-level” data from AIRSIS and WRCC, the data processing pipeline involves the following steps which are broken out as separate functions:</p>
+<p>The data loaded by the the functions above comes from one of three
+source: AirNow, AIRSIS or WRCC. For “engineering-level” data from AIRSIS
+and WRCC, the data processing pipeline involves the following steps
+which are broken out as separate functions:</p>
 <ul>
 <li>
 <code>~_downloadData()</code> – download ASCII data</li>
 <li>
-<code>~_identifyMonitorType()</code> – identify the specific format based on header lines</li>
+<code>~_identifyMonitorType()</code> – identify the specific format
+based on header lines</li>
 <li>
 <code>~_parseData()</code> – parse ASCII data into a tibble</li>
 <li>
-<code>~_qualitiyControl()</code> – apply monitorType specific QC</li>
+<code>~_qualitiyControl()</code> – apply monitorType specific
+QC</li>
 <li>
-<code>~_createMetaAndData()</code> – restructure data into a <em>mts_monitor</em> object</li>
+<code>~_createMetaAndData()</code> – restructure data into a
+<em>mts_monitor</em> object</li>
 <li>
-<code>~_updateKnownLocations()</code> – update the “known locations” table for WRCC monitors</li>
+<code>~_updateKnownLocations()</code> – update the “known locations”
+table for WRCC monitors</li>
 </ul>
 <p>One additional functions is used internally:</p>
 <ul>
 <li>
-<code><a href="../reference/addClustering.html">addClustering()</a></code> – handle jitter in GPS positions by creating clusters</li>
+<code><a href="../reference/addClustering.html">addClustering()</a></code> – handle jitter in GPS positions by
+creating clusters</li>
 </ul>
-<p>Understanding how to work with these functions will be important if one wants to work with the full engineering data including variables like ‘flow rate’ or ‘voltage’.</p>
+<p>Understanding how to work with these functions will be important if
+one wants to work with the full engineering data including variables
+like ‘flow rate’ or ‘voltage’.</p>
 <hr>
 <p>Best of luck analyzing your local air quality data!</p>
 </div>

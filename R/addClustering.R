@@ -67,9 +67,10 @@ addClustering <- function(
   }
 
   # If we only have a single row, return immediately
+  # NOTE:  Use as.numeric() to remove any names associated with these vectors
   if ( nrow(tbl) == 1 ) {
-    tbl$clusterLon <- tbl[[lonVar]][1]
-    tbl$clusterLat <- tbl[[latVar]][1]
+    tbl$clusterLon <- as.numeric(tbl[[lonVar]][1])
+    tbl$clusterLat <- as.numeric(tbl[[latVar]][1])
     tbl$clusterID <- 1
     return(tbl)
   }
@@ -148,9 +149,10 @@ addClustering <- function(
   }
 
   # Add cluster lons and lats to the tibble
-  tbl$clusterLon <- clusterObj$medoids[,lonVar][clusterObj$clustering]
-  tbl$clusterLat <- clusterObj$medoids[,latVar][clusterObj$clustering]
-  tbl$clusterID <- clusterObj$clustering
+  # NOTE:  Use as.numeric() to remove any names associated with these vectors
+  tbl$clusterLon <- as.numeric(clusterObj$medoids[,lonVar][clusterObj$clustering])
+  tbl$clusterLat <- as.numeric(clusterObj$medoids[,latVar][clusterObj$clustering])
+  tbl$clusterID <- as.character(clusterObj$clustering)
 
   # Reinsert rows with bad locations if flagAndKeep = TRUE
   if ( flagAndKeep ) {

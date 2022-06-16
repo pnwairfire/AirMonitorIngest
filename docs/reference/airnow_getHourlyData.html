@@ -41,38 +41,7 @@
 
 <meta property="og:title" content="Download and aggregate multiple hourly data files from AirNow — airnow_getHourlyData" />
 <meta property="og:description" content="This function downloads, parses and combines hourly data files
-from baseUrl.
-Parameters included in AirNow data include at least the following list:
-
-BARPR
-BC
-CO
-NO
-NO2
-NO2Y
-NO2X
-NOX
-NOOY
-OC
-OZONE
-PM10
-PM2.5
-PRECIP
-RHUM
-SO2
-SRAD
-TEMP
-UV-AETH
-WD
-WS
-
-
-Passing a vector of one ore more of the above names as the parameters
-argument will cause the resulting tibble to be filtered to contain only
-records for those parameters.
-Datetimes can be anything that is understood by
-MazamaCoreUtils::parseDatetime(). For non-POSIXct values, the
-recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&quot;." />
+from baseUrl." />
 
 
 
@@ -104,7 +73,7 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
       </span>
     </div>
 
@@ -123,7 +92,7 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -169,37 +138,6 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
     <div class="ref-description">
     <p>This function downloads, parses and combines hourly data files
 from <code>baseUrl</code>.</p>
-<p>Parameters included in AirNow data include at least the following list:</p>
-<ol>
-<li><p>BARPR</p></li>
-<li><p>BC</p></li>
-<li><p>CO</p></li>
-<li><p>NO</p></li>
-<li><p>NO2</p></li>
-<li><p>NO2Y</p></li>
-<li><p>NO2X</p></li>
-<li><p>NOX</p></li>
-<li><p>NOOY</p></li>
-<li><p>OC</p></li>
-<li><p>OZONE</p></li>
-<li><p>PM10</p></li>
-<li><p>PM2.5</p></li>
-<li><p>PRECIP</p></li>
-<li><p>RHUM</p></li>
-<li><p>SO2</p></li>
-<li><p>SRAD</p></li>
-<li><p>TEMP</p></li>
-<li><p>UV-AETH</p></li>
-<li><p>WD</p></li>
-<li><p>WS</p></li>
-</ol>
-
-<p>Passing a vector of one ore more of the above names as the <code>parameters</code>
-argument will cause the resulting tibble to be filtered to contain only
-records for those parameters.</p>
-<p>Datetimes can be anything that is understood by
-<code><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/parseDatetime.html'>MazamaCoreUtils::parseDatetime()</a></code>. For non-POSIXct values, the
-recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".</p>
     </div>
 
     <pre class="usage"><span class='fu'>airnow_getHourlyData</span><span class='op'>(</span>
@@ -245,7 +183,41 @@ recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".</p>
     <p>Tibble of AirNow hourly data.</p>
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p>Hourly data are available from AirNow starting on 2014-01-01.</p>
+    <p>Data returned by this function does not include data from "temporary"
+monitors and does not include a field for <code>fullAQSID</code>. For these reasons,
+this function is deprecated in favor of <code><a href='airnow_getData.html'>airnow_getData</a></code>.</p>
+<p>Parameters included in AirNow data include at least the following list:</p>
+<ol>
+<li><p>BARPR</p></li>
+<li><p>BC</p></li>
+<li><p>CO</p></li>
+<li><p>NO</p></li>
+<li><p>NO2</p></li>
+<li><p>NO2Y</p></li>
+<li><p>NO2X</p></li>
+<li><p>NOX</p></li>
+<li><p>NOOY</p></li>
+<li><p>OC</p></li>
+<li><p>OZONE</p></li>
+<li><p>PM10</p></li>
+<li><p>PM2.5</p></li>
+<li><p>PRECIP</p></li>
+<li><p>RHUM</p></li>
+<li><p>SO2</p></li>
+<li><p>SRAD</p></li>
+<li><p>TEMP</p></li>
+<li><p>UV-AETH</p></li>
+<li><p>WD</p></li>
+<li><p>WS</p></li>
+</ol>
+
+<p>Passing a vector of one ore more of the above names as the <code>parameters</code>
+argument will cause the resulting tibble to be filtered to contain only
+records for those parameters.</p>
+<p>Datetimes can be anything that is understood by
+<code><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/parseDatetime.html'>MazamaCoreUtils::parseDatetime()</a></code>. For non-POSIXct values, the
+recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".</p>
+<p>Hourly data are available from AirNow starting on 2014-01-01.</p>
 <p>Data from locations whose timezones have a fractional offset from UTC
 are removed as the <em>mts_monitor</em> data model only supports data reported
 on hour boundaries. As of 2019-06-26, fractional offsets only applies to US

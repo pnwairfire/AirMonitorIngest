@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Identify WRCC monitor type — wrcc_identifyMonitorType • AirMonitorIngest</title>
+<title>Download and parse AirNow sites metadata — airnow_getSites_v1 • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,27 +39,13 @@
 
 
 
-<meta property="og:title" content="Identify WRCC monitor type — wrcc_identifyMonitorType" />
-<meta property="og:description" content="Examine the column names of the incoming character vector
-to identify different types of monitor data provided by WRCC.
-The returned list includes everything needed to identify and parse the raw
-data using readr::read_tsv():
-
-monitorType -- identification string
-rawNames -- column names from the data (including special characters)
-columnNames -- assigned column names (special characters repaced with '.')
-columnTypes -- column type string for use with readr::read_csv()
-
-
-The monitorType will be one of:
-&quot;WRCC_TYPE1&quot; -- ???
-&quot;WRCC_TYPE2&quot; -- ???
-&quot;WRCC_TYPE3&quot; -- ???
-&quot;WRCC_TYPE4&quot; -- ???
-&quot;WRCC_TYPE5&quot; -- ???
-&quot;UNKOWN&quot; -- ???
-
-" />
+<meta property="og:title" content="Download and parse AirNow sites metadata — airnow_getSites_v1" />
+<meta property="og:description" content="The https://airnowtech.org site provides both air pollution
+monitoring data as well as monitoring site location metadata. This function
+retrieves the most recent version of the site location metadata file and
+returns it as a tibble.
+A description of the data format is publicly available at the
+Monitoring Site Fact Sheet." />
 
 
 
@@ -148,61 +134,64 @@ The monitorType will be one of:
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Identify WRCC monitor type</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/wrcc_identifyMonitorType.R'><code>R/wrcc_identifyMonitorType.R</code></a></small>
-    <div class="hidden name"><code>wrcc_identifyMonitorType.Rd</code></div>
+    <h1>Download and parse AirNow sites metadata</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/airnow_getSites_v1.R'><code>R/airnow_getSites_v1.R</code></a></small>
+    <div class="hidden name"><code>airnow_getSites_v1.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Examine the column names of the incoming character vector
-to identify different types of monitor data provided by WRCC.</p>
-<p>The returned list includes everything needed to identify and parse the raw
-data using <code><a href='https://readr.tidyverse.org/reference/read_delim.html'>readr::read_tsv()</a></code>:</p>
-<ul>
-<li><p><code>monitorType</code> -- identification string</p></li>
-<li><p><code>rawNames</code> -- column names from the data (including special characters)</p></li>
-<li><p><code>columnNames</code> -- assigned column names (special characters repaced with '.')</p></li>
-<li><p><code>columnTypes</code> -- column type string for use with <code><a href='https://readr.tidyverse.org/reference/read_delim.html'>readr::read_csv()</a></code></p></li>
-</ul>
-
-<p>The <code>monitorType</code> will be one of:</p><ul>
-<li><p>"<code>WRCC_TYPE1</code>" -- ???</p></li>
-<li><p>"<code>WRCC_TYPE2</code>" -- ???</p></li>
-<li><p>"<code>WRCC_TYPE3</code>" -- ???</p></li>
-<li><p>"<code>WRCC_TYPE4</code>" -- ???</p></li>
-<li><p>"<code>WRCC_TYPE5</code>" -- ???</p></li>
-<li><p>"<code>UNKOWN</code>" -- ???</p></li>
-</ul>
-
+    <p>The <a href='https://airnowtech.org'>https://airnowtech.org</a> site provides both air pollution
+monitoring data as well as monitoring site location metadata. This function
+retrieves the most recent version of the site location metadata file and
+returns it as a tibble.</p>
+<p>A description of the data format is publicly available at the
+<a href='https://www.airnowapi.org/docs/MonitoringSiteFactSheet.pdf'>Monitoring Site Fact Sheet</a>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wrcc_identifyMonitorType</span><span class='op'>(</span>fileString <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>airnow_getSites_v1</span><span class='op'>(</span>
+  url <span class='op'>=</span> <span class='st'>"https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat"</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>fileString</th>
-      <td><p>Character string containing WRCC data.</p></td>
+      <th>url</th>
+      <td><p>URL of the AirNow monitoring site locations file.</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>Logical passed on to
+<code><a href='https://readr.tidyverse.org/reference/read_delim.html'>readr::read_delim(progress = !quiet)</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>List including <code>monitorType</code>, <code>rawNames</code>, <code>columnNames</code> and <code>columnTypes</code>.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <p>Tibble of AirNow site metadata.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p><a href='https://wrcc.dri.edu/cgi-bin/smoke.pl'>WRCC Fire Cache Smoke Monitor Archive</a></p>
+    <p>As of October, 2021, the description above is incorrect. See the source
+code for this function for a correct set of field names.</p>
+<p>As of October, 2021, the <code>monitoring_site_locations.dat</code> file has
+an encoding of "CP437" (aka "Non-ISO extended-ASCII" or "IBMPC 437") and will
+be converted to "UTF-8" so that French and Spanish language place names are
+properly encoded in the returned dataframe.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># Fail gracefully if any resources are not available</span>
-<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='op'>{</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/pnwairfire/AirMonitorIngest'>AirMonitorIngest</a></span><span class='op'>)</span>
 
-<span class='va'>fileString</span> <span class='op'>&lt;-</span> <span class='fu'><a href='wrcc_downloadData.html'>wrcc_downloadData</a></span><span class='op'>(</span><span class='fl'>20160701</span>, <span class='fl'>20160930</span>, unitID <span class='op'>=</span> <span class='st'>'1307'</span><span class='op'>)</span>
-<span class='va'>monitorTypeList</span> <span class='op'>&lt;-</span> <span class='fu'>wrcc_identifyMonitorType</span><span class='op'>(</span><span class='va'>fileString</span><span class='op'>)</span>
+<span class='co'># Create a directory specifically for AirNow data</span>
+<span class='fu'><a href='https://rdrr.io/r/base/files2.html'>dir.create</a></span><span class='op'>(</span><span class='st'>"~/Data/AirNow"</span>, recursive <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 
-<span class='op'>}</span>, silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='co'># Set logging level so messages and errors will appear in the console</span>
+<span class='fu'>MazamaCoreUtils</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/initializeLogging.html'>initializeLogging</a></span><span class='op'>(</span>logDir <span class='op'>=</span> <span class='st'>"~/Data/AirNow"</span><span class='op'>)</span>
+<span class='fu'>logger.setLevel</span><span class='op'>(</span><span class='va'>TRACE</span><span class='op'>)</span>
+
+<span class='co'># Download and parse site metadata</span>
+<span class='va'>airnow_sites</span> <span class='op'>&lt;-</span> <span class='fu'>airnow_getSites_v1</span><span class='op'>(</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>

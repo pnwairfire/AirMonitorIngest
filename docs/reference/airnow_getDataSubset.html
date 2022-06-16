@@ -41,8 +41,8 @@
 
 <meta property="og:title" content="Download and parse hourly data from the AirNow data API — airnow_getDataSubset" />
 <meta property="og:description" content="This function uses the AirNow data webservice to retrieve
-subsets of data that do not exceed a maximum data size which causes
-errors.
+subsets of data that do not exceed a maximum data size. This prevents error
+returns from the AirNow data API.
 Datetimes can be anything that is understood by
 MazamaCoreUtils::parseDatetime(). For non-POSIXct values, the
 recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&quot;." />
@@ -77,7 +77,7 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
       </span>
     </div>
 
@@ -96,7 +96,7 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -141,8 +141,8 @@ recommended format is &quot;YYYY-mm-dd HH:00:00&quot; or just &quot;YYYYmmddhh&q
 
     <div class="ref-description">
     <p>This function uses the AirNow data webservice to retrieve
-subsets of data that do not exceed a maximum data size which causes
-errors.</p>
+subsets of data that do not exceed a maximum data size. This prevents error
+returns from the AirNow data API.</p>
 <p>Datetimes can be anything that is understood by
 <code><a href='https://rdrr.io/pkg/MazamaCoreUtils/man/parseDatetime.html'>MazamaCoreUtils::parseDatetime()</a></code>. For non-POSIXct values, the
 recommended format is "YYYY-mm-dd HH:00:00" or just "YYYYmmddhh".</p>
