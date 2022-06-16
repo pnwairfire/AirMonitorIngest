@@ -11,7 +11,7 @@
 #' local file using \code{readr::read_file()}.
 #'
 #' The type of monitor represented by \code{fileString} is inferred from the
-#' column names using \code{wrcc_identifyMonitorType()} and appropriate column
+#' column names using \code{wrcc_identifyDataFormat()} and appropriate column
 #' types are assigned. The character data are then processed, read into a tibble,
 #' and augmented in the following ways:
 #'
@@ -50,7 +50,7 @@ wrcc_parseData <- function(
   # ----- Parse ----------------------------------------------------------------
 
   # Identify monitor type
-  monitorTypeList <- wrcc_identifyMonitorType(fileString)
+  monitorTypeList <- wrcc_identifyDataFormat(fileString)
 
   monitorType <- monitorTypeList$monitorType
   rawNames <- monitorTypeList$rawNames

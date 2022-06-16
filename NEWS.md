@@ -2,6 +2,7 @@
 
 * Guarantee that `clusterLon` and `clusterLat` returned from `addClustering()`
 are pure numerics without any `names`.
+* Rename `wrcc_identifyMonitorType()` to `wrcc_identifyDataFormat()`.
 
 # AirMonitorIngest 0.4.0
 

@@ -38,12 +38,12 @@
 #' try({
 #'
 #' fileString <- wrcc_downloadData(20160701, 20160930, unitID = '1307')
-#' monitorTypeList <- wrcc_identifyMonitorType(fileString)
+#' monitorTypeList <- wrcc_identifyDataFormat(fileString)
 #'
 #' }, silent = FALSE)
 #' }
 
-wrcc_identifyMonitorType <- function(
+wrcc_identifyDataFormat <- function(
   fileString = NULL
 ) {
 

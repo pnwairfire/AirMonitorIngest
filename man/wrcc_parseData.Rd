@@ -19,7 +19,7 @@ can be read in directly from WRCC using \code{wrcc_downloadData()} or from a
 local file using \code{readr::read_file()}.
 
 The type of monitor represented by \code{fileString} is inferred from the
-column names using \code{wrcc_identifyMonitorType()} and appropriate column
+column names using \code{wrcc_identifyDataFormat()} and appropriate column
 types are assigned. The character data are then processed, read into a tibble,
 and augmented in the following ways:
 

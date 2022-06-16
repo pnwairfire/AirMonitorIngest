@@ -117,8 +117,8 @@ WRCC, asking for raw, ASCII data for a single monitor over some time
 period.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fileString</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/wrcc_downloadData.html">wrcc_downloadData</a></span><span class="op">(</span><span class="fl">20210701</span>, <span class="fl">20210930</span>, unitID <span class="op">=</span> <span class="st">'sm16'</span><span class="op">)</span></code></pre></div>
-<pre><code>## DEBUG [2022-06-16 12:46:23]  ----- wrcc_downloadData() ----- 
-## TRACE [2022-06-16 12:46:23] Downloading WRCC data for unitID sm16 ...</code></pre>
+<pre><code>## DEBUG [2022-06-16 13:10:51]  ----- wrcc_downloadData() ----- 
+## TRACE [2022-06-16 13:10:51] Downloading WRCC data for unitID sm16 ...</code></pre>
 <p>This <code>fileString</code> is just the tab-delimited data file and
 will look something like this:</p>
 <pre>
@@ -138,8 +138,8 @@ into a tibble that is ready for examination.</p>
 <code class="sourceCode R"><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/wrcc_parseData.html">wrcc_parseData</a></span><span class="op">(</span><span class="va">fileString</span><span class="op">)</span>
 
 <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span></code></pre></div>
-<pre><code>## DEBUG [2022-06-16 12:46:26]  ----- wrcc_parseData() ----- 
-## DEBUG [2022-06-16 12:46:26]  ----- wrcc_parseData() ----- 
+<pre><code>## DEBUG [2022-06-16 13:10:54]  ----- wrcc_parseData() ----- 
+## DEBUG [2022-06-16 13:10:54]  ----- wrcc_parseData() ----- 
 ## Rows: 668
 ## Columns: 19
 ## $ DateTime       &lt;chr&gt; "2107242200", "2107242300", "2107250000", "2107250100",…
@@ -187,17 +187,17 @@ If logging is enabled, output will be printed describing the QC
 process.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tbl_qc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/wrcc_qualityControl.html">wrcc_qualityControl</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span></code></pre></div>
-<pre><code>## DEBUG [2022-06-16 12:46:27]  ----- wrcc_qualityControl() ----- 
-## TRACE [2022-06-16 12:46:27] Applying ESAM QC rules ...
-## DEBUG [2022-06-16 12:46:27]  ----- wrcc_ESAMQualityControl() ----- 
-## TRACE [2022-06-16 12:46:27] Flow has 14 missing or out of range values
-## TRACE [2022-06-16 12:46:27] Bad Flow values:  0, 0.5, 0.6, 1.7, 1.8, 1.9
-## TRACE [2022-06-16 12:46:27] AT has 0 missing or out of range values
-## TRACE [2022-06-16 12:46:27] RHi has 0 missing or out of range values
-## TRACE [2022-06-16 12:46:27] Conc has 0 missing or out of range values
-## TRACE [2022-06-16 12:46:27] datetime has 0 missing or out of range values
-## TRACE [2022-06-16 12:46:27] Discarding 14 rows because of QC logic
-## TRACE [2022-06-16 12:46:27] Retaining 654 rows of validated measurements</code></pre>
+<pre><code>## DEBUG [2022-06-16 13:10:55]  ----- wrcc_qualityControl() ----- 
+## TRACE [2022-06-16 13:10:55] Applying ESAM QC rules ...
+## DEBUG [2022-06-16 13:10:55]  ----- wrcc_ESAMQualityControl() ----- 
+## TRACE [2022-06-16 13:10:55] Flow has 14 missing or out of range values
+## TRACE [2022-06-16 13:10:55] Bad Flow values:  0, 0.5, 0.6, 1.7, 1.8, 1.9
+## TRACE [2022-06-16 13:10:55] AT has 0 missing or out of range values
+## TRACE [2022-06-16 13:10:55] RHi has 0 missing or out of range values
+## TRACE [2022-06-16 13:10:55] Conc has 0 missing or out of range values
+## TRACE [2022-06-16 13:10:55] datetime has 0 missing or out of range values
+## TRACE [2022-06-16 13:10:55] Discarding 14 rows because of QC logic
+## TRACE [2022-06-16 13:10:55] Retaining 654 rows of validated measurements</code></pre>
 <p>Note that the number of rows is now reduced compared to the raw
 data.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
