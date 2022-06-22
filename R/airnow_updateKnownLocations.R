@@ -23,7 +23,7 @@
 
 airnow_updateKnownLocations <- function(
   locationTbl = NULL,
-  distanceThreshold = 100,
+  distanceThreshold = 500,
   parameterName = c("PM2.5") ###, "CO", "OZONE", "PM10")
 ) {
 
@@ -293,7 +293,7 @@ if ( FALSE ) {
   MazamaLocationUtils::setLocationDataDir("~/Data/known_locations")
 
   collectionName <- "airnow_PM2.5_sites"
-  distanceThreshold <- 100
+  distanceThreshold <- 500
   parameterName <- "PM2.5"
 
   locationTbl <- MazamaLocationUtils::table_load(collectionName)

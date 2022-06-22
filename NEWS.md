@@ -3,6 +3,7 @@
 * Guarantee that `clusterLon` and `clusterLat` returned from `addClustering()`
 are pure numerics without any `names`.
 * Rename `wrcc_identifyMonitorType()` to `wrcc_identifyDataFormat()`.
+* Increased default `distanceThreshold` to 500m in `airnow_updateKnownLocations()`.
 
 # AirMonitorIngest 0.4.0
 

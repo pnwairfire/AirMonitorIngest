@@ -6,7 +6,7 @@
 \usage{
 airnow_updateKnownLocations(
   locationTbl = NULL,
-  distanceThreshold = 100,
+  distanceThreshold = 500,
   parameterName = c("PM2.5")
 )
 }
