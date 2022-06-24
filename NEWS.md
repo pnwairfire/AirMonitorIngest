@@ -1,3 +1,10 @@
+# AirMonitorIngest 0.4.2
+
+* Removed `airnow_updateKnownLocations()`, `airnow_updateUnknownLocations()`,
+`airnow_update()`, `airnow_createData()` and `airnow_createMeta()`. These
+functions are changing more often than anticipated and have been moved to the
+**monitoring-data-ingest-v2** code base.
+
 # AirMonitorIngest 0.4.1
 
 * Guarantee that `clusterLon` and `clusterLat` returned from `addClustering()`

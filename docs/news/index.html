@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.2</span>
       </span>
     </div>
 
@@ -132,6 +132,18 @@
       <small>Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="airmonitoringest-042" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.2">
+<a href="#airmonitoringest-042" class="anchor"></a>AirMonitorIngest 0.4.2</h1>
+<ul>
+<li>Removed <code>airnow_updateKnownLocations()</code>,
+<code>airnow_updateUnknownLocations()</code>,
+<code>airnow_update()</code>, <code>airnow_createData()</code> and
+<code>airnow_createMeta()</code>. These functions are changing more
+often than anticipated and have been moved to the
+<strong>monitoring-data-ingest-v2</strong> code base.</li>
+</ul>
+</div>
     <div id="airmonitoringest-041" class="section level1">
 <h1 class="page-header" data-toc-text="0.4.1">
 <a href="#airmonitoringest-041" class="anchor"></a>AirMonitorIngest 0.4.1</h1>
@@ -142,7 +154,7 @@ returned from <code><a href="../reference/addClustering.html">addClustering()</a
 <li>Rename <code>wrcc_identifyMonitorType()</code> to
 <code><a href="../reference/wrcc_identifyDataFormat.html">wrcc_identifyDataFormat()</a></code>.</li>
 <li>Increased default <code>distanceThreshold</code> to 500m in
-<code><a href="../reference/airnow_updateKnownLocations.html">airnow_updateKnownLocations()</a></code>.</li>
+<code>airnow_updateKnownLocations()</code>.</li>
 </ul>
 </div>
     <div id="airmonitoringest-040" class="section level1">
@@ -154,8 +166,8 @@ This data can be merged with the old file but requires some changes in
 downstream data processing scripts.</p>
 <ul>
 <li>Changes to <code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code>,
-<code><a href="../reference/airnow_updateKnownLocations.html">airnow_updateKnownLocations()</a></code> and
-<code><a href="../reference/airnow_updateUnknownLocations.html">airnow_updateUnknownLocations()</a></code> to accommodate the new
+<code>airnow_updateKnownLocations()</code> and
+<code>airnow_updateUnknownLocations()</code> to accommodate the new
 metadata.</li>
 </ul>
 </div>
@@ -282,7 +294,7 @@ two clusters were &lt; 1000 meters apart.</li>
 <a href="#airmonitoringest-027" class="anchor"></a>AirMonitorIngest 0.2.7</h1>
 <p>Updates for <strong>AirMonitor</strong> 0.0.4.</p>
 <ul>
-<li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code> that occurs only
+<li>Fixed a bug in <code>airnow_createMeta()</code> that occurs only
 when new locations appear in the incoming raw data.</li>
 <li>Now exporting <code><a href="../reference/%&gt;%.html">%&gt;%</a></code>.</li>
 </ul>
@@ -291,10 +303,10 @@ when new locations appear in the incoming raw data.</li>
 <h1 class="page-header" data-toc-text="0.2.6">
 <a href="#airmonitoringest-026" class="anchor"></a>AirMonitorIngest 0.2.6</h1>
 <ul>
-<li>Fixed a bug in <code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code>.</li>
-<li>Fixed a bug in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that kept records
+<li>Fixed a bug in <code>airnow_createMeta()</code>.</li>
+<li>Fixed a bug in <code>airnow_createData()</code> that kept records
 with no data.</li>
-<li>Removed expectation in <code><a href="../reference/airnow_createData.html">airnow_createData()</a></code> that all
+<li>Removed expectation in <code>airnow_createData()</code> that all
 monitors in <code>meta</code> will be represted in the incoming
 data.</li>
 </ul>
@@ -320,11 +332,11 @@ from <code>MazamaCoreUtils</code> 0.4.10.</li>
 <a href="#airmonitoringest-023" class="anchor"></a>AirMonitorIngest 0.2.3</h1>
 <p>Added functions to create AirNow ‘data’ and ‘meta’ objects:</p>
 <ul>
-<li><code><a href="../reference/airnow_update.html">airnow_update()</a></code></li>
-<li><code><a href="../reference/airnow_updateKnownLocations.html">airnow_updateKnownLocations()</a></code></li>
-<li><code><a href="../reference/airnow_updateUnknownLocations.html">airnow_updateUnknownLocations()</a></code></li>
-<li><code><a href="../reference/airnow_createMeta.html">airnow_createMeta()</a></code></li>
-<li><code><a href="../reference/airnow_createData.html">airnow_createData()</a></code></li>
+<li><code>airnow_update()</code></li>
+<li><code>airnow_updateKnownLocations()</code></li>
+<li><code>airnow_updateUnknownLocations()</code></li>
+<li><code>airnow_createMeta()</code></li>
+<li><code>airnow_createData()</code></li>
 </ul>
 </div>
     <div id="airmonitoringest-022" class="section level1">
