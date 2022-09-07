@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.3</span>
       </span>
     </div>
 
@@ -98,9 +98,6 @@
   <ul class="dropdown-menu" role="menu">
     <li>
       <a href="../articles/Developer_Style_Guide.html">Developer Style Guide</a>
-    </li>
-    <li>
-      <a href="../articles/articles/Working_with_WRCC_data.html">Working with WRCC Data</a>
     </li>
   </ul>
 </li>
@@ -132,6 +129,22 @@
       <small>Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="airmonitoringest-043" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.3">
+<a href="#airmonitoringest-043" class="anchor"></a>AirMonitorIngest 0.4.3</h1>
+<p>Moved the following functions to the
+<strong>monitoring-data-ingest-v2</strong> code base. These functions
+are changing more often than anticipated.</p>
+<ul>
+<li><code>wrcc_EBAMQualityControl()</code></li>
+<li><code>wrcc_ESAMQualityControl()</code></li>
+<li><code>wrcc_createMetaAndData()</code></li>
+<li><code>wrcc_identifyDataFormat()</code></li>
+<li><code>wrcc_parseData()</code></li>
+<li><code>wrcc_qualityControl()</code></li>
+<li><code>wrcc_updateKnownLocations()</code></li>
+</ul>
+</div>
     <div id="airmonitoringest-042" class="section level1">
 <h1 class="page-header" data-toc-text="0.4.2">
 <a href="#airmonitoringest-042" class="anchor"></a>AirMonitorIngest 0.4.2</h1>
@@ -152,7 +165,7 @@ often than anticipated and have been moved to the
 returned from <code><a href="../reference/addClustering.html">addClustering()</a></code> are pure numerics without any
 <code>names</code>.</li>
 <li>Rename <code>wrcc_identifyMonitorType()</code> to
-<code><a href="../reference/wrcc_identifyDataFormat.html">wrcc_identifyDataFormat()</a></code>.</li>
+<code>wrcc_identifyDataFormat()</code>.</li>
 <li>Increased default <code>distanceThreshold</code> to 500m in
 <code>airnow_updateKnownLocations()</code>.</li>
 </ul>
@@ -201,7 +214,7 @@ metadata.</li>
 <ul>
 <li>Ensure distinct records when updating known location tables in
 <code>airsis_updateKnownLocations()</code> and
-<code><a href="../reference/wrcc_updateKnownLocations.html">wrcc_updateKnownLocations()</a></code>.</li>
+<code>wrcc_updateKnownLocations()</code>.</li>
 </ul>
 </div>
     <div id="airmonitoringest-039" class="section level1">
@@ -280,12 +293,12 @@ two clusters were &lt; 1000 meters apart.</li>
 <ul>
 <li><code><a href="../reference/wrcc_downloadData.html">wrcc_downloadData()</a></code></li>
 <li><code>wrcc_identifyMonitorType()</code></li>
-<li><code><a href="../reference/wrcc_parseData.html">wrcc_parseData()</a></code></li>
-<li><code><a href="../reference/wrcc_qualityControl.html">wrcc_qualityControl()</a></code></li>
-<li><code><a href="../reference/wrcc_EBAMQualityControl.html">wrcc_EBAMQualityControl()</a></code></li>
-<li><code><a href="../reference/wrcc_ESAMQualityControl.html">wrcc_ESAMQualityControl()</a></code></li>
-<li><code><a href="../reference/wrcc_updateKnownLocations.html">wrcc_updateKnownLocations()</a></code></li>
-<li><code><a href="../reference/wrcc_createMetaAndData.html">wrcc_createMetaAndData()</a></code></li>
+<li><code>wrcc_parseData()</code></li>
+<li><code>wrcc_qualityControl()</code></li>
+<li><code>wrcc_EBAMQualityControl()</code></li>
+<li><code>wrcc_ESAMQualityControl()</code></li>
+<li><code>wrcc_updateKnownLocations()</code></li>
+<li><code>wrcc_createMetaAndData()</code></li>
 <li><code><a href="../reference/addClustering.html">addClustering()</a></code></li>
 </ul>
 </div>

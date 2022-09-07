@@ -1,3 +1,16 @@
+# AirMonitorIngest 0.4.3
+
+Moved the following functions to the **monitoring-data-ingest-v2** code base.
+These functions are changing more often than anticipated.
+
+* `wrcc_EBAMQualityControl()`
+* `wrcc_ESAMQualityControl()`
+* `wrcc_createMetaAndData()`
+* `wrcc_identifyDataFormat()`
+* `wrcc_parseData()`
+* `wrcc_qualityControl()`
+* `wrcc_updateKnownLocations()`
+
 # AirMonitorIngest 0.4.2
 
 * Removed `airnow_updateKnownLocations()`, `airnow_updateUnknownLocations()`,
