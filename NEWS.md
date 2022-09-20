@@ -1,3 +1,9 @@
+# AirMonitorIngest 0.4.4
+
+* Refactored `addClustering()` into `addClustering()` and `clusterByDistance()` 
+and added additional adjacency checks to improve results when an entire year's 
+worth of data is used.
+
 # AirMonitorIngest 0.4.3
 
 Moved the following functions to the **monitoring-data-ingest-v2** code base.

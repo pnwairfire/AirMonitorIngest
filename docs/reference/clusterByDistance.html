@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get AIRSIS unit IDs from the daily summary page — airsis_getCurrentUnitIDs • AirMonitorIngest</title>
+<title>Add distance-clustering information to a dataframe — clusterByDistance • AirMonitorIngest</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,13 @@
 
 
 
-<meta property="og:title" content="Get AIRSIS unit IDs from the daily summary page — airsis_getCurrentUnitIDs" />
-<meta property="og:description" content="Parse the AIRSIS Current Status page for a particular provider
-to extract unit IDs for those monitors that are currently reporting." />
+<meta property="og:title" content="Add distance-clustering information to a dataframe — clusterByDistance" />
+<meta property="og:description" content="Distance clustering is used to identify unique deployments.
+Standard kmeans clustering does not work well when clusters can have widely
+differing numbers of members. A much better result is acheived with
+the Partitioning Around Medoids method available in cluster::pam().
+The value of clusterDiameter is compared with the output of
+cluster::pam(...)$clusinfo[,'av_diss'] to determine the number of clusters." />
 
 
 
@@ -127,30 +131,60 @@ to extract unit IDs for those monitors that are currently reporting." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get AIRSIS unit IDs from the daily summary page</h1>
-    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/airsis_getCurrentUnitIDs.R'><code>R/airsis_getCurrentUnitIDs.R</code></a></small>
-    <div class="hidden name"><code>airsis_getCurrentUnitIDs.Rd</code></div>
+    <h1>Add distance-clustering information to a dataframe</h1>
+    <small class="dont-index">Source: <a href='https://github.com/pnwairfire/AirMonitorIngest/blob/master/R/clusterByDistance.R'><code>R/clusterByDistance.R</code></a></small>
+    <div class="hidden name"><code>clusterByDistance.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the AIRSIS Current Status page for a particular provider
-to extract unit IDs for those monitors that are currently reporting.</p>
+    <p>Distance clustering is used to identify unique deployments.</p>
+<p>Standard <code>kmeans</code> clustering does not work well when clusters can have widely
+differing numbers of members. A much better result is acheived with
+the Partitioning Around Medoids method available in <code><a href='https://rdrr.io/pkg/cluster/man/pam.html'>cluster::pam()</a></code>.</p>
+<p>The value of <code>clusterDiameter</code> is compared with the output of
+<code>cluster::pam(...)$clusinfo[,'av_diss']</code> to determine the number of clusters.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>airsis_getCurrentUnitIDs</span><span class='op'>(</span>url <span class='op'>=</span> <span class='st'>"~/Downloads/apcd_stattable.aspx.html"</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>clusterByDistance</span><span class='op'>(</span>
+  <span class='va'>tbl</span>,
+  clusterDiameter <span class='op'>=</span> <span class='fl'>1000</span>,
+  lonVar <span class='op'>=</span> <span class='st'>"longitude"</span>,
+  latVar <span class='op'>=</span> <span class='st'>"latitude"</span>,
+  maxClusters <span class='op'>=</span> <span class='fl'>50</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>url</th>
-      <td><p>URL with daily summary links. (NOTE: only file paths are supported.)</p></td>
+      <th>tbl</th>
+      <td><p>Tibble with geolocation information.</p></td>
+    </tr>
+    <tr>
+      <th>clusterDiameter</th>
+      <td><p>Diameter in meters used to determine the number of
+clusters (see description).</p></td>
+    </tr>
+    <tr>
+      <th>lonVar</th>
+      <td><p>Name of longitude variable in the incoming tibble.</p></td>
+    </tr>
+    <tr>
+      <th>latVar</th>
+      <td><p>Name of the latitude variable in the incoming tibble.</p></td>
+    </tr>
+    <tr>
+      <th>maxClusters</th>
+      <td><p>Maximum number of clusters to try.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Vector of AIRSIS unit IDs.</p>
+    <p>Input tibble with additional columns: <code>clusterLon, clusterLat</code>.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p><a href='https://working-with-data.mazamascience.com/2021/07/15/when-k-means-clustering-fails/'>When k-means clustering fails</a></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

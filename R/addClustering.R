@@ -75,7 +75,7 @@ addClustering <- function(
     return(tbl)
   }
 
-  # ----- Clustering -----------------------------------------------------------
+  # ----- Separate table (flagAndKeep) -----------------------------------------
 
   # temporarily remove rows with bad locations if flagAndKeep = TRUE
   if ( flagAndKeep ) {
@@ -90,69 +90,79 @@ addClustering <- function(
     badLocationTbl$clusterID <- as.character(NA)
   }
 
-  # NOTE:  A monitor will be moved around from time to time, sometimes across the country
-  # NOTE:  and sometimes across the street.  We need to assign unique identifiers to each
-  # NOTE:  new "deployment" but not when the monitor is moved a short distance.
-  # NOTE:
-  # NOTE:  We use clustering to find an appropriate number of unique "deployments".
-  # NOTE:  The sensitivity of this algorithm can be adjused with the clusterDiameter argument.
-  # NOTE:
-  # NOTE:  Standard kmeans clustering does not work well when clusters can have widely
-  # NOTE:  differing numbers of members. A much better result is acheived with
-  # NOTE:  the Partitioning Around Medoids method available in cluster::pam().
-  # NOTE:
-  # NOTE:  Try the following example:
-  # NOTE:    x <- y <- c(rep(0,3), rep(1,3), rep(10,20), rep(11,20), rep(100,50), rep(101,50))
-  # NOTE:    m <- cbind(x,y)
-  # NOTE:    layout(matrix(seq(2)))
-  # NOTE:    plot(x, y, pch = as.character( stats::kmeans(m,3)$cluster ))
-  # NOTE:    plot(x, y, pch = as.character( cluster::pam(m,3)$cluster ))
-  # NOTE:    plot(x, y, pch = as.character( cluster::clara(m,3)$cluster ))
-  # NOTE:
-  # NOTE:  Run the plots a few times and you will see that kmeans clustering sometimes
-  # NOTE:  gets it wrong.
+  # ----- Cluster by distance --------------------------------------------------
 
-  ###logger.trace("Testing up to %s clusters", maxClusters)
+  tbl <-
+    clusterByDistance(
+      tbl,
+      clusterDiameter = clusterDiameter,
+      lonVar = lonVar,
+      latVar = latVar,
+      maxClusters = maxClusters
+    )
 
-  # NOTE:  We need to use cluster::clara when we get above ~2K points.
-  # NOTE:  For this reason we need to use clusinfo[,'max_diss'] instead
-  # NOTE:  of clusinfo[,'diameter'] as the latter is only provided by
-  # NOTE:  cluster::pam and not cluster::clara.
-  # NOTE:  (Is there really any difference between 'max_diss' and 'distance'?)
+  # ----- Verify clustering ----------------------------------------------------
 
-  # Perform clustering
-  for ( clusterCount in 1:maxClusters ) {
-    if ( nrow(tbl) < 2000 ) {
-      ###logger.trace("\ttesting %d clusters using cluster::pam", clusterCount)
-      clusterObj <- cluster::pam(tbl[,c(lonVar,latVar)],clusterCount)
-    } else {
-      ###logger.trace("\ttesting %d clusters using cluster::clara", clusterCount)
-      clusterObj <- cluster::clara(tbl[,c(lonVar,latVar)],clusterCount, samples = 50)
+  # Only use one locaion record per clusterID
+  distinctTbl <-
+    tbl %>%
+    dplyr::distinct(.data$clusterID, .keep_all = TRUE) %>%
+    dplyr::mutate(
+      longitude = .data$clusterLon,
+      latitude = .data$clusterLat
+    ) %>%
+    dplyr::select(c("longitude", "latitude"))
+
+  # Check if any of the clustered locations are too close
+  adjacentDistances <-
+    distinctTbl %>%
+    MazamaLocationUtils::table_findAdjacentDistances(
+      distanceThreshold = clusterDiameter
+    )
+
+  # ----- Fix clustering -------------------------------------------------------
+
+  if ( nrow(adjacentDistances) > 0 ) {
+
+    # NOTE:  Clearly, clustering has failed. At this point we just cluster the
+    # NOTE:  distinct locations. Having just a few points should radically
+    # NOTE:  improve the reliability of cluster::pam().
+
+    # Cluster the distinct locations
+    distinctTbl <-
+      clusterByDistance(
+        distinctTbl,
+        clusterDiameter = clusterDiameter,
+        lonVar = "longitude",
+        latVar = "latitude",
+        maxClusters = maxClusters
+      )
+
+    clusterCount <- max(as.numeric(distinctTbl$clusterID), na.rm = TRUE)
+
+    if ( clusterCount < nrow(distinctTbl) ) {
+      logger.trace(
+        "Cluster distance check: reducing clusters from %d to %d",
+        nrow(distinctTbl),
+        clusterCount
+      )
     }
-    clusterLats <- clusterObj$medoids[,latVar]
-    diameters <- 2 * clusterObj$clusinfo[,'max_diss'] # decimal degrees
-    # NOTE:  We don't know whether distance is pure NS, EW or some combination
-    # NOTE:  so we can't accurately convert to meters. We approximate by
-    # NOTE:  assuming a 50-50 split and using 111,320 meters/degree at the equator.
-    radianClusterLats <- clusterLats * pi/180
-    meters <- diameters * (1 + cos(radianClusterLats))/2 * 111320
-    if ( max(meters) < clusterDiameter ) break
+
+    # Now use this clusterCount for full clustering -- see clusterByDistance()
+
+    if ( nrow(tbl) < 2000 ) {
+      clusterObj <- cluster::pam(tbl[,c(lonVar,latVar)], clusterCount)
+    } else {
+      clusterObj <- cluster::clara(tbl[,c(lonVar,latVar)], clusterCount, samples = 50)
+    }
+
+    tbl$clusterLon <- as.numeric(clusterObj$medoids[,lonVar][clusterObj$clustering])
+    tbl$clusterLat <- as.numeric(clusterObj$medoids[,latVar][clusterObj$clustering])
+    tbl$clusterID <- as.character(clusterObj$clustering)
+
   }
 
-  logger.trace("Using %d cluster(s) with a diameter of %d meters", clusterCount, clusterDiameter)
-
-  # Create the vector of deployment identifiers
-  if ( nrow(tbl) < 2000 ) {
-    clusterObj <- cluster::pam(tbl[,c(lonVar,latVar)], clusterCount)
-  } else {
-    clusterObj <- cluster::clara(tbl[,c(lonVar,latVar)], clusterCount, samples = 50)
-  }
-
-  # Add cluster lons and lats to the tibble
-  # NOTE:  Use as.numeric() to remove any names associated with these vectors
-  tbl$clusterLon <- as.numeric(clusterObj$medoids[,lonVar][clusterObj$clustering])
-  tbl$clusterLat <- as.numeric(clusterObj$medoids[,latVar][clusterObj$clustering])
-  tbl$clusterID <- as.character(clusterObj$clustering)
+  # ------ Recombine table (flagAndKeep) ---------------------------------------
 
   # Reinsert rows with bad locations if flagAndKeep = TRUE
   if ( flagAndKeep ) {
@@ -180,6 +190,7 @@ if ( FALSE ) {
 
   library(AirMonitorIngest)
 
+  # Also try wrcc_downloadData(20210101, 20220101, unitID = "sm23")
   tbl <-
     wrcc_downloadData(20150701, 20150930, unitID = 'SM16') %>%
     wrcc_parseData() %>%
