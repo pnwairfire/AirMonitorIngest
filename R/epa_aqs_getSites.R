@@ -17,6 +17,7 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(MazamaCoreUtils)
 #' library(AirMonitorIngest)
 #'
 #' # Create a directory specifically for EPA data
