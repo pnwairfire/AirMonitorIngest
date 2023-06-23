@@ -22,6 +22,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -34,18 +36,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">AirMonitorIngest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="articles/AirMonitorIngest.html">Get started</a>
 </li>
@@ -70,7 +66,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/pnwairfire/AirMonitorIngest/">
+  <a href="https://github.com/pnwairfire/AirMonitorIngest/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -89,67 +85,47 @@
   <div class="contents col-md-9">
 
 
-<div id="airmonitoringest" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#airmonitoringest" class="anchor"></a>AirMonitorIngest</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="airmonitoringest">AirMonitorIngest<a class="anchor" aria-label="anchor" href="#airmonitoringest"></a>
+</h1></div>
 <pre><code>A suite of utility functions for ingesting hourly air quality monitoring data. 
 Data from various sources are harmonized to use standardized variable names and 
 a compact data model with spatial metadata stored in a 'meta' dataframe while 
 hourly data are stored in a separate 'data' dataframe.</code></pre>
-<div id="background" class="section level2">
-<h2 class="hasAnchor">
-<a href="#background" class="anchor"></a>Background</h2>
-<p>The USFS AirFire group is focused on air quality measurements
-associated with wildfire smoke and maintains both historical and
-real-time databases of PM2.5 monitoring data obtained from stationary
-monitors. This data is used in operational displays and for
-retrospective analysis. Data ingest and management of air quality
-“stationary time series” are both important ongoing activities.</p>
-<p>The <strong>AirMonitorIngest</strong> package is used to create data
-archives for the <strong><a href="https://github.com/MazamaScience/AirMonitor">AirMonitor</a></strong>
-package and isolates the work of meticulously cleaning, validating and
-harmonizing data from various sources. In our experience, every new data
-source or data format requires dedicated code to bring it into a
-standardized system. Because new data sources appear every few months,
-putting all of the data ingest code into a separate package allows
-downstream packages that work with harmonized data to be much more
-stable.</p>
+<div class="section level2">
+<h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
+</h2>
+<p>The USFS AirFire group is focused on air quality measurements associated with wildfire smoke and maintains both historical and real-time databases of PM2.5 monitoring data obtained from stationary monitors. This data is used in operational displays and for retrospective analysis. Data ingest and management of air quality “stationary time series” are both important ongoing activities.</p>
+<p>The <strong>AirMonitorIngest</strong> package is used to create data archives for the <strong><a href="https://github.com/MazamaScience/AirMonitor" class="external-link">AirMonitor</a></strong> package and isolates the work of meticulously cleaning, validating and harmonizing data from various sources. In our experience, every new data source or data format requires dedicated code to bring it into a standardized system. Because new data sources appear every few months, putting all of the data ingest code into a separate package allows downstream packages that work with harmonized data to be much more stable.</p>
 </div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <p>Install from CRAN with:</p>
-<p><code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages('AirMonitorIngest')</a></code></p>
+<p><code>install.packages('AirMonitorIngest')</code></p>
 <p>Install the latest version from GitHub with:</p>
-<p><code><a href="https://devtools.r-lib.org/reference/remote-reexports.html">devtools::install_github('mazamascience/AirMonitorIngest')</a></code></p>
+<p><code>devtools::install_github('mazamascience/AirMonitorIngest')</code></p>
 </div>
-<div id="features" class="section level2">
-<h2 class="hasAnchor">
-<a href="#features" class="anchor"></a>Features</h2>
-<p>Although each source of data is unique, a similar set of functions is
-used to obtain, parse and harmonize the data. The basic suite of
-functions associated with any source of data will include:</p>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<p>Although each source of data is unique, a similar set of functions is used to obtain, parse and harmonize the data. The basic suite of functions associated with any source of data will include:</p>
 <ul>
 <li>
-<code>&lt;source&gt;_openWebPages()</code> – Opens web pages
-relevant to the source data.</li>
+<code>&lt;source&gt;_openWebPages()</code> – Opens web pages relevant to the source data.</li>
 <li>
-<code>&lt;source&gt;_get~()</code> – Gets tables of non-data
-information.</li>
+<code>&lt;source&gt;_get~()</code> – Gets tables of non-data information.</li>
 <li>
-<code>&lt;source&gt;_downloadData()</code> – Download ASCII
-data.</li>
+<code>&lt;source&gt;_downloadData()</code> – Download ASCII data.</li>
 <li>
 <code>&lt;source&gt;_parseData()</code> – Parse ASCII data.</li>
 <li>
-<code>&lt;source&gt;_createData()</code> – Create the
-<code>data</code> dataframe.</li>
+<code>&lt;source&gt;_createData()</code> – Create the <code>data</code> dataframe.</li>
 <li>
-<code>&lt;source&gt;_createMeta()</code> – Create the
-<code>meta</code> dataframe.</li>
+<code>&lt;source&gt;_createMeta()</code> – Create the <code>meta</code> dataframe.</li>
 </ul>
 <hr>
-<p>This project is supported by the <a href="https://www.airfire.org">USFS AirFire</a> group.</p>
+<p>This project is supported by the <a href="https://www.airfire.org" class="external-link">USFS AirFire</a> group.</p>
 </div>
 </div>
 
@@ -157,45 +133,56 @@ data.</li>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/pnwairfire/AirMonitorIngest/">https://​github.com/​pnwairfire/​AirMonitorIngest/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/pnwairfire/AirMonitorIngest/issues">https://​github.com/​pnwairfire/​AirMonitorIngest/​issues</a>
-</li>
+<li><a href="https://github.com/pnwairfire/AirMonitorIngest/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/pnwairfire/AirMonitorIngest/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing AirMonitorIngest</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Jonathan Callahan <br><small class="roles"> Author, maintainer </small>  </li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://cran.r-project.org/package=AirMonitorIngest"><img src="http://www.r-pkg.org/badges/version/AirMonitorIngest" alt="CRAN_Status_Badge"></a></li>
-<li><a href="https://cran.r-project.org/package=AirMonitorIngest"><img src="http://cranlogs.r-pkg.org/badges/AirMonitorIngest" alt="Downloads"></a></li>
-<li><a href="https://travis-ci.org/MazamaScience/AirMonitorIngest"><img src="https://travis-ci.org/MazamaScience/AirMonitorIngest.svg?branch=master" alt="Build Status"></a></li>
+<li><a href="https://cran.r-project.org/package=AirMonitorIngest" class="external-link"><img src="http://www.r-pkg.org/badges/version/AirMonitorIngest" alt="CRAN_Status_Badge"></a></li>
+<li><a href="https://cran.r-project.org/package=AirMonitorIngest" class="external-link"><img src="http://cranlogs.r-pkg.org/badges/AirMonitorIngest" alt="Downloads"></a></li>
+<li><a href="https://travis-ci.org/MazamaScience/AirMonitorIngest" class="external-link"><img src="https://travis-ci.org/MazamaScience/AirMonitorIngest.svg?branch=master" alt="Build Status"></a></li>
 </ul>
 </div>
-</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Jonathan Callahan.</p>
+  <p></p>
+<p>Developed by Jonathan Callahan.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -203,6 +190,8 @@ data.</li>
 
   
 
+
+  
 
   </body>
 </html>

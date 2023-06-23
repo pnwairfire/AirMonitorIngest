@@ -67,6 +67,7 @@ airnow_getSites <- function(
     col_names = col_names,
     col_types = col_types,
     locale = locale,
+    skip = 1,
     progress = !quiet,
     show_col_types = !quiet
   )

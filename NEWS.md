@@ -1,3 +1,9 @@
+# AirMonitorIngest 0.4.5
+
+* Added `skip = 1` to `readr::read_delim()` to skip the header line when 
+ingesting AirNow metadata.
+* Removed unused dependency on **MazamaSpatialUtils**.
+
 # AirMonitorIngest 0.4.4
 
 * Refactored `addClustering()` into `addClustering()` and `clusterByDistance()` 
