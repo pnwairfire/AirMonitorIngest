@@ -1,9 +1,15 @@
-# AirMonitorIngest 0.4.5
+# AirMonitorIngest 0.4.6
 
 Moved the following functions to the **monitoring-data-ingest-v2** code base.
 
 * `airsis_downloadData()`
 * `airsis_getCurrentUnitIDs()`
+
+# AirMonitorIngest 0.4.5
+
+* Added `skip = 1` to `readr::read_delim()` to skip the header line when 
+ingesting AirNow metadata.
+* Removed unused dependency on **MazamaSpatialUtils**.
 
 # AirMonitorIngest 0.4.4
 
