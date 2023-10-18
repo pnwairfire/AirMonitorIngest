@@ -26,6 +26,7 @@ uncompress and parse the data into a tibble.
 }
 \examples{
 \dontrun{
+library(MazamaCoreUtils)
 library(AirMonitorIngest)
 
 # Create a directory specifically for EPA data

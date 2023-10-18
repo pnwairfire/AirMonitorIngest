@@ -1,3 +1,10 @@
+# AirMonitorIngest 0.4.5
+
+Moved the following functions to the **monitoring-data-ingest-v2** code base.
+
+* `airsis_downloadData()`
+* `airsis_getCurrentUnitIDs()`
+
 # AirMonitorIngest 0.4.4
 
 * Refactored `addClustering()` into `addClustering()` and `clusterByDistance()` 
