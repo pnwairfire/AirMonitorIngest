@@ -1,3 +1,10 @@
+# AirMonitorIngest 0.4.7
+
+Moved the following functions to the **monitoring-data-ingest-v2** code base.
+
+* `wrcc_downloadData()`
+* `wrcc_getCurrentUnitIDs()`
+
 # AirMonitorIngest 0.4.6
 
 Moved the following functions to the **monitoring-data-ingest-v2** code base.
