@@ -2,10 +2,23 @@
 % Please edit documentation in R/AirMonitorIngest.R
 \docType{package}
 \name{AirMonitorIngest}
+\alias{AirMonitorIngest-package}
 \alias{AirMonitorIngest}
 \title{Data Ingest of Air Quality Monitoring Data}
 \description{
 A suite of utility functions for ingesting air quality data
 from various providers and converting that data into the compact data format
 used by the \pkg{AirMonitor} package.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/pnwairfire/AirMonitorIngest}
+  \item Report bugs at \url{https://github.com/pnwairfire/AirMonitorIngest/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+
 }

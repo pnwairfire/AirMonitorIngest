@@ -1,3 +1,16 @@
+# AirMonitorIngest 0.4.8
+
+Added support for AirNow `instrumentType` parameter. This allows us to specify
+whether we want include "sensors" as part of a data request. This parameter
+can now be specified in:
+
+- `airnow_getData()`
+- `airnow_getDataCustom()`
+- `airnow_getData()`
+
+Default behavior is to include sensors in the data request which is the same
+behavior as in all previous versions of the package.
+
 # AirMonitorIngest 0.4.7
 
 Moved the following functions to the **monitoring-data-ingest-v2** code base.

@@ -11,6 +11,7 @@ airnow_getDataCustom(
   timezone = "UTC",
   bbox = NULL,
   monitorType = c("both", "permanent", "mobile"),
+  instrumentType = c("both", "monitor", "sensor"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 )
 }
@@ -25,7 +26,9 @@ airnow_getDataCustom(
 
 \item{bbox}{Bounding box vector defined as c(w, s, e, n).}
 
-\item{monitorType}{Subset of all monitors to select.}
+\item{monitorType}{Specifies mobile or permanent monitor deployments.}
+
+\item{instrumentType}{Specifies regulatory monitors or low cost sensors.}
 
 \item{baseUrl}{Base URL for archived hourly data.}
 }

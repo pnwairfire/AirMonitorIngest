@@ -31,7 +31,7 @@ Download hourly air quality data from the US EPA and save it to a directory.
 
 EPA parameter codes and (start year) include:
 
-\enumerate{
+\describe{
 \item{44201}{ -- Ozone (1980)}
 \item{42401}{ -- SO2 (1980)}
 \item{42101}{ -- CO (1980)}
@@ -47,7 +47,7 @@ EPA parameter codes and (start year) include:
 \item{RH_DP}{ -- RH and Dewpoint (1980)}
 \item{HAPS}{ -- HAPs (1993)}
 \item{VOCS}{ -- VOCs (1980)}
-\item{NONOxNOy (1980)}
+\item{NONOxNOy}{ -- Nitrous Oxides (1980)}
 }
 }
 \note{

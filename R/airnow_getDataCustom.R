@@ -9,7 +9,8 @@
 #' @param endtime Desired end datetime (ISO 8601).
 #' @param timezone Olson timezone used to interpret dates (required).
 #' @param bbox Bounding box vector defined as c(w, s, e, n).
-#' @param monitorType Subset of all monitors to select.
+#' @param monitorType Specifies mobile or permanent monitor deployments.
+#' @param instrumentType Specifies regulatory monitors or low cost sensors.
 #' @param baseUrl Base URL for archived hourly data.
 #'
 #' @return Tibble of AirNow hourly data.
@@ -54,6 +55,7 @@ airnow_getDataCustom <- function(
   timezone = "UTC",
   bbox = NULL,
   monitorType = c("both", "permanent", "mobile"),
+  instrumentType = c("both", "monitor", "sensor"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 
@@ -69,6 +71,7 @@ airnow_getDataCustom <- function(
 
   parameterName <- match.arg(parameterName, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
+  instrumentType <- match.arg(instrumentType, several.ok = FALSE)
 
   baseUrl <- MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
@@ -117,13 +120,21 @@ airnow_getDataCustom <- function(
 
 
   # monitortype
-
   monitortype <-
     switch(
       monitorType,
       permanent = 0,
       mobile = 1,
       both = 2
+    )
+
+  # instrumenttype
+  instrumenttype <-
+    switch(
+      instrumentType,
+      both = 0,
+      monitor = 1,
+      sensor = 2
     )
 
   # ----- Request parameters ---------------------------------------------------
@@ -153,6 +164,7 @@ airnow_getDataCustom <- function(
     enddate = timeStamp[2],
     parameters = parameters,
     monitortype = monitortype,
+    instrumenttype = instrumenttype,
     datatype = "B",
     format = "text/csv",
     api_key = AIRNOW_API_KEY,
