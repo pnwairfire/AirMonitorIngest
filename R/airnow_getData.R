@@ -8,7 +8,8 @@
 #' @param starttime Desired start datetime (ISO 8601).
 #' @param endtime Desired end datetime (ISO 8601).
 #' @param timezone Olson timezone used to interpret dates (required).
-#' @param monitorType Subset of all monitors to select.
+#' @param monitorType Specifies mobile or permanent monitor deployments.
+#' @param instrumentType Specifies regulatory monitors or low cost sensors.
 #' @param baseUrl Base URL for archived hourly data.
 #'
 #' @return Tibble of AirNow hourly data.
@@ -45,6 +46,7 @@ airnow_getData <- function(
   endtime = NULL,
   timezone = "UTC",
   monitorType = c("both", "permanent", "mobile"),
+  instrumentType = c("both", "monitor", "sensor"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 ) {
 
@@ -59,6 +61,7 @@ airnow_getData <- function(
 
   parameterName <- match.arg(parameterName, several.ok = TRUE)
   monitorType <- match.arg(monitorType, several.ok = FALSE)
+  instrumentType <- match.arg(instrumentType, several.ok = FALSE)
 
   baseUrl <- MazamaCoreUtils::setIfNull(baseUrl, "https://www.airnowapi.org/aq/data/")
 
@@ -126,6 +129,7 @@ airnow_getData <- function(
           endtime = endTimes[i],
           timezone = timezone,
           monitorType = monitorType,
+          instrumentType = instrumentType,
           baseUrl = baseUrl
         )
     }, silent = TRUE)
@@ -165,12 +169,12 @@ if ( FALSE ) {
   library(AirMonitorIngest)
   setAPIKey("airnow", Sys.getenv("AIRNOW_API_KEY"))
 
-  starttime <- 2021101802
-  endtime <- 2021101802
+  starttime <- 2024051600
+  endtime <- 2024051601
   timezone <- "America/Los_Angeles"
   parameterName <- "PM2.5"
-  monitorType <- "mobile"
-  monitorType <- "permanent"
+  monitorType <- "both"
+  instrumentType <- "sensor"
 
 
 
@@ -180,10 +184,11 @@ if ( FALSE ) {
       endtime = endtime,
       timezone = timezone,
       parameterName = parameterName,
-      monitorType = monitorType
+      monitorType = monitorType,
+      instrumentType = instrumentType
     )
 
-
+  sensorIDs <- unique(tbl$AQSID)
 
 
   MazamaLocationUtils::table_leaflet(

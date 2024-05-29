@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.4.7
+Version: 0.4.8
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
@@ -37,4 +37,4 @@ Suggests:
     roxygen2
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

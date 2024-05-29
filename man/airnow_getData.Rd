@@ -10,6 +10,7 @@ airnow_getData(
   endtime = NULL,
   timezone = "UTC",
   monitorType = c("both", "permanent", "mobile"),
+  instrumentType = c("both", "monitor", "sensor"),
   baseUrl = "https://www.airnowapi.org/aq/data/"
 )
 }
@@ -22,7 +23,9 @@ airnow_getData(
 
 \item{timezone}{Olson timezone used to interpret dates (required).}
 
-\item{monitorType}{Subset of all monitors to select.}
+\item{monitorType}{Specifies mobile or permanent monitor deployments.}
+
+\item{instrumentType}{Specifies regulatory monitors or low cost sensors.}
 
 \item{baseUrl}{Base URL for archived hourly data.}
 }
