@@ -95,7 +95,7 @@ airnow_getDataSubset <- function(
   # Comma-separated "parameters"
   parameters <-
     parameterName %>%
-    stringr::str_replace("CO", "o3") %>%
+    stringr::str_replace("CO", "co") %>%
     stringr::str_replace("NO2", "no2") %>%
     stringr::str_replace("OZONE", "o3") %>%
     stringr::str_replace("PM2.5", "pm25") %>%
