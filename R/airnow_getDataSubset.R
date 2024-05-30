@@ -285,6 +285,18 @@ if ( FALSE ) {
       monitorType = monitorType
     )
 
+  # Sensors only
+  tbl <-
+    airnow_getDataSubset(
+      starttime = lubridate::now("UTC") %>% lubridate::floor_date(unit = "hours") - lubridate::dhours(3),
+      endtime = lubridate::now("UTC") %>% lubridate::floor_date(unit = "hours"),
+      timezone = ,
+      parameterName = "PM2.5",
+      monitorType = "both",
+      instrumentType = "sensor"
+    )
+
+
 
 
 
