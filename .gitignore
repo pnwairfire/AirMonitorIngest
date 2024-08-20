@@ -47,3 +47,5 @@ rsconnect/
 .DS_Store
 .AppleDouble
 .LSOverride
+
+global_vars.R
