@@ -1,6 +1,6 @@
 Type: Package
 Package: AirMonitorIngest
-Version: 0.4.8
+Version: 0.5.0
 Title: Data Ingest of Air Quality Data
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre"))
@@ -17,14 +17,14 @@ BugReports: https://github.com/pnwairfire/AirMonitorIngest/issues
 Depends:
     R (>= 4.0)
 Imports:
-    AirMonitor (>= 0.3.1),
+    AirMonitor (>= 0.4.1),
     cluster,
     dplyr,
     httr,
     magrittr,
     lubridate,
-    MazamaCoreUtils (>= 0.4.13),
-    MazamaLocationUtils (>= 0.3.7),
+    MazamaCoreUtils (>= 0.5.2),
+    MazamaLocationUtils (>= 0.4.4),
     readr,
     reshape2,
     rlang,

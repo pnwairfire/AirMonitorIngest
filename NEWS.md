@@ -1,3 +1,14 @@
+# AirMonitorIngest 0.5.0
+
+Updated dependences:
+
+- `AirMonitor` 0.3.1 => 0.4.1
+- `MazamaCoreUtils` 0.4.13 => 0.5.2
+- `MazamaLocationUtils` 0.3.7 => 0.4.4
+
+- Removed internal `clusterByDistance()` in favor of
+`MazamaLocationUtils::clusterByDistance()`.
+
 # AirMonitorIngest 0.4.8
 
 Added support for AirNow `instrumentType` parameter. This allows us to specify

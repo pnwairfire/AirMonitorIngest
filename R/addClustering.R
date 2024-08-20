@@ -93,7 +93,7 @@ addClustering <- function(
   # ----- Cluster by distance --------------------------------------------------
 
   tbl <-
-    clusterByDistance(
+    MazamaLocationUtils::clusterByDistance(
       tbl,
       clusterDiameter = clusterDiameter,
       lonVar = lonVar,
@@ -130,7 +130,7 @@ addClustering <- function(
 
     # Cluster the distinct locations
     distinctTbl <-
-      clusterByDistance(
+      MazamaLocationUtils::clusterByDistance(
         distinctTbl,
         clusterDiameter = clusterDiameter,
         lonVar = "longitude",
@@ -148,7 +148,7 @@ addClustering <- function(
       )
     }
 
-    # Now use this clusterCount for full clustering -- see clusterByDistance()
+    # Now use this clusterCount for full clustering -- see MazamaLocationUtils::clusterByDistance()
 
     if ( nrow(tbl) < 2000 ) {
       clusterObj <- cluster::pam(tbl[,c(lonVar,latVar)], clusterCount)
