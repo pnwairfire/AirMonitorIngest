@@ -71,9 +71,9 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.8" id="airmonitoringest-048">AirMonitorIngest 0.4.8<a class="anchor" aria-label="anchor" href="#airmonitoringest-048"></a></h2>
 <p>Added support for AirNow <code>instrumentType</code> parameter. This allows us to specify whether we want include “sensors” as part of a data request. This parameter can now be specified in:</p>
-<ul><li><code><a href="../reference/airnow_getData.html">airnow_getData()</a></code></li>
-<li><code><a href="../reference/airnow_getDataCustom.html">airnow_getDataCustom()</a></code></li>
-<li><code><a href="../reference/airnow_getData.html">airnow_getData()</a></code></li>
+<ul><li><code>airnow_getData()</code></li>
+<li><code>airnow_getDataCustom()</code></li>
+<li><code>airnow_getData()</code></li>
 </ul><p>Default behavior is to include sensors in the data request which is the same behavior as in all previous versions of the package.</p>
 </div>
     <div class="section level2">
@@ -121,7 +121,7 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.0" id="airmonitoringest-040">AirMonitorIngest 0.4.0<a class="anchor" aria-label="anchor" href="#airmonitoringest-040"></a></h2>
 <p>Version 0.4 uses a new sites metadata file from AirNow, Monitoring_Site_Locations_v2.data, which has a different set of fields. This data can be merged with the old file but requires some changes in downstream data processing scripts.</p>
-<ul><li>Changes to <code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code>, <code>airnow_updateKnownLocations()</code> and <code>airnow_updateUnknownLocations()</code> to accommodate the new metadata.</li>
+<ul><li>Changes to <code>airnow_getSites()</code>, <code>airnow_updateKnownLocations()</code> and <code>airnow_updateUnknownLocations()</code> to accommodate the new metadata.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.13" id="airmonitoringest-0313">AirMonitorIngest 0.3.13<a class="anchor" aria-label="anchor" href="#airmonitoringest-0313"></a></h2>
@@ -147,11 +147,11 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.8" id="airmonitoringest-038">AirMonitorIngest 0.3.8<a class="anchor" aria-label="anchor" href="#airmonitoringest-038"></a></h2>
-<ul><li>Added <code><a href="../reference/airnow_getDataCustom.html">airnow_getDataCustom()</a></code>.</li>
+<ul><li>Added <code>airnow_getDataCustom()</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.7" id="airmonitoringest-037">AirMonitorIngest 0.3.7<a class="anchor" aria-label="anchor" href="#airmonitoringest-037"></a></h2>
-<ul><li>Added <code><a href="../reference/airnow_getHourlyData.html">airnow_getHourlyData()</a></code>.</li>
+<ul><li>Added <code>airnow_getHourlyData()</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.6" id="airmonitoringest-036">AirMonitorIngest 0.3.6<a class="anchor" aria-label="anchor" href="#airmonitoringest-036"></a></h2>
@@ -238,7 +238,7 @@
 <h2 class="page-header" data-toc-text="0.2.0" id="airmonitoringest-020">AirMonitorIngest 0.2.0<a class="anchor" aria-label="anchor" href="#airmonitoringest-020"></a></h2>
 <p>Version 0.2 focuses on data ingest from AirNow using the AirNow API.</p>
 <p>Initial functions include:</p>
-<ul><li><code><a href="../reference/airnow_getSites.html">airnow_getSites()</a></code></li>
+<ul><li><code>airnow_getSites()</code></li>
 <li><code>airnow_api_getData()</code></li>
 <li><code>airnow_api_getDataSubset()</code></li>
 <li><code><a href="../reference/airnow_openWebPages.html">airnow_openWebPages()</a></code></li>

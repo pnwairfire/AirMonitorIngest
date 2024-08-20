@@ -13,9 +13,6 @@
     <loc>/articles/Developer_Style_Guide.html</loc>
   </url>
   <url>
-    <loc>/articles/articles/Working_with_WRCC_data.html</loc>
-  </url>
-  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
@@ -34,49 +31,10 @@
     <loc>/reference/addClustering.html</loc>
   </url>
   <url>
-    <loc>/reference/airnow_createData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_createMeta.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_getData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_getDataCustom.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_getDataSubset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_getHourlyData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_getSites.html</loc>
-  </url>
-  <url>
     <loc>/reference/airnow_getSites_v1.html</loc>
   </url>
   <url>
     <loc>/reference/airnow_openWebPages.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_update.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_updateKnownLocations.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airnow_updateUnknownLocations.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airsis_downloadData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/airsis_getCurrentUnitIDs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/clusterByDistance.html</loc>
   </url>
   <url>
     <loc>/reference/epa_aqs_createData.html</loc>
@@ -122,41 +80,5 @@
   </url>
   <url>
     <loc>/reference/showAPIKeys.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_EBAMQualityControl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_ESAMQualityControl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_createMetaAndData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_downloadData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_getCurrentUnitIDs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_getDailyUnitIDs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_getUnitIDs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_identifyDataFormat.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_identifyMonitorType.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_parseData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_qualityControl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wrcc_updateKnownLocations.html</loc>
   </url>
 </urlset>
